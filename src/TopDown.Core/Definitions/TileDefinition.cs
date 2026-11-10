@@ -59,7 +59,7 @@ public sealed class DoorDefinition
     public string Id { get; set; } = "";
     public string SpriteId { get; set; } = "";
     public float Thickness { get; set; } = 6f;
-    public float MaxAngleDegrees { get; set; } = 95f;
+    public float MaxAngleDegrees { get; set; } = 90f;
 
     /// <summary>Angular speed given to the door when pushed (degrees/s).</summary>
     public float PushSpeedDegrees { get; set; } = 600f;

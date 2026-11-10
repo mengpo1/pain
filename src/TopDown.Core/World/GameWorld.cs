@@ -31,7 +31,10 @@ public sealed class GameWorld
     private readonly Dictionary<string, RectF> _zones = new();
     private readonly List<GameEvent> _events = new();
     private readonly List<Noise> _noises = new();
+    /// <summary>How long an early attack click is remembered (seconds).</summary>
+    private const float AttackBufferTime = 0.15f;
     private bool[] _propBlocked = [];
+    private float _attackBuffer;
     private int _nextActorId = 1;
 
     internal GameWorld(LevelDefinition level, DefinitionSet definitions, TileMap map, ModifierDefinition modifier, int seed)
@@ -101,7 +104,7 @@ public sealed class GameWorld
             actor.TickState(dt);
         }
 
-        ApplyPlayerCommands(commands);
+        ApplyPlayerCommands(commands, dt);
         DeliverNoises();
         foreach (Actor actor in _actors) actor.Brain?.Update(dt);
 
@@ -130,9 +133,10 @@ public sealed class GameWorld
         }
     }
 
-    private void ApplyPlayerCommands(in PlayerCommands commands)
+    private void ApplyPlayerCommands(in PlayerCommands commands, float dt)
     {
         Actor player = Player;
+        _attackBuffer = MathF.Max(0f, _attackBuffer - dt);
         if (!player.IsAlive || Outcome != WorldOutcome.Playing)
         {
             player.MoveIntent = Vector2.Zero;
@@ -153,7 +157,10 @@ public sealed class GameWorld
         if (player.CanAct && aim.LengthSquared() > 1f) player.Facing = Geo.ToAngle(aim);
 
         bool automatic = Combat.CurrentWeapon(player).Automatic;
-        if (commands.AttackPressed || (commands.AttackHeld && automatic)) Combat.TryAttack(player);
+        // A click slightly too early (end of the previous swing) is kept briefly instead of being lost.
+        if (commands.AttackPressed) _attackBuffer = AttackBufferTime;
+        bool wantsAttack = _attackBuffer > 0f || (commands.AttackHeld && automatic);
+        if (wantsAttack && Combat.TryAttack(player)) _attackBuffer = 0f;
         if (commands.PickupOrThrowPressed) Combat.PickupOrThrow(player);
         if (commands.InteractPressed) Combat.TryInteract(player);
     }

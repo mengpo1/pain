@@ -30,6 +30,10 @@ public sealed class EnemyBrain
     private const float MeleeFacingTolerance = 0.45f;
     private const float FirearmFacingTolerance = 0.2f;
     private const int MaxRepathAttempts = 3;
+    /// <summary>A target hidden longer than this needs a new (shorter) reaction time when it reappears.</summary>
+    private const float ReappearDelay = 0.3f;
+    /// <summary>A gunman whose shot is blocked this long moves to get a clear line of fire.</summary>
+    private const float BlockedShotPatience = 0.6f;
 
     private readonly Actor _self;
     private readonly GameWorld _world;
@@ -56,6 +60,7 @@ public sealed class EnemyBrain
     private Vector2 _pointOfInterest;
     private Vector2? _wanderGoal;
     private bool _wasIncapacitated;
+    private float _blockedShotTime;
 
     internal EnemyBrain(Actor self, GameWorld world, AiBehavior behavior, List<Vector2> patrol)
     {
@@ -182,7 +187,10 @@ public sealed class EnemyBrain
     private void Perceive(float dt)
     {
         Actor player = _world.Player;
+        bool sawBefore = CanSeeTarget;
         CanSeeTarget = _self.IsHostileTo(player) && CanSee(player);
+        if (CanSeeTarget && !sawBefore && State == AiState.Chase && TimeSinceTargetSeen > ReappearDelay)
+            _reactionTimer = _ai.ReactionTime * 0.6f;
         if (CanSeeTarget)
         {
             Target = player;
@@ -206,7 +214,9 @@ public sealed class EnemyBrain
         foreach (Actor ally in _world.Actors)
         {
             if (ally == _self || ally.Brain is null || !ally.IsAlive || ally.Faction != _self.Faction) continue;
-            if (Vector2.Distance(ally.Position, _self.Position) <= _ai.AlertAlliesRadius) ally.Brain.AlertTo(target);
+            if (Vector2.Distance(ally.Position, _self.Position) > _ai.AlertAlliesRadius) continue;
+            // Allies only react to what they can see: no telepathy through walls.
+            if (_world.Physics.HasLineOfSight(ally.Position, _self.Position, Blocking.Vision)) ally.Brain.AlertTo(target);
         }
     }
 
@@ -327,13 +337,16 @@ public sealed class EnemyBrain
                 return;
             }
 
+            bool clear = LineOfFireClear(Target);
+            _blockedShotTime = clear ? 0f : _blockedShotTime + dt;
             float preferred = weapon.Range * _ai.PreferredRangeFactor;
-            if (distance > preferred) MoveTo(Target.Position, _self.Definition.RunSpeed, dt, faceMovement: false);
+            if (distance > preferred || _blockedShotTime > BlockedShotPatience)
+                MoveTo(Target.Position, _self.Definition.RunSpeed, dt, faceMovement: false);
             else Stop();
 
             TurnTowards(targetAngle, dt, 1f);
             bool aimed = MathF.Abs(Geo.AngleDifference(_self.Facing, targetAngle)) < FirearmFacingTolerance;
-            if (_reactionTimer <= 0f && aimed && distance <= weapon.Range && LineOfFireClear(Target))
+            if (_reactionTimer <= 0f && aimed && distance <= weapon.Range && clear)
                 AttackWithAimError(targetAngle);
             return;
         }
@@ -365,7 +378,7 @@ public sealed class EnemyBrain
         for (int i = 0; i < 8; i++)
         {
             bool blocked = _world.Physics.Raycast(from, target.Position, Blocking.Projectiles, out RayHit hit,
-                actor => actor != _self && actor != target && actor.IsAlive && !actor.IsDown && !_self.IsHostileTo(actor));
+                actor => actor != _self && actor != target && actor.IsAlive && !_self.IsHostileTo(actor));
             if (!blocked) return true;
             if (hit.Kind == HitKind.Tile && _world.Map.Get(hit.TileX, hit.TileY).Destructible)
             {
@@ -447,7 +460,9 @@ public sealed class EnemyBrain
         }
 
         bool goalMoved = float.IsNaN(_pathGoal.X) || Vector2.Distance(goal, _pathGoal) > _world.Map.TileSize * 0.5f;
-        if (_path.Count == 0 || (goalMoved && _repathTimer <= 0f)) Repath(goal);
+        // An empty path means "arrived" or "unreachable": only retry when the goal moves or after a delay.
+        bool needPath = _path.Count == 0 ? goalMoved || _repathTimer <= 0f : goalMoved && _repathTimer <= 0f;
+        if (needPath) Repath(goal);
         if (_path.Count == 0)
         {
             Stop();
@@ -464,8 +479,10 @@ public sealed class EnemyBrain
             _pathIndex++;
             if (_pathIndex >= _path.Count)
             {
+                // End of the path: as close as the grid allows (the goal itself may be inside a wall).
                 _path.Clear();
-                return Vector2.Distance(_self.Position, goal) <= _world.Map.TileSize;
+                Stop();
+                return true;
             }
 
             waypoint = _path[_pathIndex];

@@ -59,7 +59,8 @@ public sealed class CombatSystem
             _world.AddEvent(new WeaponEmpty(shooter, definition));
             if (definition.WhenEmpty == EmptyBehavior.Throw) ThrowWeapon(shooter);
             else if (definition.WhenEmpty == EmptyBehavior.Drop) DropWeapon(shooter, Vector2.Zero);
-            return false;
+            // The click (and the automatic throw or drop) is the action: the attack input is consumed.
+            return true;
         }
 
         shooter.AttackCooldown = definition.Cooldown;
@@ -204,7 +205,8 @@ public sealed class CombatSystem
             targets.Add((target, distance));
         }
 
-        targets.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+        // Standing threats first, then bodies on the floor; nearest first within each group.
+        targets.Sort((a, b) => a.Target.IsDown != b.Target.IsDown ? a.Target.IsDown.CompareTo(b.Target.IsDown) : a.Distance.CompareTo(b.Distance));
         int count = Math.Min(Math.Max(1, weapon.MaxTargets), targets.Count);
         for (int i = 0; i < count; i++)
         {
@@ -253,7 +255,6 @@ public sealed class CombatSystem
         float damage = hit.Damage * multiplier;
 
         _world.AddEvent(new ActorHit(target, hit.Direction, hit.Method, hit.DamageType, damage, hit.Weapon));
-        if (hit.Source is not null && target.Brain is not null) target.Brain.OnAttacked(hit.Source);
 
         if (damage > 0f) target.Health -= damage;
         if (target.Health <= 0f)
@@ -261,6 +262,9 @@ public sealed class CombatSystem
             Kill(target, hit);
             return;
         }
+
+        // Only survivors react (a silent kill alerts nobody).
+        if (hit.Source is not null && target.Brain is not null) target.Brain.OnAttacked(hit.Source);
 
         if (hit.Knockdown && !target.Definition.KnockdownImmune)
         {
@@ -295,7 +299,7 @@ public sealed class CombatSystem
 
     public void PickupOrThrow(Actor actor)
     {
-        if (!actor.CanAct) return;
+        if (!actor.IsFreeToAct) return;
         WorldWeapon? nearest = FindPickup(actor);
         if (actor.Weapon is null)
         {
@@ -322,7 +326,7 @@ public sealed class CombatSystem
             if (weapon.IsFlying) continue;
             if (actor.IsPlayer && !_world.Modifier.AllowFirearms && weapon.Weapon.Definition.IsFirearm) continue;
             float distance = Vector2.Distance(weapon.Position, actor.Position);
-            if (distance <= bestDistance)
+            if (distance <= bestDistance && _world.Physics.HasLineOfSight(actor.Position, weapon.Position, Blocking.Projectiles))
             {
                 best = weapon;
                 bestDistance = distance;
@@ -353,7 +357,7 @@ public sealed class CombatSystem
 
     public void ThrowWeapon(Actor actor)
     {
-        if (!actor.CanAct || actor.Weapon is not { Definition.CanDrop: true } weapon) return;
+        if (!actor.IsFreeToAct || actor.Weapon is not { Definition.CanDrop: true } weapon) return;
         actor.Weapon = null;
         actor.AttackCooldown = MathF.Max(actor.AttackCooldown, ThrowCooldown);
         ThrowDefinition throwDefinition = weapon.Definition.Throw;
@@ -402,9 +406,14 @@ public sealed class CombatSystem
     {
         Vector2 delta = weapon.Velocity * dt;
         Vector2 direction = Geo.NormalizeOrZero(delta);
+        // In flight a weapon passes over low furniture and through broken windows, like a bullet.
+        Blocking mask = weapon.IsFlying ? Blocking.Projectiles : Blocking.Movement;
+        bool blocked = _world.Physics.Raycast(weapon.Position, weapon.Position + delta, mask, out RayHit hit);
 
-        if (weapon.IsFlying && FindThrowTarget(weapon, delta) is { } victim)
+        if (weapon.IsFlying && FindThrowTarget(weapon, delta) is { } victim && (!blocked || victim.Fraction < hit.Fraction)
+            && !_world.Physics.Raycast(weapon.Position + delta * victim.Fraction, victim.Actor.Position, mask, out _))
         {
+            // The weapon is a small disc: the last check stops it from "touching" someone through a door.
             ThrowDefinition definition = weapon.Weapon.Definition.Throw;
             ApplyHit(victim.Actor, new Hit(definition.Damage, definition.DamageType, definition.Knockdown,
                 definition.KnockdownDuration, direction, 180f, weapon.Thrower, HitMethod.Thrown, weapon.Weapon.Definition));
@@ -415,7 +424,7 @@ public sealed class CombatSystem
             return;
         }
 
-        if (_world.Physics.Raycast(weapon.Position, weapon.Position + delta, Blocking.Movement, out RayHit hit))
+        if (blocked)
         {
             if (hit.Kind == HitKind.Tile && weapon.IsFlying && _world.Map.Get(hit.TileX, hit.TileY).Destructible)
             {
@@ -486,6 +495,7 @@ public sealed class CombatSystem
         foreach (Actor other in _world.Actors)
         {
             if (other.State != ActorState.KnockedDown || !actor.IsHostileTo(other)) continue;
+            if (other.Definition.DamageMultipliers.GetValueOrDefault("execution", 1f) <= 0f) continue;
             float gap = Vector2.Distance(other.Position, actor.Position) - other.Radius - actor.Radius;
             if (gap <= bestGap && _world.Physics.HasLineOfSight(actor.Position, other.Position, Blocking.Movement))
             {

@@ -47,32 +47,43 @@ internal static class ModLoadOrder
         var ordered = new List<ContentPack> { basePack };
         var visiting = new HashSet<string>(StringComparer.Ordinal);
         var done = new HashSet<string>(StringComparer.Ordinal) { basePack.Manifest.Id };
+        var failed = new HashSet<string>(StringComparer.Ordinal);
         foreach (string id in enabled)
         {
-            if (candidates.ContainsKey(id)) Visit(id, candidates, visiting, done, ordered, diagnostics);
+            if (candidates.ContainsKey(id)) Visit(id, candidates, visiting, done, failed, ordered, diagnostics);
         }
 
         return ordered;
     }
 
-    private static void Visit(string id, Dictionary<string, ContentPack> candidates, HashSet<string> visiting, HashSet<string> done,
-        List<ContentPack> ordered, DiagnosticList diagnostics)
+    /// <summary>Adds a mod after its dependencies. Returns false if it cannot be loaded (dependency cycle).</summary>
+    private static bool Visit(string id, Dictionary<string, ContentPack> candidates, HashSet<string> visiting, HashSet<string> done,
+        HashSet<string> failed, List<ContentPack> ordered, DiagnosticList diagnostics)
     {
-        if (done.Contains(id)) return;
+        if (done.Contains(id)) return true;
+        if (failed.Contains(id)) return false;
         if (!visiting.Add(id))
         {
-            diagnostics.Error($"mod:{id}", "Circular dependency between mods.");
-            return;
+            diagnostics.Error($"mod:{id}", "Circular dependency between mods; the mods involved are not loaded.");
+            failed.Add(id);
+            return false;
         }
 
-        ContentPack mod = candidates[id];
-        foreach (string dependency in mod.Manifest.Dependencies)
+        bool ok = true;
+        foreach (string dependency in candidates[id].Manifest.Dependencies)
         {
-            if (candidates.ContainsKey(dependency)) Visit(dependency, candidates, visiting, done, ordered, diagnostics);
+            if (candidates.ContainsKey(dependency) && !Visit(dependency, candidates, visiting, done, failed, ordered, diagnostics)) ok = false;
         }
 
         visiting.Remove(id);
-        if (done.Add(id)) ordered.Add(mod);
+        if (!ok || failed.Contains(id))
+        {
+            failed.Add(id);
+            return false;
+        }
+
+        if (done.Add(id)) ordered.Add(candidates[id]);
+        return true;
     }
 
     /// <summary>True if <paramref name="pack"/> depends (directly or not) on <paramref name="other"/>.</summary>

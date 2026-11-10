@@ -46,17 +46,31 @@ public sealed class Localizer
 
     public string Format(string key, params (string Name, object Value)[] arguments)
     {
-        string resolvedKey = key;
         foreach ((string name, object value) in arguments)
         {
-            if (name != "count" || !TryGetNumber(value, out double count)) continue;
-            string pluralKey = $"{key}.{PluralCategory(Language, count)}";
-            if (Has(pluralKey)) resolvedKey = pluralKey;
-            else if (Has($"{key}.other")) resolvedKey = $"{key}.other";
-            break;
+            if (name == "count" && TryGetNumber(value, out double count) && PluralText(key, count) is { } plural)
+                return Substitute(plural, arguments);
         }
 
-        return Substitute(Get(resolvedKey), arguments);
+        return Substitute(Get(key), arguments);
+    }
+
+    /// <summary>
+    /// Picks the language first (current, then fallback), then the plural form with that
+    /// language's rules, so a sentence never mixes two languages.
+    /// </summary>
+    private string? PluralText(string key, double count)
+    {
+        foreach (string language in new[] { Language, FallbackLanguage })
+        {
+            string? one = Lookup(language, $"{key}.one");
+            string? other = Lookup(language, $"{key}.other");
+            if (one is null && other is null) continue;
+            if (language != Language) Report($"{key}.other");
+            return PluralCategory(language, count) == "one" ? one ?? other : other ?? one;
+        }
+
+        return null;
     }
 
     /// <summary>CLDR-style plural category, simplified to "one"/"other".</summary>

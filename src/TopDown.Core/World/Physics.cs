@@ -85,7 +85,22 @@ public sealed class Physics
         return !Map.Raycast(from, to, Blocking.Movement, out _)
             && !Map.Raycast(from + side, to + side, Blocking.Movement, out _)
             && !Map.Raycast(from - side, to - side, Blocking.Movement, out _)
-            && !PropsBlock(from, to, Blocking.Movement);
+            && !PropsBlock(from, to, Blocking.Movement)
+            && !LockedDoorBlocks(from, to, side);
+    }
+
+    private bool LockedDoorBlocks(Vector2 from, Vector2 to, Vector2 side)
+    {
+        foreach (Door door in _world.Doors)
+        {
+            if (!door.Locked) continue;
+            if (Geo.SegmentIntersect(from, to - from, door.Hinge, door.Tip, out _)
+                || Geo.SegmentIntersect(from + side, to - from, door.Hinge, door.Tip, out _)
+                || Geo.SegmentIntersect(from - side, to - from, door.Hinge, door.Tip, out _))
+                return true;
+        }
+
+        return false;
     }
 
     private bool PropsBlock(Vector2 from, Vector2 to, Blocking mask)
@@ -160,7 +175,10 @@ public sealed class Physics
                 {
                     if (Geo.CircleCapsulePush(actor.Position, r, door.Hinge, door.Tip, door.HalfThickness, out Vector2 push))
                     {
+                        // A door hit adds knockback to actor.Velocity; keep it in the local velocity.
+                        Vector2 before = actor.Velocity;
                         _world.DoorLogic.OnContact(door, actor, velocity);
+                        velocity += actor.Velocity - before;
                         actor.Position += push;
                         velocity = RemoveInward(velocity, push);
                         pushed = true;

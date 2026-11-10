@@ -85,7 +85,11 @@ internal static class LevelBuilder
             for (int x = 0; x < level.Map[y].Length; x++)
             {
                 if (!level.DoorSymbols.TryGetValue(level.Map[y][x].ToString(), out LevelDoorSymbol? symbol)) continue;
-                bool horizontal = map.Blocks(x - 1, y, Blocking.Movement) && map.Blocks(x + 1, y, Blocking.Movement);
+                // Neighbouring door symbols count as wall, so double doors get the wall's axis.
+                bool WallOrDoor(int nx, int ny) => map.Blocks(nx, ny, Blocking.Movement)
+                    || (ny >= 0 && ny < level.Height && nx >= 0 && nx < level.Map[ny].Length && level.DoorSymbols.ContainsKey(level.Map[ny][nx].ToString()));
+                bool vertical = WallOrDoor(x, y - 1) && WallOrDoor(x, y + 1);
+                bool horizontal = !vertical && WallOrDoor(x - 1, y) && WallOrDoor(x + 1, y);
                 yield return new LevelDoor
                 {
                     Definition = symbol.Door,

@@ -3,7 +3,7 @@
     "id": "door_wood",
     "spriteId": "door.wood",
     "thickness": 6,
-    "maxAngleDegrees": 95,
+    "maxAngleDegrees": 90,
     "pushSpeedDegrees": 620,
     "damping": 2.2,
     "knockdownSpeedDegrees": 240,

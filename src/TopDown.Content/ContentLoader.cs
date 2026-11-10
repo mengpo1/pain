@@ -147,7 +147,7 @@ public static class ContentLoader
                     continue;
                 }
 
-                string? id = definition["id"]?.GetValue<string>();
+                string? id = definition["id"] is JsonValue idValue && idValue.TryGetValue(out string? text) ? text : null;
                 if (string.IsNullOrWhiteSpace(id) && kind == "level") id = Path.GetFileNameWithoutExtension(file);
                 if (string.IsNullOrWhiteSpace(id))
                 {
@@ -247,8 +247,9 @@ public static class ContentLoader
         {
             return ContentJson.ParseFile(path);
         }
-        catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (exception is JsonException or IOException or UnauthorizedAccessException or ArgumentException)
         {
+            // ArgumentException: the same key twice in one object.
             diagnostics.Error(path, $"Cannot read JSON: {exception.Message}");
             return null;
         }

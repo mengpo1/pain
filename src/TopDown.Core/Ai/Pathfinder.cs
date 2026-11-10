@@ -49,7 +49,7 @@ public sealed class Pathfinder
         (int startX, int startY) = _map.TileAt(from);
         (int goalX, int goalY) = _map.TileAt(to);
         bool exactGoal = IsWalkable(goalX, goalY);
-        if (!exactGoal && !TryNearestWalkable(ref goalX, ref goalY)) return false;
+        if (!exactGoal && !TryNearestWalkable(ref goalX, ref goalY, startX, startY)) return false;
         if (!_map.InBounds(startX, startY)) return false;
 
         int width = _map.Width;
@@ -112,22 +112,29 @@ public sealed class Pathfinder
         _parent[node] = parent;
     }
 
-    private bool TryNearestWalkable(ref int x, ref int y)
+    /// <summary>Walkable tile around an unwalkable goal, the closest to the start among the nearest ring.</summary>
+    private bool TryNearestWalkable(ref int x, ref int y, int fromX, int fromY)
     {
         for (int radius = 1; radius <= 3; radius++)
         {
+            int bestX = 0, bestY = 0, bestDistance = int.MaxValue;
             for (int dy = -radius; dy <= radius; dy++)
             {
                 for (int dx = -radius; dx <= radius; dx++)
                 {
-                    if (IsWalkable(x + dx, y + dy))
-                    {
-                        x += dx;
-                        y += dy;
-                        return true;
-                    }
+                    if (!IsWalkable(x + dx, y + dy)) continue;
+                    int distance = (x + dx - fromX) * (x + dx - fromX) + (y + dy - fromY) * (y + dy - fromY);
+                    if (distance >= bestDistance) continue;
+                    bestDistance = distance;
+                    bestX = x + dx;
+                    bestY = y + dy;
                 }
             }
+
+            if (bestDistance == int.MaxValue) continue;
+            x = bestX;
+            y = bestY;
+            return true;
         }
 
         return false;

@@ -102,6 +102,12 @@ internal static class ContentValidator
             return;
         }
 
+        if (level.TileSize <= 0f)
+        {
+            d.Error(source, "'tileSize' must be > 0.");
+            return;
+        }
+
         foreach ((string symbol, string tileId) in level.Legend)
         {
             if (symbol.Length != 1) d.Error(source, $"Legend key '{symbol}' must be a single character.");
@@ -266,8 +272,9 @@ internal static class ContentValidator
     {
         public void Check(Vector2 position, string what)
         {
-            int x = (int)MathF.Round(position.X);
-            int y = (int)MathF.Round(position.Y);
+            // Same rounding as LevelDefinition.ToWorld: x.5 belongs to the next tile.
+            int x = (int)MathF.Floor(position.X + 0.5f);
+            int y = (int)MathF.Floor(position.Y + 0.5f);
             if (x < 0 || y < 0 || y >= level.Map.Count || x >= level.Map[y].Length)
             {
                 d.Error(source, $"The {what} at {position} is outside the map.");
