@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: Build and tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build TopDown.slnx -c Release
+      - run: dotnet test tests/TopDown.Tests -c Release --no-build
+
+  # Runs the real game (OpenGL software rendering) on every level, the game playing itself.
+  smoke-linux:
+    name: Game smoke test (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri
+      - run: dotnet build src/TopDown.Desktop -c Release
+      - name: Play every level
+        run: |
+          game=src/TopDown.Desktop/bin/Release/net10.0/TopDown.dll
+          for level in first_night warehouse offices; do
+            xvfb-run -a -s "-screen 0 1280x720x24" dotnet $game --level $level --autopilot --mute --frames 300 --size 1280x720 --screenshot $level.png
+          done
+          for level in outpost tunnels; do
+            xvfb-run -a -s "-screen 0 1280x720x24" dotnet $game --profile noct --level $level --autopilot --mute --frames 300 --size 1280x720 --screenshot $level.png
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-linux
+          path: '*.png'
+
+  # Informational: hosted macOS runners may not provide an OpenGL context.
+  smoke-macos:
+    name: Game smoke test (macOS, informational)
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build src/TopDown.Desktop -c Release
+      - run: dotnet src/TopDown.Desktop/bin/Release/net10.0/TopDown.dll --level first_night --autopilot --mute --frames 300 --size 1280x720 --screenshot first_night.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-macos
+          path: '*.png'
