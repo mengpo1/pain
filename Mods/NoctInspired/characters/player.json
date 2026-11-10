@@ -1,0 +1,6 @@
+{
+  // More vulnerable than in the action game.
+  "id": "player",
+  "speed": 165,
+  "sounds": { "death": "sound.static" }
+}

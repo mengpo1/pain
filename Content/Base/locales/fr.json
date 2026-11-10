@@ -88,7 +88,8 @@
     },
     "offices": {
       "name": "Bureaux",
-      "intro": "La mallette est quelque part dans les bureaux."
+      "intro": "La mallette est quelque part dans les bureaux.",
+      "alarm": "ALARME ! La sécurité arrive."
     }
   },
   "weapon": {

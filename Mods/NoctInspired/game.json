@@ -1,0 +1,25 @@
+{
+  // A different game on the same engine: only data changes.
+  "titleKey": "noct.title",
+  "campaign": ["outpost", "tunnels"],
+  "theme": "thermal",
+  "menuMusic": "music.dread",
+  "rules": {
+    "enemiesHaveInfiniteAmmo": false,
+    "execution": { "durationMultiplier": 1.6 },
+    "score": { "enabled": false }
+  },
+  "camera": {
+    "viewHeight": 340,
+    "followSharpness": 5,
+    "lookAhead": 0.12,
+    "lookAheadMax": 60,
+    "farLook": 0.45,
+    "farLookMax": 220,
+    "maxShake": 8
+  },
+  "sounds": {
+    "levelComplete": "sound.static",
+    "objectiveComplete": "sound.static"
+  }
+}

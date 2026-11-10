@@ -376,8 +376,12 @@ public sealed class PlayScreen : Screen
                 ColorParser.Parse(light.Color, Color.White), light.Intensity * flicker));
         }
 
-        if (post.PlayerLightRadius > 0f && _world.Player.IsAlive)
-            _lights.Add(new WorldLight(WorldRenderer.ToXna(_world.Player.Position), post.PlayerLightRadius, Color.White, post.PlayerLightIntensity));
+        if (post.PlayerLightRadius > 0f)
+        {
+            // The light stays on the body after death (dimmer) so the scene does not go black.
+            float intensity = post.PlayerLightIntensity * (_world.Player.IsAlive ? 1f : 0.6f);
+            _lights.Add(new WorldLight(WorldRenderer.ToXna(_world.Player.Position), post.PlayerLightRadius, Color.White, intensity));
+        }
 
         foreach (TransientLight flash in _effects.Lights)
             _lights.Add(new WorldLight(flash.Position, flash.Radius, flash.Color, flash.Intensity));

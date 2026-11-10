@@ -88,7 +88,8 @@
     },
     "offices": {
       "name": "Offices",
-      "intro": "The briefcase is somewhere in the offices."
+      "intro": "The briefcase is somewhere in the offices.",
+      "alarm": "ALARM! Security is coming."
     }
   },
   "weapon": {

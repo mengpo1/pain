@@ -44,7 +44,11 @@ public sealed class MenuScreen : Screen
     private UserSettings Settings => Host.Settings;
     private InputState Input => Host.Input;
 
-    private sealed record MenuItem(Func<string> Label, Action? Select = null, Action<int>? Adjust = null, bool Enabled = true);
+    private sealed record MenuItem(Func<string> Label, Action? Select = null, Action<int>? Adjust = null, bool Enabled = true)
+    {
+        /// <summary>Extra line shown under the menu while the item is selected.</summary>
+        public Func<string?>? Hint { get; init; }
+    }
 
     private void Build()
     {
@@ -65,7 +69,7 @@ public sealed class MenuScreen : Screen
         var items = new List<MenuItem>
         {
             new(() => T.Get("menu.play"), () => Open(Page.Levels)),
-            new(() => $"{T.Get("menu.modifier")} : {ModifierName()}", () => CycleModifier(1), CycleModifier),
+            new(() => $"{T.Get("menu.modifier")} : {ModifierName()}", () => CycleModifier(1), CycleModifier) { Hint = ModifierDescription },
             new(() => $"{T.Get("menu.profile")} : {ProfileName(Session.Profile)}", () => CycleProfile(1), CycleProfile),
             new(() => $"{T.Get("menu.language")} : {LanguageName(T.Language)}", () => CycleLanguage(1), CycleLanguage),
             new(() => T.Get("menu.settings"), () => Open(Page.Settings)),
@@ -128,6 +132,11 @@ public sealed class MenuScreen : Screen
         Session.Content.Definitions.Modifiers.TryGetValue(Settings.Modifier ?? "", out ModifierDefinition? modifier)
             ? T.Get(modifier.NameKey)
             : T.Get("modifier.none");
+
+    private string? ModifierDescription() =>
+        Session.Content.Definitions.Modifiers.TryGetValue(Settings.Modifier ?? "", out ModifierDefinition? modifier)
+            ? T.Get(modifier.DescriptionKey)
+            : null;
 
     private string ProfileName(ProfileDefinition profile) => T.Has(profile.NameKey) ? T.Get(profile.NameKey) : profile.Id;
 
@@ -283,6 +292,12 @@ public sealed class MenuScreen : Screen
             string label = _items[i].Label();
             if (selected) label = $"> {label} <";
             ui.Text(batch, label, new Vector2(screen.Width * 0.5f, area.Y + 4), selected ? 32f : 28f, color, Align.Center);
+        }
+
+        if (_items.Count > 0 && _items[_index].Hint?.Invoke() is { } itemHint)
+        {
+            Rectangle last = ItemArea(_items.Count - 1);
+            ui.Text(batch, itemHint, new Vector2(screen.Width * 0.5f, last.Bottom + 24f * ui.Scale), 20f, ui.Colors.Accent, Align.Center);
         }
 
         if (_page == Page.Settings)

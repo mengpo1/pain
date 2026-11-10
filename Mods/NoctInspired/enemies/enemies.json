@@ -1,0 +1,64 @@
+[
+  {
+    // Survivors in protective suits, nervous and slower to react.
+    "id": "guard",
+    "nameKey": "actor.survivor.name",
+    "sounds": { "alert": "sound.alert" },
+    "ai": { "reactionTime": 0.5, "visionRange": 340, "alertAlliesRadius": 220 }
+  },
+  {
+    // Something that used to be a person: slow, then suddenly fast.
+    "id": "husk",
+    "nameKey": "actor.husk.name",
+    "faction": "enemy",
+    "health": 200,
+    "radius": 11,
+    "speed": 45,
+    "runSpeed": 170,
+    "acceleration": 1800,
+    "naturalWeaponId": "claws",
+    "hitStunDuration": 0.3,
+    "damageMultipliers": { "unarmed": 0.5 },
+    "sprites": { "body": "actor.thug", "legs": "actor.legs", "down": "actor.thug.down", "dead": "actor.thug.dead" },
+    "sounds": { "death": "sound.creature_growl", "alert": "sound.creature_growl" },
+    "ai": {
+      "behavior": "wander",
+      "visionRange": 260,
+      "visionAngleDegrees": 140,
+      "hearingMultiplier": 1.8,
+      "reactionTime": 0.6,
+      "turnSpeedDegrees": 240,
+      "wanderRadiusTiles": 3,
+      "searchDuration": 6
+    }
+  },
+  {
+    // Almost blind, but hears everything. Cold body: barely visible on the thermal feed.
+    "id": "stalker",
+    "nameKey": "actor.stalker.name",
+    "faction": "enemy",
+    "health": 500,
+    "radius": 15,
+    "speed": 70,
+    "runSpeed": 260,
+    "acceleration": 2000,
+    "naturalWeaponId": "claws",
+    "knockdownImmune": true,
+    "hitStunDuration": 0.4,
+    "damageMultipliers": { "blunt": 0.2, "unarmed": 0, "thrown": 0.2, "sharp": 0.4, "execution": 0, "fire": 2 },
+    "sprites": { "body": "actor.creature", "dead": "actor.creature.dead", "bloodTint": "#606060" },
+    "sounds": { "death": "sound.creature_screech", "alert": "sound.creature_screech" },
+    "ai": {
+      "behavior": "dormant",
+      "visionRange": 140,
+      "visionAngleDegrees": 360,
+      "closeDetectionRadius": 90,
+      "hearingMultiplier": 3,
+      "reactionTime": 0.4,
+      "turnSpeedDegrees": 360,
+      "loseTargetTime": 6,
+      "searchDuration": 10,
+      "wanderRadiusTiles": 6
+    }
+  }
+]

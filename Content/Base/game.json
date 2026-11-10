@@ -3,7 +3,7 @@
   "titleKey": "game.title",
   "defaultLanguage": "fr",
   "fallbackLanguage": "en",
-  "campaign": ["first_night"],
+  "campaign": ["first_night", "warehouse", "offices"],
   "theme": "neon",
   "menuMusic": "music.action",
   "rules": {

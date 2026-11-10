@@ -1,0 +1,45 @@
+[
+  // Changes to base weapons: only the values given here are replaced.
+  { "id": "pistol", "magazineSize": 7 },
+  { "id": "shotgun", "magazineSize": 4 },
+  {
+    // New weapon: a slow, loud flare. Every creature nearby will come.
+    "id": "flare_gun",
+    "nameKey": "weapon.flare_gun.name",
+    "kind": "firearm",
+    "spriteId": "weapon.flare_gun",
+    "damage": 200,
+    "damageType": "fire",
+    "range": 700,
+    "fireRate": 0.8,
+    "magazineSize": 2,
+    "projectileSpeed": 650,
+    "projectileSpriteId": "fx.muzzle",
+    "knockback": 260,
+    "recoil": 5,
+    "noiseRadius": 1100,
+    "muzzleDistance": 20,
+    "holdOffset": [12, 3],
+    "whenEmpty": "drop",
+    "sounds": { "attack": "sound.flare", "empty": "sound.empty", "pickup": "sound.pickup" }
+  },
+  {
+    "id": "hunting_rifle",
+    "nameKey": "weapon.hunting_rifle.name",
+    "kind": "firearm",
+    "spriteId": "weapon.rifle",
+    "damage": 150,
+    "damageType": "bullet",
+    "range": 1200,
+    "fireRate": 1,
+    "magazineSize": 5,
+    "spreadDegrees": 0.5,
+    "projectileSpeed": 0,
+    "knockback": 280,
+    "recoil": 7,
+    "noiseRadius": 900,
+    "muzzleDistance": 24,
+    "holdOffset": [13, 3],
+    "sounds": { "attack": "sound.revolver", "empty": "sound.empty", "pickup": "sound.pickup" }
+  }
+]
