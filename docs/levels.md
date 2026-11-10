@@ -53,7 +53,8 @@ le bord entre deux tuiles). L'axe Y descend.
   voisins (murs à gauche et à droite → porte horizontale). `hinge` : `start` (charnière en haut ou à
   gauche) ou `end`.
 - Les portes peuvent aussi être listées dans `doors` (utile pour leur donner un `id`, par exemple pour
-  les déverrouiller par un déclencheur).
+  les déverrouiller par un déclencheur). Une porte dessinée avec un symbole `locked` n'a pas d'`id` :
+  elle reste verrouillée pour toute la partie.
 - L'apparence (`sprite`) et la collision (`size`, `blocks*`) des `props` sont indépendantes. Le `decor`
   n'a jamais de collision.
 
