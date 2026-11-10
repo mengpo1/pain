@@ -193,6 +193,28 @@ public class GameplayTests
     }
 
     [Fact]
+    public void Simulation_with_many_enemies_runs_much_faster_than_real_time()
+    {
+        string[] map = Room(60, 40);
+        // Pillars so the AI has to path around obstacles.
+        for (int y = 6; y < 34; y += 6) map[y] = "#" + string.Concat(Enumerable.Range(1, 58).Select(x => x % 8 == 0 ? '#' : '.')) + "#";
+        var actors = Enumerable.Range(0, 60)
+            .Select(i => TestContent.Enemy(i % 2 == 0 ? "guard" : "thug", 10 + i % 15 * 3, 3 + i / 15 * 8))
+            .ToArray();
+        GameWorld world = World(new LevelDefinitionBuilder(map, new Vector2(2, 20)).With(actors).Build(), Definitions(rules => rules.FriendlyFire = false));
+        foreach (Actor enemy in world.Actors.Where(a => !a.IsPlayer)) enemy.Brain!.AlertTo(world.Player);
+        // Keep the player alive so the AI keeps chasing and shooting.
+        world.Player.Health = float.MaxValue;
+        Run(world, 0.5f);
+
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        Run(world, 2f);
+        watch.Stop();
+
+        Assert.True(watch.ElapsedMilliseconds < 1000, $"2 s of simulation took {watch.ElapsedMilliseconds} ms");
+    }
+
+    [Fact]
     public void Simulation_is_deterministic_for_a_given_seed()
     {
         LevelDefinition level = new LevelDefinitionBuilder(Room(30, 10), new Vector2(2, 5), playerWeapon: "pistol")
