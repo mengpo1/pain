@@ -119,7 +119,7 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 ```
 
 ```json
-{ "id": "door_wood", "spriteId": "door.wood", "thickness": 6, "maxAngleDegrees": 95,
+{ "id": "door_wood", "spriteId": "door.wood", "thickness": 6, "maxAngleDegrees": 90,
   "pushSpeedDegrees": 620, "damping": 2.2, "closeSpring": 0,
   "knockdownSpeedDegrees": 240, "knockdownDuration": 2.6,
   "blocksVision": true, "blocksProjectiles": true, "hitNoiseRadius": 220, "hitSound": "sound.door" }
