@@ -1,0 +1,213 @@
+{
+  "id": "first_night",
+  "nameKey": "level.first_night.name",
+  "introKey": "level.first_night.intro",
+  "tileSize": 32,
+  "legend": {
+    "#": "wall_brick",
+    ":": "floor_concrete",
+    ";": "floor_carpet",
+    ",": "floor_tile",
+    ".": "floor_wood",
+    "=": "glass"
+  },
+  "doorSymbols": {
+    "D": {
+      "tile": "floor_wood",
+      "door": "door_wood"
+    }
+  },
+  "map": [
+    "####################################",
+    "#:::::::::#;;;;;;;;;#,,,,,,,,,,,,,,#",
+    "#:::::::::#;;;;;;;;;#,,,,,,,,,,,,,,#",
+    "#:::::::::#;;;;;;;;;#,,,,,,,,,,,,,,#",
+    "#:::::::::#;;;;;;;;;D,,,,,,,,,,,,,,#",
+    "#:::::::::#;;;;;;;;;#,,,,,,,,,,,,,,#",
+    "#:::::::::#;;;;;;;;;#,,,,,,,,,,,,,,#",
+    "#:::::::::#####D###########D########",
+    "#:::::::::#.........#..............#",
+    "#:::::::::#.........#..............#",
+    "#:::::::::#.........=..............#",
+    "#:::::::::#.........=..............#",
+    "#:::::::::D.........#..............#",
+    "#:::::::::#.........#..............#",
+    "#:::::::::#.........D..............#",
+    "#:::::::::#.........#..............#",
+    "#:::::::::#.........#..............#",
+    "#:::::::::#####D##############D#####",
+    "#:::::::::#::::::::::::::::::::::::#",
+    "#:::::::::#::::::::::::::::::::::::#",
+    "#:::::::::#::::::::::::::::::::::::#",
+    "#:::::::::#::::::::::::::::::::::::#",
+    "#:::::::::#::::::::::::::::::::::::#",
+    "####################################"
+  ],
+  "player": {
+    "definition": "player",
+    "position": [4, 12],
+    "facingDegrees": 0
+  },
+  "actors": [
+    {
+      "id": "lobby_thug",
+      "definition": "thug",
+      "position": [12, 9],
+      "weaponId": "none",
+      "behavior": "patrol",
+      "patrol": [
+        [12, 9],
+        [18, 9],
+        [18, 15],
+        [12, 15]
+      ]
+    },
+    {
+      "id": "office_guard",
+      "definition": "guard",
+      "position": [17, 3],
+      "facingDegrees": 180
+    },
+    {
+      "id": "kitchen_dog",
+      "definition": "dog",
+      "position": [28, 3]
+    },
+    {
+      "id": "hall_watcher",
+      "definition": "thug",
+      "position": [25, 11],
+      "facingDegrees": 180,
+      "behavior": "guard",
+      "weaponId": "pipe"
+    },
+    {
+      "id": "hall_patrol",
+      "definition": "thug",
+      "position": [22, 9],
+      "weaponId": "knife",
+      "patrol": [
+        [22, 9],
+        [33, 9],
+        [33, 15],
+        [22, 15]
+      ]
+    },
+    {
+      "id": "storage_guard",
+      "definition": "guard",
+      "position": [22, 20],
+      "facingDegrees": 270,
+      "weaponId": "shotgun"
+    },
+    {
+      "id": "storage_brute",
+      "definition": "brute",
+      "position": [32, 20],
+      "facingDegrees": 180
+    }
+  ],
+  "weapons": [
+    {
+      "definition": "bat",
+      "position": [6, 10],
+      "rotationDegrees": 30
+    },
+    {
+      "definition": "knife",
+      "position": [12, 16],
+      "rotationDegrees": -40
+    },
+    {
+      "definition": "pistol",
+      "position": [33, 2],
+      "rotationDegrees": 15,
+      "ammo": 6
+    }
+  ],
+  "props": [
+    {
+      "sprite": "prop.table",
+      "position": [14.5, 2],
+      "size": [2, 1]
+    },
+    {
+      "sprite": "prop.plant",
+      "position": [11, 1],
+      "size": [0.6, 0.6]
+    },
+    {
+      "sprite": "prop.crate",
+      "position": [27, 19],
+      "size": [1, 1],
+      "blocksProjectiles": true,
+      "blocksVision": true
+    },
+    {
+      "sprite": "prop.crate",
+      "position": [28, 19],
+      "size": [1, 1],
+      "blocksProjectiles": true,
+      "blocksVision": true
+    },
+    {
+      "sprite": "prop.crate",
+      "position": [27, 20],
+      "size": [1, 1],
+      "blocksProjectiles": true,
+      "blocksVision": true
+    },
+    {
+      "sprite": "prop.table",
+      "position": [29.5, 4],
+      "size": [2, 1]
+    }
+  ],
+  "decor": [
+    {
+      "sprite": "prop.car",
+      "position": [3, 20],
+      "rotationDegrees": 0,
+      "layer": "floor"
+    }
+  ],
+  "zones": {
+    "exit": {
+      "x": 2,
+      "y": 19,
+      "width": 3,
+      "height": 3
+    },
+    "lobby": {
+      "x": 11,
+      "y": 8,
+      "width": 9,
+      "height": 9
+    }
+  },
+  "objectives": [
+    {
+      "type": "eliminateAll",
+      "textKey": "objective.eliminateAll"
+    },
+    {
+      "type": "reachZone",
+      "zone": "exit",
+      "textKey": "objective.reachCar"
+    }
+  ],
+  "triggers": [
+    {
+      "on": "enterZone",
+      "subject": "lobby",
+      "actions": [
+        {
+          "type": "message",
+          "textKey": "tutorial.execute",
+          "duration": 4
+        }
+      ]
+    }
+  ],
+  "music": "music.action"
+}

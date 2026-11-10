@@ -1,0 +1,27 @@
+{
+  "id": "neon",
+  "background": "#120a1c",
+  "tints": { "floor": "#ffffff", "wall": "#ffffff", "actor": "#ffffff", "weapon": "#ffffff", "decor": "#ffffff", "fx": "#fff2b0", "blood": "#ffffff" },
+  "shadow": { "enabled": true, "offset": [3, 4], "color": "#0a001880" },
+  "ui": {
+    "font": "font.ui",
+    "text": "#ffffff",
+    "accent": "#ff3d8b",
+    "secondary": "#3df0ff",
+    "danger": "#ff2a3d",
+    "panel": "#1a0a2ad0",
+    "shadow": "#2a0038",
+    "hudStyle": "default",
+    "titleWave": 1
+  },
+  "post": {
+    "vignette": 0.45,
+    "grain": 0.03,
+    "scanlines": 0.08,
+    "flicker": 0,
+    "videoNoise": 0,
+    "darkness": 0,
+    "colorMultiply": "#ffffff",
+    "hideUnseenActors": false
+  }
+}

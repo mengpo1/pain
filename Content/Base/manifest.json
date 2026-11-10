@@ -1,0 +1,9 @@
+{
+  "id": "base",
+  "name": "Base demo",
+  "version": "0.1.0",
+  "formatVersion": 1,
+  "description": "Original demonstration content: a fast, lethal top-down action game.",
+  "author": "TopDown contributors",
+  "dependencies": []
+}
