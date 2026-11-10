@@ -10,6 +10,7 @@ public sealed class InputState
     private KeyboardState _previousKeyboard;
     private MouseState _mouse;
     private MouseState _previousMouse;
+    private bool _initialized;
 
     public InputState(InputBindings bindings) => Bindings = bindings;
 
@@ -27,6 +28,11 @@ public sealed class InputState
         _previousMouse = _mouse;
         _keyboard = Keyboard.GetState();
         _mouse = Mouse.GetState();
+        if (_initialized) return;
+        // First frame: nothing was "just pressed" and the mouse did not "move" from (0, 0).
+        _previousKeyboard = _keyboard;
+        _previousMouse = _mouse;
+        _initialized = true;
     }
 
     public bool Held(GameAction action)
