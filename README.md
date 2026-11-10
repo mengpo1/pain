@@ -11,6 +11,10 @@ Deux expériences tournent déjà sur le même exécutable :
 | `action` | `Content/Base` | « Néon brutal » : action nerveuse, un coup = un mort, score et combos |
 | `noct` | `Content/Base` + `Mods/NoctInspired` | « Signal mort » : horreur de surveillance thermique, obscurité, créatures qui chassent au bruit, sans score |
 
+| Action (`action`) | Horreur (`noct`) | Mode debug |
+|---|---|---|
+| ![Combat dans l'entrepôt](docs/images/action.jpg) | ![Avant-poste en vision thermique](docs/images/horror.jpg) | ![Hitboxes, collisions et IA](docs/images/debug.jpg) |
+
 Tout le contenu (graphismes, sons, niveaux, textes) est original. Les graphismes et sons de
 remplacement sont générés par `tools/PlaceholderArt` (CC0).
 
@@ -113,10 +117,15 @@ docs/                 formats et guides
 
 ## État et limites
 
-- Vérifié ici : compilation sans avertissement, 120 tests, exécution réelle sous Linux (Xvfb, OpenGL logiciel)
-  des menus et des cinq niveaux, en pilotage automatique. **Non vérifié** : macOS et Windows (aucune
-  machine disponible), le son (pas de carte son dans l'environnement de développement : le jeu le
-  détecte et continue sans audio).
+- **Vérifié** :
+  - ici (Linux, Xvfb, OpenGL logiciel) : compilation sans avertissement, tests, menus, les cinq
+    niveaux en pilotage automatique, et une partie pilotée au clavier et à la souris (menu, ramassage,
+    attaque, pause, mode debug, recommencement) ;
+  - en intégration continue (`.github/workflows/ci.yml`) : compilation et tests sous **Linux, Windows et
+    macOS** ; le jeu réel sur les cinq niveaux sous Linux ; le jeu lancé et rendu sous **macOS** (Apple
+    Silicon) sur un niveau.
+- **Non vérifié** : une vraie session de jeu sur un Mac ou un PC Windows avec carte graphique, et le son
+  (pas de carte son dans l'environnement de développement : le jeu le détecte et continue sans audio).
 - Post-traitement sans shaders compilés (le compilateur d'effets de MonoGame exige Wine hors Windows) :
   obscurité, lumières, grain, vignette, lignes de balayage et parasites sont faits par mélanges de
   couleurs. Un vrai rendu thermique (conversion en niveaux de gris) passe par des sprites adaptés, comme
