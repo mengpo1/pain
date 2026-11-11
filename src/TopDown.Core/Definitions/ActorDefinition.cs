@@ -25,6 +25,9 @@ public sealed class ActorDefinition
     public float Health { get; set; } = 100f;
     public float Radius { get; set; } = 11f;
 
+    /// <summary>Body type ("human", "quadruped"…): weapons can execute each one differently.</summary>
+    public string Anatomy { get; set; } = "human";
+
     /// <summary>Walking speed (units/s).</summary>
     public float Speed { get; set; } = 120f;
 
@@ -66,8 +69,32 @@ public sealed class ActorSprites
     public string? Legs { get; set; }
     public string? Down { get; set; }
     public string? Dead { get; set; }
+
+    /// <summary>Kneeling astride a body (executions). Falls back to <see cref="Body"/>.</summary>
+    public string? Mount { get; set; }
+
+    /// <summary>Legs while kicking (executions). Falls back to <see cref="Legs"/>.</summary>
+    public string? Kick { get; set; }
+
+    /// <summary>
+    /// Body on the floor without its <see cref="Parts"/>, for executions that tear them off. Each part
+    /// is an image of the same size as the torso, drawn at the same place, so they fit together.
+    /// </summary>
+    public string? Torso { get; set; }
+    public List<BodyPart> Parts { get; set; } = new();
+
     /// <summary>Colour multiplied with blood effects ("#rrggbb").</summary>
     public string BloodTint { get; set; } = "#ffffff";
+}
+
+/// <summary>A piece of a body that can be torn off ("head", "leg").</summary>
+public sealed class BodyPart
+{
+    public string Id { get; set; } = "";
+    public string Sprite { get; set; } = "";
+
+    /// <summary>Drawn over the torso (a head) rather than under it (legs).</summary>
+    public bool Over { get; set; }
 }
 
 public sealed class ActorSounds

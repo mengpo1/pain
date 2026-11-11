@@ -22,3 +22,9 @@ public static class ColorParser
         return new Color(r * a / 255, g * a / 255, b * a / 255, a);
     }
 }
+
+internal static class ColorExtensions
+{
+    public static Color MultiplyBy(this Color a, Color b) =>
+        new(a.R * b.R / 255, a.G * b.G / 255, a.B * b.B / 255, a.A * b.A / 255);
+}

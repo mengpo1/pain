@@ -11,7 +11,8 @@
     "acceleration": 5000,
     "friction": 5000,
     "weaponId": "pistol",
-    "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead" },
+    "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead",
+                 "mount": "actor.guard.mount", "kick": "actor.legs.kick" },
     "sounds": { "death": "sound.death" },
     "ai": {
       "behavior": "guard",
@@ -36,7 +37,8 @@
     "acceleration": 5000,
     "friction": 5000,
     "weaponId": "bat",
-    "sprites": { "body": "actor.thug", "legs": "actor.legs", "down": "actor.thug.down", "dead": "actor.thug.dead" },
+    "sprites": { "body": "actor.thug", "legs": "actor.legs", "down": "actor.thug.down", "dead": "actor.thug.dead",
+                 "mount": "actor.thug.mount", "kick": "actor.legs.kick" },
     "sounds": { "death": "sound.death" },
     "ai": {
       "behavior": "patrol",
@@ -61,7 +63,8 @@
     "knockdownResistStun": 0.35,
     "hitStunDuration": 0.25,
     "damageMultipliers": { "blunt": 0, "unarmed": 0, "thrown": 0, "sharp": 0.5 },
-    "sprites": { "body": "actor.brute", "legs": "actor.legs", "down": "actor.brute.down", "dead": "actor.brute.dead" },
+    "sprites": { "body": "actor.brute", "legs": "actor.legs", "down": "actor.brute.down", "dead": "actor.brute.dead",
+                 "mount": "actor.brute.mount", "kick": "actor.legs.kick" },
     "sounds": { "death": "sound.death" },
     "ai": {
       "behavior": "guard",

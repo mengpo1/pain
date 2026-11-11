@@ -49,6 +49,14 @@
       "weaponId": "none"
     },
     {
+      // Bare hands on a dog: its legs or its head come off.
+      "id": "dog",
+      "definition": "dog",
+      "position": [5, 2],
+      "facingDegrees": 0,
+      "behavior": "guard"
+    },
+    {
       "id": "duo_1",
       "definition": "thug",
       "position": [21, 3],

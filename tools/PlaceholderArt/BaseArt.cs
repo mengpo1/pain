@@ -99,6 +99,12 @@ public static class BaseArt
         Effects.BloodPool(dead, downSize / 2f + 6f * k, downSize / 2f + 1.5f * k, 15f * k, Blood, seed);
         dead.Draw(down);
         pack.Png($"sprites/actors/{name}_dead.png", dead);
+
+        int mountSize = size + 8;
+        var mount = new Canvas(mountSize, mountSize);
+        Actors.HumanMount(mount, look, mountSize / 2f, mountSize / 2f);
+        mount.Outline(Ink);
+        pack.Png($"sprites/actors/{name}_mount.png", mount);
     }
 
     static void Dogs(Pack pack)
@@ -115,6 +121,15 @@ public static class BaseArt
         Effects.BloodPool(dead, 24f, 20f, 11.5f, Blood, 105);
         dead.Draw(body);
         pack.Png("sprites/actors/dog_dead.png", dead);
+
+        // The same corpse in pieces, each at its place on a canvas of the same size.
+        foreach (Actors.DogPart part in Enum.GetValues<Actors.DogPart>())
+        {
+            var piece = new Canvas(40, 40);
+            Actors.DogDeadPart(piece, Dog, 19f, 18f, part);
+            piece.Outline(Ink);
+            pack.Png($"sprites/actors/dog_{part.ToString().ToLowerInvariant()}.png", piece);
+        }
     }
 
     static void Creatures(Pack pack)
@@ -142,6 +157,11 @@ public static class BaseArt
         for (int f = 0; f < 4; f++) Actors.LegsFrame(strip, f, Rgba.Hex("#2b2f3c"), Rgba.Hex("#141418"));
         strip.Outline(Ink);
         pack.Png("sprites/actors/legs.png", strip);
+
+        var kick = new Canvas(32, 32);
+        Actors.LegsKick(kick, Rgba.Hex("#2b2f3c"), Rgba.Hex("#141418"));
+        kick.Outline(Ink);
+        pack.Png("sprites/actors/legs_kick.png", kick);
     }
 
     static void Fx(Pack pack)
@@ -150,6 +170,8 @@ public static class BaseArt
         pack.Png("sprites/fx/muzzle_flash.png", Effects.MuzzleFlash(Rgba.Hex("#ff8418"), Rgba.Hex("#ffd84a"), Rgba.Hex("#fffbe8")));
         for (int i = 1; i <= 3; i++) pack.Png($"sprites/fx/blood_{i}.png", Effects.Splat(i, Blood, 110 + i));
         pack.Png("sprites/fx/blood_drop.png", Effects.Drop(Blood));
+        pack.Png("sprites/fx/gore.png", Effects.Gore(Blood, Rgba.Hex("#d9707a"), Rgba.Hex("#efe2d0"), 120));
+        pack.Png("sprites/fx/gib.png", Effects.Gib(Blood, Rgba.Hex("#c4505c"), 121));
         pack.Png("sprites/fx/spark.png", Effects.Spark(Rgba.Hex("#ffffff"), Rgba.Hex("#ffd84a")));
         pack.Png("sprites/fx/shard.png", Effects.Shard(new Rgba(0.68f, 0.9f, 1f, 0.85f), new Rgba(1f, 1f, 1f, 0.95f)));
         pack.Png("sprites/fx/smoke.png", Effects.Smoke(Rgba.Hex("#c4c4cc")));

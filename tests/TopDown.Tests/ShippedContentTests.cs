@@ -108,7 +108,8 @@ public class ShippedContentTests
         GameWorld world = GameWorld.Create(database.Levels["arena"], database.Definitions);
 
         Assert.Null(world.Player.Weapon);
-        Assert.Equal(3, world.Actors.Count(a => !a.IsPlayer && a.Weapon is null));
+        Assert.Equal(3, world.Actors.Count(a => !a.IsPlayer && a.Weapon is null && a.Definition.Anatomy == "human"));
+        Assert.Contains(world.Actors, a => a.Definition.Anatomy == "quadruped");
         Assert.Contains(world.Weapons, w => !w.Weapon.Definition.IsFirearm);
         Assert.Contains(world.Weapons, w => w.Weapon.Definition.IsFirearm);
         Assert.Contains(database.PlayableExtraLevels, level => level.Id == "arena");

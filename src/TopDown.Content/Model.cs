@@ -48,8 +48,8 @@ public sealed class FeelSettings
     public ImpactFeel Hit { get; set; } = new() { Hitstop = 0.02f, Shake = 0.06f };
     public ImpactFeel Knockdown { get; set; } = new() { Hitstop = 0.045f, Shake = 0.16f };
     public ImpactFeel Kill { get; set; } = new() { Hitstop = 0.06f, Shake = 0.22f };
-    public ImpactFeel ExecutionStrike { get; set; } = new() { Hitstop = 0.035f, Shake = 0.14f };
-    public ImpactFeel ExecutionFinish { get; set; } = new() { Hitstop = 0.08f, Shake = 0.32f };
+    public ImpactFeel ExecutionStrike { get; set; } = new() { Hitstop = 0.045f, Shake = 0.4f, Punch = 4f };
+    public ImpactFeel ExecutionFinish { get; set; } = new() { Hitstop = 0.1f, Shake = 0.75f, Punch = 9f };
     /// <summary>The player is hit, knocked down or killed.</summary>
     public ImpactFeel PlayerHurt { get; set; } = new() { Hitstop = 0.06f, Shake = 0.45f };
     /// <summary>Longest total freeze, however many impacts happen at once.</summary>
@@ -64,6 +64,8 @@ public sealed class ImpactFeel
 {
     public float Hitstop { get; set; }
     public float Shake { get; set; }
+    /// <summary>Camera jolt in the direction of the blow, in world units.</summary>
+    public float Punch { get; set; }
 }
 
 /// <summary>Sounds of generic events (not tied to a weapon or a character).</summary>
@@ -78,6 +80,10 @@ public sealed class GameSounds
     public string? Footstep { get; set; }
     public string? ObjectiveComplete { get; set; }
     public string? LevelComplete { get; set; }
+    /// <summary>A head that gives way (last blow of an execution).</summary>
+    public string? Crush { get; set; }
+    /// <summary>A limb torn off.</summary>
+    public string? Tear { get; set; }
 }
 
 public sealed class CameraSettings

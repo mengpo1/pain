@@ -97,8 +97,15 @@ public sealed class Actor
     public WeaponDefinition? ExecutionWeapon { get; private set; }
     public float ExecutionElapsed { get; private set; }
     public int ExecutionStrikesDone { get; internal set; }
-    internal float NextStrikeAt { get; set; }
-    internal float LastStrikeAt { get; set; }
+    /// <summary>Blows this execution needs (the weapon's, or its variant against this victim).</summary>
+    public int ExecutionStrikesNeeded { get; private set; } = 1;
+    public ExecutionAnimation ExecutionAnimation { get; private set; }
+    /// <summary>Side of the victim the executioner stands on (+1 its right, -1 its left).</summary>
+    public int ExecutionSide { get; private set; } = 1;
+    /// <summary>Earliest time (in <see cref="ExecutionElapsed"/>) of the next blow.</summary>
+    public float NextStrikeAt { get; internal set; }
+    /// <summary>Time (in <see cref="ExecutionElapsed"/>) of the last blow, 0 before the first.</summary>
+    public float LastStrikeAt { get; internal set; }
     /// <summary>The player pressed attack during the execution: deliver the next blow.</summary>
     internal bool StrikeRequested { get; set; }
     /// <summary>Final blow delivered; waiting for the recovery to end.</summary>
@@ -183,7 +190,8 @@ public sealed class Actor
     /// Starts finishing off <paramref name="target"/>. The target becomes <see cref="ActorState.BeingExecuted"/>,
     /// which reserves it: nobody else can execute it until this execution ends.
     /// </summary>
-    internal bool BeginExecution(Actor target, WeaponDefinition weapon, float windUp)
+    internal bool BeginExecution(Actor target, WeaponDefinition weapon, float windUp,
+        ExecutionAnimation animation = ExecutionAnimation.Smash, int strikes = 1, int side = 1)
     {
         if (!IsFreeToAct || target == this || !target.BecomeExecuted(this)) return false;
         CurrentAttack = null;
@@ -191,6 +199,9 @@ public sealed class Actor
         SetState(ActorState.Executing);
         ExecutionTarget = target;
         ExecutionWeapon = weapon;
+        ExecutionAnimation = animation;
+        ExecutionStrikesNeeded = Math.Max(1, strikes);
+        ExecutionSide = side < 0 ? -1 : 1;
         ExecutionElapsed = 0f;
         ExecutionStrikesDone = 0;
         NextStrikeAt = windUp;

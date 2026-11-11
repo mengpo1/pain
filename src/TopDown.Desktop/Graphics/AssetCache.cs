@@ -9,6 +9,9 @@ namespace TopDown.Desktop.Graphics;
 /// <summary>A drawable piece of a texture with its rotation origin.</summary>
 public readonly record struct SpriteFrame(Texture2D Texture, Rectangle Source, Vector2 Origin);
 
+/// <summary>Centre and joint of a body part, in pixels from the centre of its image.</summary>
+public readonly record struct PartShape(Vector2 Center, Vector2 Joint);
+
 /// <summary>
 /// Loads every texture, sound and font of the content catalog once, by logical id, and frees
 /// them on <see cref="Dispose"/>. Missing files are reported once and replaced by a visible
@@ -25,6 +28,7 @@ public sealed class AssetCache : IDisposable
     private readonly HashSet<string> _reported = new(StringComparer.Ordinal);
     private readonly List<Texture2D> _generated = new();
     private readonly Dictionary<string, List<int>> _frames = new(StringComparer.Ordinal);
+    private readonly Dictionary<(string Part, string Torso), PartShape> _partShapes = new();
 
     public AssetCache(GraphicsDevice device, AssetCatalog catalog, bool loadSounds)
     {
@@ -67,6 +71,48 @@ public sealed class AssetCache : IDisposable
         if (_textures.TryGetValue(id, out Texture2D? texture)) return Frame(texture);
         Report($"Unknown sprite '{id}': drawing a placeholder.");
         return Frame(Placeholder);
+    }
+
+    /// <summary>
+    /// Where a body part sits on its image, relative to the image centre: its centre (pivot when it
+    /// flies off) and the joint where it meets the torso (blood comes from there). Computed once from
+    /// the pixels, so modders only provide the images.
+    /// </summary>
+    public PartShape PartShape(string partId, string torsoId)
+    {
+        if (_partShapes.TryGetValue((partId, torsoId), out PartShape cached)) return cached;
+        PartShape shape = default;
+        if (_textures.TryGetValue(partId, out Texture2D? part))
+        {
+            Color[] partPixels = Pixels(part);
+            Color[]? torsoPixels = _textures.TryGetValue(torsoId, out Texture2D? torso) && torso.Bounds == part.Bounds ? Pixels(torso) : null;
+            Vector2 half = new Vector2(part.Width, part.Height) * 0.5f;
+            Vector2 sum = Vector2.Zero, overlap = Vector2.Zero, torsoSum = Vector2.Zero;
+            int count = 0, overlapCount = 0, torsoCount = 0;
+            for (int i = 0; i < partPixels.Length; i++)
+            {
+                var pixel = new Vector2(i % part.Width + 0.5f, i / part.Width + 0.5f) - half;
+                bool inPart = partPixels[i].A > 96, inTorso = torsoPixels is not null && torsoPixels[i].A > 96;
+                if (inPart) { sum += pixel; count++; }
+                if (inTorso) { torsoSum += pixel; torsoCount++; }
+                if (inPart && inTorso) { overlap += pixel; overlapCount++; }
+            }
+
+            Vector2 center = count > 0 ? sum / count : Vector2.Zero;
+            Vector2 joint = overlapCount > 0 ? overlap / overlapCount
+                : torsoCount > 0 ? center + (torsoSum / torsoCount - center) * 0.35f
+                : center;
+            shape = new PartShape(center, joint);
+        }
+
+        return _partShapes[(partId, torsoId)] = shape;
+    }
+
+    private static Color[] Pixels(Texture2D texture)
+    {
+        var pixels = new Color[texture.Width * texture.Height];
+        texture.GetData(pixels);
+        return pixels;
     }
 
     public bool HasSprite(string? id) => id is not null && (_textures.ContainsKey(id) || _catalog.Animations.ContainsKey(id));

@@ -100,6 +100,50 @@ public static class Effects
         }
     }
 
+    /// <summary>
+    /// 24x24 crushed head, drawn over a body: a wet mass of blood with lumps of flesh and splinters of
+    /// bone, spattered outwards (mostly towards +X, away from the body).
+    /// </summary>
+    public static Canvas Gore(BloodColors col, Rgba flesh, Rgba bone, int seed)
+    {
+        var c = new Canvas(24, 24);
+        var rng = new Random(seed);
+        for (int i = 0; i < 6; i++)
+        {
+            float a = (rng.NextSingle() - 0.5f) * 2.6f, len = 6f + rng.NextSingle() * 5f;
+            c.Fill(Shape.Capsule(12f, 12f, 12f + MathF.Cos(a) * len, 12f + MathF.Sin(a) * len, 1.6f, 0.4f), col.Dark);
+        }
+        c.Fill(WobblyBlob(12.5f, 12f, 6.2f, 5.6f, 0.22f, rng), col.Dark);
+        c.Fill(WobblyBlob(12.2f, 11.6f, 4.6f, 4.1f, 0.2f, rng), col.Mid);
+        for (int i = 0; i < 6; i++)
+        {
+            float a = rng.NextSingle() * 6.283f, d = rng.NextSingle() * 3.6f, r = 0.9f + rng.NextSingle() * 1.1f;
+            float x = 12f + MathF.Cos(a) * d, y = 12f + MathF.Sin(a) * d;
+            c.Fill(WobblyBlob(x, y, r, r * 0.8f, 0.2f, rng), flesh.Shade(0.75f));
+            c.Fill(WobblyBlob(x - 0.2f, y - 0.25f, r * 0.65f, r * 0.5f, 0.2f, rng), flesh);
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            float a = rng.NextSingle() * 6.283f, d = 1.5f + rng.NextSingle() * 3.5f, len = 1f + rng.NextSingle() * 1.4f, turn = rng.NextSingle() * 3.14f;
+            float x = 12f + MathF.Cos(a) * d, y = 12f + MathF.Sin(a) * d;
+            c.Fill(Shape.Capsule(x, y, x + MathF.Cos(turn) * len, y + MathF.Sin(turn) * len, 0.55f, 0.3f), bone);
+        }
+        Drops(c, rng, 12f, 12f, 7f, 11.5f, 10, col.Dark);
+        c.Fill(Shape.Ellipse(10.8f, 10.4f, 1.6f, 0.7f, -0.6f), col.Light.Fade(0.55f));
+        return c;
+    }
+
+    /// <summary>8x8 lump of flesh flying off a body.</summary>
+    public static Canvas Gib(BloodColors col, Rgba flesh, int seed)
+    {
+        var c = new Canvas(8, 8);
+        var rng = new Random(seed);
+        c.Fill(WobblyBlob(4f, 4f, 2.6f, 2.1f, 0.25f, rng), col.Dark);
+        c.Fill(WobblyBlob(3.8f, 3.7f, 1.8f, 1.4f, 0.2f, rng), flesh);
+        c.Fill(Shape.Circle(3.3f, 3.2f, 0.6f), col.Light.Fade(0.6f));
+        return c;
+    }
+
     public static Canvas Drop(BloodColors col)
     {
         var c = new Canvas(4, 4);

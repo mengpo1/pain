@@ -54,8 +54,8 @@
     "fireRate": 4.5,
     "knockback": 90,
     "holdOffset": [8, 6],
-    // One short stab.
-    "execution": { "strikes": 1, "windUp": 0.08, "recovery": 0.1 },
+    // Astride, one short stab.
+    "execution": { "strikes": 1, "windUp": 0.1, "recovery": 0.1, "animations": ["stab"] },
     "throw": { "speed": 900, "damage": 100, "damageType": "sharp", "knockdown": false, "spin": 26 },
     "sounds": { "attack": "sound.swing", "hit": "sound.hit_sharp" }
   },

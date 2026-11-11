@@ -11,6 +11,7 @@ public sealed class Camera2D
 {
     private readonly Random _random = new(3);
     private float _trauma;
+    private Vector2 _punch;
 
     public Vector2 Position { get; private set; }
     public Vector2 ShakeOffset { get; private set; }
@@ -43,6 +44,7 @@ public sealed class Camera2D
     {
         Position = position;
         _trauma = 0f;
+        _punch = Vector2.Zero;
         ShakeOffset = Vector2.Zero;
     }
 
@@ -64,7 +66,22 @@ public sealed class Camera2D
         ShakeOffset = shake > 0.01f
             ? new Vector2((float)_random.NextDouble() * 2f - 1f, (float)_random.NextDouble() * 2f - 1f) * shake
             : Vector2.Zero;
+        _punch *= MathF.Exp(-PunchRecovery * dt);
+        ShakeOffset += _punch * shakeScale;
     }
+
+    /// <summary>How fast a camera jolt settles back (1/s).</summary>
+    private const float PunchRecovery = 18f;
+
+    /// <summary>Jolts the view in the direction of a blow, by <paramref name="amount"/> world units.</summary>
+    public void Punch(Vector2 direction, float amount)
+    {
+        if (direction.LengthSquared() < 0.0001f || amount <= 0f) return;
+        _punch += Vector2.Normalize(direction) * amount;
+        if (_punch.Length() > MaxPunch) _punch = Vector2.Normalize(_punch) * MaxPunch;
+    }
+
+    private const float MaxPunch = 14f;
 
     /// <summary>Adds screen shake; <paramref name="amount"/> around 0.1–1.</summary>
     public void Shake(float amount) => _trauma = Math.Clamp(_trauma + amount, 0f, 1f);

@@ -59,10 +59,10 @@ public sealed record NoiseMade(Vector2 Position, float Radius) : GameEvent;
 
 public sealed record EnemyAlerted(Actor Enemy) : GameEvent;
 
-public sealed record ExecutionStarted(Actor Executioner, Actor Victim) : GameEvent;
+public sealed record ExecutionStarted(Actor Executioner, Actor Victim, ExecutionAnimation Animation) : GameEvent;
 
 /// <summary>One blow (or the shot) of an execution. <paramref name="Final"/> is the killing blow.</summary>
-public sealed record ExecutionStrike(Actor Executioner, Actor Victim, WeaponDefinition Weapon, int Index, bool Final, bool Shot) : GameEvent;
+public sealed record ExecutionStrike(Actor Executioner, Actor Victim, WeaponDefinition Weapon, int Index, bool Final, bool Shot, ExecutionAnimation Animation) : GameEvent;
 
 public sealed record ItemCollected(Actor Actor, ItemPickup Item) : GameEvent;
 

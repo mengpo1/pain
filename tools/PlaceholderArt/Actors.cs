@@ -200,6 +200,61 @@ public static class Actors
         c.Fill(Shape.Circle(hx - r * 0.42f, hy, 0.55f), mark);
     }
 
+    // ------------------------------------------------------------------ kneeling astride (executions)
+
+    /// <summary>
+    /// Kneeling astride a body lying along X, leaning towards +X: knees on both sides of the body, shins
+    /// folded back flat on the floor, both hands forward around the victim's head.
+    /// </summary>
+    public static void HumanMount(Canvas c, HumanLook l, float cx, float cy)
+    {
+        var f = new Frame(cx, cy, l.Scale, l.Bulk);
+        float limb = l.BareArms ? 1.12f : 1f;
+        Rgba pantsShade = l.Pants.Shade(0.72f);
+        Rgba arm = l.BareArms ? l.Skin : l.Body, armShade = l.BareArms ? l.SkinShade : l.BodyShade;
+
+        foreach (int s in Sides)
+        {
+            // shin flat on the floor behind the knee, sole of the shoe facing up
+            Limb(c, f, (2.6f, 10.6f * s), (-8.4f, 10.2f * s), 2.6f, 2.3f, pantsShade, l.Pants);
+            c.Fill(Shape.Ellipse(f.X(-10.6f), f.Y(9.8f * s), f.R(2.6f), f.R(1.9f)), l.Shoes);
+            c.Fill(Shape.Ellipse(f.X(-11.3f), f.Y(9.8f * s) - 0.3f, f.R(1.1f), f.R(1.1f)), l.Shoes.Tone(1.3f));
+            // thigh from the hip to the knee, outside the victim's torso
+            Limb(c, f, (-4.2f, 4.4f * s), (2.6f, 10.6f * s), 3.2f, 2.9f, pantsShade, l.Pants);
+        }
+
+        // hips
+        c.Fill(Shape.Ellipse(f.X(-4.6f), cy, f.R(4.2f), f.R(6.2f) * l.Bulk), pantsShade);
+        c.Fill(Shape.Ellipse(f.X(-4.8f), cy - 0.4f, f.R(3.5f), f.R(5.4f) * l.Bulk), l.Pants);
+
+        // arms reaching down and forward to the head
+        foreach (int s in Sides)
+        {
+            (float, float) shoulder = (2.6f, 7.4f * s), elbow = (7.4f, 8.2f * s), hand = (10.6f, 4.1f * s);
+            Limb(c, f, shoulder, elbow, 2.6f * limb, 2.35f * limb, armShade, arm);
+            Limb(c, f, elbow, hand, 2.35f * limb, 2.0f * limb, armShade, arm);
+        }
+
+        // torso leaning forward: shoulders ahead of the hips, foreshortened
+        c.Fill(Shape.Ellipse(f.X(0.8f), cy, f.R(6.8f), f.R(9.4f) * l.Bulk), l.BareArms ? l.SkinShade : l.BodyShade);
+        if (l.BareArms)
+        {
+            c.Fill(Shape.Ellipse(f.X(0.6f), cy - 0.4f, f.R(5.9f), f.R(8.6f) * l.Bulk), l.Skin);
+            c.Fill(Shape.Ellipse(f.X(0.2f), cy, f.R(5.8f), f.R(6.8f) * l.Bulk), l.BodyShade);
+            c.Fill(Shape.Ellipse(f.X(0f), cy - 0.4f, f.R(5.1f), f.R(6.1f) * l.Bulk), l.Body);
+        }
+        else
+        {
+            c.Fill(Shape.Ellipse(f.X(0.5f), cy - 0.45f, f.R(6f), f.R(8.5f) * l.Bulk), l.Body);
+        }
+        c.Fill(Shape.Ellipse(f.X(-1.6f), f.Y(-3.4f), f.R(2.6f), f.R(3.4f) * l.Bulk), l.BodyLight.Fade(0.5f));
+        if (l.Collar is { } collar)
+            c.Fill(Shape.Ellipse(f.X(3.4f), cy, f.R(4f), f.R(5.8f)), collar);
+
+        foreach (int s in Sides) Hand(c, l, f.X(10.6f), f.Y(4.1f * s), f.R(2.1f) * (l.BareArms ? 1.1f : 1f));
+        HeadFromAbove(c, l, f.X(4.6f), cy, HeadRadius(l) * 0.96f);
+    }
+
     // ------------------------------------------------------------------ dog
 
     public static void Dog(Canvas c, DogLook d, float cx, float cy)
@@ -221,24 +276,43 @@ public static class Actors
         foreach (int s in Sides) c.Fill(Shape.Circle(cx + 10f, cy + 1.75f * s, 0.6f), d.Nose);       // eyes
     }
 
+    /// <summary>Parts of a dead dog that can be drawn separately (torn off by executions).</summary>
+    public enum DogPart { Leg1, Leg2, Leg3, Leg4, Torso, Head }
+
+    static readonly (float X0, float Y0, float X1, float Y1)[] DogLegs =
+        [(3.4f, 3.4f, 5.0f, 11.0f), (-3.6f, 3.6f, -5.2f, 11.2f), (5.8f, 2.8f, 9.4f, 10.2f), (-5.8f, 3f, -9.8f, 10f)];
+
     /// <summary>Dog lying on its side, legs sticking out towards +Y, head towards +X.</summary>
     public static void DogDead(Canvas c, DogLook d, float cx, float cy)
     {
-        foreach (var (x0, y0, x1, y1) in new[] { (5.8f, 2.8f, 9.4f, 10.2f), (3.4f, 3.4f, 5.0f, 11.0f), (-5.8f, 3f, -9.8f, 10f), (-3.6f, 3.6f, -5.2f, 11.2f) })
+        foreach (DogPart part in Enum.GetValues<DogPart>()) DogDeadPart(c, d, cx, cy, part);
+    }
+
+    /// <summary>One part of <see cref="DogDead"/>, at the same place as in the whole body.</summary>
+    public static void DogDeadPart(Canvas c, DogLook d, float cx, float cy, DogPart part)
+    {
+        switch (part)
         {
-            c.Fill(Shape.Capsule(cx + x0, cy + y0, cx + x1, cy + y1, 1.6f, 1.2f), d.FurDark);
-            c.Fill(Shape.Ellipse(cx + x1, cy + y1 + 0.4f, 1.5f, 1.2f), d.FurDark.Shade(0.8f));
+            case DogPart.Torso:
+                c.Fill(Shape.Capsule(cx - 9.8f, cy + 0.6f, cx - 15.2f, cy + 3.8f, 1.4f, 0.7f), d.FurDark);
+                c.Fill(Shape.Ellipse(cx - 1f, cy, 9.6f, 5.6f), d.FurDark);
+                c.Fill(Shape.Ellipse(cx - 1.1f, cy - 0.4f, 8.8f, 4.9f), d.Fur);
+                c.Fill(Shape.Ellipse(cx - 1f, cy + 2.8f, 6.5f, 2.0f), d.Belly.Fade(0.8f));
+                break;
+            case DogPart.Head:
+                c.Fill(Shape.Ellipse(cx + 9.8f, cy - 0.6f, 4f, 3.4f, -0.15f), d.FurDark);
+                c.Fill(Shape.Ellipse(cx + 9.7f, cy - 0.9f, 3.4f, 2.8f, -0.15f), d.Fur);
+                c.Fill(Shape.Ellipse(cx + 13.6f, cy + 0.2f, 2.6f, 1.8f), d.Belly);
+                c.Fill(Shape.Ellipse(cx + 15.8f, cy + 0.4f, 0.9f, 1.0f), d.Nose);
+                c.Fill(Shape.Ellipse(cx + 8.2f, cy - 3.7f, 2.4f, 1.4f, 0.4f), d.FurDark);                   // ear flop
+                c.Fill(Shape.Capsule(cx + 10.4f, cy - 1.6f, cx + 11.6f, cy - 1.3f, 0.35f), d.Nose);          // closed eye
+                break;
+            default:
+                var (x0, y0, x1, y1) = DogLegs[(int)part];
+                c.Fill(Shape.Capsule(cx + x0, cy + y0, cx + x1, cy + y1, 1.6f, 1.2f), d.FurDark);
+                c.Fill(Shape.Ellipse(cx + x1, cy + y1 + 0.4f, 1.5f, 1.2f), d.FurDark.Shade(0.8f));
+                break;
         }
-        c.Fill(Shape.Capsule(cx - 9.8f, cy + 0.6f, cx - 15.2f, cy + 3.8f, 1.4f, 0.7f), d.FurDark);
-        c.Fill(Shape.Ellipse(cx - 1f, cy, 9.6f, 5.6f), d.FurDark);
-        c.Fill(Shape.Ellipse(cx - 1.1f, cy - 0.4f, 8.8f, 4.9f), d.Fur);
-        c.Fill(Shape.Ellipse(cx - 1f, cy + 2.8f, 6.5f, 2.0f), d.Belly.Fade(0.8f));
-        c.Fill(Shape.Ellipse(cx + 9.8f, cy - 0.6f, 4f, 3.4f, -0.15f), d.FurDark);
-        c.Fill(Shape.Ellipse(cx + 9.7f, cy - 0.9f, 3.4f, 2.8f, -0.15f), d.Fur);
-        c.Fill(Shape.Ellipse(cx + 13.6f, cy + 0.2f, 2.6f, 1.8f), d.Belly);
-        c.Fill(Shape.Ellipse(cx + 15.8f, cy + 0.4f, 0.9f, 1.0f), d.Nose);
-        c.Fill(Shape.Ellipse(cx + 8.2f, cy - 3.7f, 2.4f, 1.4f, 0.4f), d.FurDark);                   // ear flop
-        c.Fill(Shape.Capsule(cx + 10.4f, cy - 1.6f, cx + 11.6f, cy - 1.3f, 0.35f), d.Nose);          // closed eye
     }
 
     // ------------------------------------------------------------------ creature
@@ -331,6 +405,17 @@ public static class Actors
     }
 
     // ------------------------------------------------------------------ legs
+
+    /// <summary>32x32 legs kicking forward: the -Y foot planted, the +Y leg stretched out towards +X.</summary>
+    public static void LegsKick(Canvas c, Rgba pants, Rgba shoes)
+    {
+        float cx = 16f, cy = 16f;
+        c.Fill(Shape.Capsule(cx - 0.5f, cy - 3.6f, cx - 3.2f, cy - 4.6f, 2.5f, 2.3f), pants);
+        c.Fill(Shape.Ellipse(cx - 2.2f, cy - 4.6f, 3.4f, 2.1f), shoes);
+        c.Fill(Shape.Capsule(cx - 0.5f, cy + 3.6f, cx + 10.5f, cy + 2.2f, 2.7f, 2.2f), pants);
+        c.Fill(Shape.Ellipse(cx + 12.2f, cy + 2.1f, 3.4f, 2.2f), shoes);
+        c.Fill(Shape.Ellipse(cx + 13.2f, cy + 1.6f, 1.5f, 0.8f), shoes.Tone(1.35f));
+    }
 
     /// <summary>One 32x32 walk frame of feet seen from above, drawn at horizontal offset frame * 32.</summary>
     public static void LegsFrame(Canvas c, int frame, Rgba pants, Rgba shoes)

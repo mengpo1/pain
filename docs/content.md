@@ -98,6 +98,30 @@ Une seule mécanique pour toutes les armes, paramétrée par arme ; elle sert au
 | `autoStrikeDelay` | sans appui, un coup part quand même après ce délai (jamais bloqué) | poings 0,6 |
 | `recovery` | temps avant de pouvoir agir après le coup final | 0,1 à 0,25 |
 | `noiseRadius` | bruit de chaque coup (le tir utilise le bruit de l'arme) | |
+| `animations` | allure de l'achèvement, tirée au hasard dans la liste (voir ci-dessous) | poings : `headBash`, `stomp` |
+| `against` | réglages différents contre une anatomie (`strikes`, `animations`) | poings contre `quadruped` : `tearLegs`, `tearHead` |
+
+L'animation décide aussi de la place du bourreau. Un corps au sol a la tête du côté de son
+orientation.
+
+| Animation | Placement | Effet |
+|---|---|---|
+| `headBash` | à cheval sur la poitrine, face à la tête | cogne la tête au sol ; elle éclate au dernier coup |
+| `stomp` | debout à côté de la tête | coups de pied dans la tête |
+| `smash` | debout à côté de la tête | coup d'arme vers le bas (défaut des armes de mêlée) |
+| `stab` | à cheval | coup de couteau |
+| `shoot` | debout à côté de la tête | tir à bout portant (défaut des armes à feu chargées) |
+| `bite` | au-dessus de la tête | morsure (animaux) |
+| `tearLegs` | à genoux sur la bête, face aux pattes | une patte arrachée par coup (`sprites.parts` d'id `leg`) |
+| `tearHead` | à cheval sur la bête | tire la tête jusqu'à l'arracher (part d'id `head`) |
+
+```json
+"execution": {
+  "strikes": 3, "strikeOnInput": true,
+  "animations": ["headBash", "stomp"],
+  "against": { "quadruped": { "animations": ["tearLegs", "tearHead"] } }
+}
+```
 
 ## Personnages et ennemis (`characters/`, `enemies/`)
 
@@ -109,7 +133,9 @@ Une seule mécanique pour toutes les armes, paramétrée par arme ; elle sert au
   "knockdownImmune": false, "knockdownResistStun": 0.3, "hitStunDuration": 0.15, "getUpDuration": 0.4,
   "damageMultipliers": { "blunt": 0, "sharp": 0.5 },
   "countsForObjectives": true,
-  "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead", "bloodTint": "#ffffff" },
+  "anatomy": "human",
+  "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead",
+               "mount": "actor.guard.mount", "kick": "actor.legs.kick", "bloodTint": "#ffffff" },
   "sounds": { "death": "sound.death", "hurt": null, "alert": null },
   "ai": {
     "behavior": "guard", "visionRange": 430, "visionAngleDegrees": 120, "closeDetectionRadius": 36,
@@ -128,6 +154,20 @@ Une seule mécanique pour toutes les armes, paramétrée par arme ; elle sert au
   vacille ce temps-là à la place.
 - `damageMultipliers` par type de dégâts : `0` = immunisé (le colosse ignore les battes),
   `"execution": 0` empêche d'achever.
+- `anatomy` (`human` par défaut, `quadruped` pour le chien) : une arme peut achever chaque anatomie
+  différemment (`execution.against`).
+- Images : `down` (au sol, tête vers la droite), `dead`, `mount` (à genoux à cheval sur un corps, pour
+  les achèvements ; sinon `body`), `kick` (jambes en train de frapper ; sinon `legs`).
+- Corps démontable (`torso` + `parts`) : le corps au sol sans ses morceaux, puis chaque morceau, chacun
+  sur une image **de même taille**, à sa place. Le moteur calcule seul le centre et l'articulation de
+  chaque morceau à partir des pixels. `over: true` dessine le morceau au-dessus du torse (une tête).
+  Les morceaux sont arrachés dans l'ordre de la liste.
+
+  ```json
+  "sprites": { "body": "actor.dog", "down": "actor.dog.dead", "dead": "actor.dog.dead",
+               "torso": "actor.dog.torso",
+               "parts": [ { "id": "leg", "sprite": "actor.dog.leg1" }, { "id": "head", "sprite": "actor.dog.head", "over": true } ] }
+  ```
 - `ai.behavior` : `guard` (poste fixe, regarde autour), `patrol` (suit la ronde du niveau),
   `wander` (erre), `dormant` (attend un déclencheur). Le combat est le même pour tous.
 - Un ennemi « rapide », « résistant » ou « déclenché par un événement » est une variante de données, sans code.
@@ -178,12 +218,13 @@ Choisis dans le menu, ils s'appliquent au joueur et à la perception des ennemis
   "camera": { "viewHeight": 400, "zoom": 1, "followSharpness": 16, "lookAhead": 0.22, "lookAheadMax": 90,
               "farLook": 0.6, "farLookMax": 300, "shakeDecay": 4, "maxShake": 12 },
   "sounds": { "uiMove": "...", "uiSelect": "...", "pickup": "...", "throw": "...", "bounce": "...",
-              "impact": "...", "footstep": "...", "objectiveComplete": "...", "levelComplete": "..." },
+              "impact": "...", "footstep": "...", "objectiveComplete": "...", "levelComplete": "...",
+              "crush": "...", "tear": "..." },
   "extraLevels": ["arena"],
   "feel": {
-    "hit": { "hitstop": 0.02, "shake": 0.06 }, "knockdown": { "hitstop": 0.045, "shake": 0.16 },
-    "kill": { "hitstop": 0.06, "shake": 0.22 }, "executionStrike": { "hitstop": 0.035, "shake": 0.14 },
-    "executionFinish": { "hitstop": 0.08, "shake": 0.32 }, "playerHurt": { "hitstop": 0.06, "shake": 0.45 },
+    "hit": { "hitstop": 0.02, "shake": 0.06, "punch": 1.5 }, "knockdown": { "hitstop": 0.045, "shake": 0.16, "punch": 2.5 },
+    "kill": { "hitstop": 0.06, "shake": 0.22, "punch": 3 }, "executionStrike": { "hitstop": 0.045, "shake": 0.4, "punch": 4 },
+    "executionFinish": { "hitstop": 0.1, "shake": 0.75, "punch": 9 }, "playerHurt": { "hitstop": 0.06, "shake": 0.45 },
     "maxHitstop": 0.1, "hitFlash": 0.08, "fallDuration": 0.09
   }
 }
@@ -206,10 +247,12 @@ Choisis dans le menu, ils s'appliquent au joueur et à la perception des ennemis
 ### Ressenti (`feel`)
 
 Présentation uniquement, jamais les règles. Pour chaque type d'impact où le joueur est impliqué :
-`hitstop` (micro-arrêt en secondes) et `shake` (secousse de 0 à 1). `playerHurt` remplace les autres
+`hitstop` (micro-arrêt en secondes), `shake` (secousse de 0 à 1) et `punch` (à-coup de la caméra dans
+le sens du coup, en unités du monde). `playerHurt` remplace les autres
 quand c'est le joueur qui est touché. `maxHitstop` plafonne le gel cumulé, `hitFlash` règle le flash
 blanc d'un personnage touché, `fallDuration` la chute visible au sol. `extraLevels` liste des niveaux
-proposés après la campagne (la salle d'essai `arena`).
+proposés après la campagne (la salle d'essai `arena`). Sons : `crush` quand une tête éclate, `tear`
+quand un morceau est arraché.
 
 `camera.viewHeight` fixe la hauteur de monde visible : tous les écrans voient la même zone.
 

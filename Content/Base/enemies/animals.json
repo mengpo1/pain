@@ -6,11 +6,23 @@
     "faction": "enemy",
     "health": 100,
     "radius": 9,
+    "anatomy": "quadruped",
     "speed": 110,
     "runSpeed": 290,
     "acceleration": 2400,
     "naturalWeaponId": "bite",
-    "sprites": { "body": "actor.dog", "dead": "actor.dog.dead", "down": "actor.dog.dead" },
+    "sprites": {
+      "body": "actor.dog", "dead": "actor.dog.dead", "down": "actor.dog.dead",
+      // Pieces torn off by bare-handed executions, in the order they come off.
+      "torso": "actor.dog.torso",
+      "parts": [
+        { "id": "leg", "sprite": "actor.dog.leg1" },
+        { "id": "leg", "sprite": "actor.dog.leg2" },
+        { "id": "leg", "sprite": "actor.dog.leg3" },
+        { "id": "leg", "sprite": "actor.dog.leg4" },
+        { "id": "head", "sprite": "actor.dog.head", "over": true }
+      ]
+    },
     "sounds": { "death": "sound.death", "alert": "sound.dog_bark" },
     "ai": {
       "behavior": "wander",

@@ -325,9 +325,19 @@ public sealed class CombatSystem
 
     private void Kill(Actor victim, in Hit hit)
     {
+        // An executed body is already on the floor: it keeps its position and orientation.
+        bool alreadyDown = victim.IsDown;
         victim.Kill();
-        FallInDirection(victim, hit.Direction);
-        victim.Velocity = hit.Direction * hit.Knockback;
+        if (!alreadyDown)
+        {
+            FallInDirection(victim, hit.Direction);
+            victim.Velocity = hit.Direction * hit.Knockback;
+        }
+        else
+        {
+            victim.Velocity = Vector2.Zero;
+        }
+
         if (Rules.DropWeaponOnDeath) DropWeapon(victim, hit.Direction * 80f);
         _world.AddEvent(new ActorKilled(victim, hit.Source, hit.Direction, hit.Method, hit.DamageType));
         _world.OnActorKilled(victim, hit);
@@ -533,11 +543,25 @@ public sealed class CombatSystem
         if (FindExecutionTarget(actor) is not { } victim) return false;
 
         WeaponDefinition weapon = CurrentWeapon(actor);
-        if (!actor.BeginExecution(victim, weapon, weapon.Execution.WindUp * ExecutionTimeScale(actor))) return false;
-        actor.Facing = Geo.ToAngle(victim.Position - actor.Position);
+        ExecutionDefinition execution = weapon.Execution;
+        ExecutionVariant? variant = execution.Against.GetValueOrDefault(victim.Definition.Anatomy);
+        int strikes = variant?.Strikes ?? execution.Strikes;
+        ExecutionAnimation animation = ChooseAnimation(actor, weapon, variant?.Animations is { Count: > 0 } list ? list : execution.Animations);
+        int side = ExecutionPose.SideOf(actor, victim);
+        if (!actor.BeginExecution(victim, weapon, execution.WindUp * ExecutionTimeScale(actor), animation, strikes, side)) return false;
         actor.Velocity = Vector2.Zero;
-        _world.AddEvent(new ExecutionStarted(actor, victim));
+        _world.AddEvent(new ExecutionStarted(actor, victim, animation));
         return true;
+    }
+
+    /// <summary>One of the listed animations; by default a shot if the gun can fire, a blow otherwise.</summary>
+    private ExecutionAnimation ChooseAnimation(Actor actor, WeaponDefinition weapon, List<ExecutionAnimation> animations)
+    {
+        bool canShoot = weapon.Execution.Mode == ExecutionMode.Shot && actor.Weapon is { Definition.IsFirearm: true } gun
+            && gun.Definition == weapon && (!gun.IsEmpty || (!actor.IsPlayer && Rules.EnemiesHaveInfiniteAmmo));
+        var usable = animations.Where(a => a != ExecutionAnimation.Shoot || canShoot).ToList();
+        if (usable.Count == 0) return canShoot ? ExecutionAnimation.Shoot : ExecutionAnimation.Smash;
+        return usable.Count == 1 ? usable[0] : usable[_world.Random.Next(usable.Count)];
     }
 
     /// <summary>
@@ -587,8 +611,11 @@ public sealed class CombatSystem
     /// <summary>How much a target behind the executioner counts against it (units per radian).</summary>
     private const float FacingPenaltyPerRadian = 10f;
 
-    /// <summary>Speed at which the executioner closes in on its victim (units/s).</summary>
-    private const float MountSpeed = 260f;
+    /// <summary>Speed at which the executioner gets into position (units/s).</summary>
+    private const float MountSpeed = 320f;
+
+    /// <summary>Turn speed while getting into position (radians/s).</summary>
+    private const float PoseTurnSpeed = 30f;
 
     public Interactable? FindInteractable(Actor actor)
     {
@@ -618,9 +645,8 @@ public sealed class CombatSystem
                 continue;
             }
 
-            CloseIn(actor, victim, dt);
-            Vector2 toVictim = victim.Position - actor.Position;
-            if (toVictim.LengthSquared() > Geo.Epsilon) actor.Facing = Geo.ToAngle(toVictim);
+            TakePose(actor, victim, dt);
+            Vector2 toVictim = ExecutionPose.HeadOf(victim) - actor.Position;
 
             ExecutionDefinition execution = weapon.Execution;
             float scale = ExecutionTimeScale(actor);
@@ -642,7 +668,7 @@ public sealed class CombatSystem
         actor.LastStrikeAt = actor.ExecutionElapsed;
         actor.NextStrikeAt = actor.ExecutionElapsed + execution.StrikeInterval * scale;
         actor.LastAttackTime = _world.Time;
-        bool final = actor.ExecutionStrikesDone >= Math.Max(1, execution.Strikes);
+        bool final = actor.ExecutionStrikesDone >= actor.ExecutionStrikesNeeded;
 
         bool shot = execution.Mode == ExecutionMode.Shot && actor.Weapon is { Definition.IsFirearm: true } gun
             && gun.Definition == weapon && (gun.TryConsumeAmmo() || (!actor.IsPlayer && Rules.EnemiesHaveInfiniteAmmo));
@@ -657,26 +683,25 @@ public sealed class CombatSystem
             _world.EmitNoise(actor.Position, execution.NoiseRadius, actor);
         }
 
-        _world.AddEvent(new ExecutionStrike(actor, victim, weapon, actor.ExecutionStrikesDone, final, shot));
-        if (!final)
-        {
-            victim.Velocity += direction * 30f;
-            return;
-        }
+        _world.AddEvent(new ExecutionStrike(actor, victim, weapon, actor.ExecutionStrikesDone, final, shot, actor.ExecutionAnimation));
+        if (!final) return;
 
         actor.FinishExecution(execution.Recovery * scale);
         ApplyHit(victim, new Hit(1_000_000f, "execution", false, 0f, direction, 40f, actor, HitMethod.Execution, weapon));
     }
 
-    /// <summary>The executioner moves onto its victim (stopped by walls like any movement).</summary>
-    private void CloseIn(Actor actor, Actor victim, float dt)
+    /// <summary>
+    /// The executioner gets into position (astride the body or beside the head, see
+    /// <see cref="ExecutionPose"/>) and turns the right way. Walls stop it like any movement.
+    /// </summary>
+    private void TakePose(Actor actor, Actor victim, float dt)
     {
-        Vector2 toVictim = victim.Position - actor.Position;
-        float distance = toVictim.Length();
-        float wanted = victim.Radius * 0.6f;
-        if (distance <= wanted + 0.5f) return;
-        float step = MathF.Min(distance - wanted, MountSpeed * dt);
-        actor.Position += toVictim / distance * step;
+        var (position, facing) = ExecutionPose.For(actor, victim, actor.ExecutionAnimation, actor.ExecutionSide);
+        actor.Facing = Geo.RotateTowards(actor.Facing, facing, PoseTurnSpeed * dt);
+        Vector2 offset = position - actor.Position;
+        float distance = offset.Length();
+        if (distance <= 0.5f) return;
+        actor.Position += offset / distance * MathF.Min(distance, MountSpeed * dt);
         actor.Velocity = _world.Physics.ResolveStatic(actor, Vector2.Zero);
     }
 }

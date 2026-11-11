@@ -8,6 +8,8 @@ public static class EffectSprites
 {
     public static readonly string[] Blood = ["fx.blood.1", "fx.blood.2", "fx.blood.3"];
     public const string BloodDrop = "fx.blood_drop";
+    public const string Gore = "fx.gore";
+    public const string Gib = "fx.gib";
     public const string Spark = "fx.spark";
     public const string Shard = "fx.shard";
     public const string Smoke = "fx.smoke";
@@ -67,6 +69,46 @@ public sealed class EffectsLayer
         }
     }
 
+    /// <summary>Blood flying in every direction (a head giving way, a limb torn off).</summary>
+    public void BloodBurst(Vector2 position, int amount, Color tint, float speed = 1f)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            Vector2 velocity = Rotate(Vector2.UnitX, Range(0f, MathF.Tau)) * Range(40f, 300f) * speed;
+            AddParticle(new Particle(position, velocity, Range(0.12f, 0.4f), EffectSprites.BloodDrop, tint, Range(1f, 2.6f), 5f)
+            {
+                LeavesDecal = true,
+            });
+        }
+    }
+
+    /// <summary>Lumps of flesh thrown around <paramref name="direction"/>; they stay on the floor.</summary>
+    public void Chunks(Vector2 position, Vector2 direction, int amount, Color tint)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            Vector2 velocity = Rotate(direction, Range(-1.3f, 1.3f)) * Range(60f, 260f);
+            AddParticle(new Particle(position, velocity, Range(0.2f, 0.45f), EffectSprites.Gib, tint, Range(0.6f, 1.2f), 6f)
+            {
+                Spin = Range(-14f, 14f),
+                Rotation = Range(0f, MathF.Tau),
+                LeavesDecal = true,
+            });
+        }
+    }
+
+    /// <summary>A torn-off body part flying away, spinning, then lying on the floor for good.</summary>
+    public void FlyingPart(Vector2 position, Vector2 velocity, float rotation, string sprite, Vector2 origin, Color tint)
+    {
+        AddParticle(new Particle(position, velocity, 0.45f, sprite, tint, 1f, 5f)
+        {
+            Rotation = rotation,
+            Spin = Range(-9f, 9f),
+            Origin = origin,
+            LeavesDecal = true,
+        });
+    }
+
     public void BloodPool(Vector2 position, Color tint, float scale = 1f)
     {
         string sprite = EffectSprites.Blood[_random.Next(EffectSprites.Blood.Length)];
@@ -121,7 +163,7 @@ public sealed class EffectsLayer
             p.Life -= dt;
             if (p.Life <= 0f)
             {
-                if (p.LeavesDecal) AddDecal(new Decal(p.Position, p.Rotation, p.Size, p.Sprite, p.Color));
+                if (p.LeavesDecal) AddDecal(new Decal(p.Position, p.Rotation, p.Size, p.Sprite, p.Color) { Origin = p.Origin });
                 _particles.RemoveAt(i);
                 continue;
             }
@@ -142,7 +184,7 @@ public sealed class EffectsLayer
         foreach (Decal decal in _decals)
         {
             SpriteFrame frame = assets.Sprite(decal.Sprite);
-            batch.Draw(frame.Texture, decal.Position, frame.Source, decal.Color, decal.Rotation, frame.Origin, decal.Scale, SpriteEffects.None, 0f);
+            batch.Draw(frame.Texture, decal.Position, frame.Source, decal.Color, decal.Rotation, decal.Origin ?? frame.Origin, decal.Scale, SpriteEffects.None, 0f);
         }
     }
 
@@ -182,7 +224,7 @@ public sealed class EffectsLayer
         SpriteFrame frame = assets.Sprite(p.Sprite);
         float fade = Math.Clamp(p.Life / (p.MaxLife * 0.4f), 0f, 1f);
         Color color = p.LeavesDecal ? p.Color : p.Color * fade;
-        batch.Draw(frame.Texture, p.Position, frame.Source, color, p.Rotation, frame.Origin, p.Size, SpriteEffects.None, 0f);
+        batch.Draw(frame.Texture, p.Position, frame.Source, color, p.Rotation, p.Origin ?? frame.Origin, p.Size, SpriteEffects.None, 0f);
     }
 
     private void AddParticle(Particle particle)
@@ -224,9 +266,14 @@ public sealed class EffectsLayer
         public float Grow { get; init; }
         public bool Additive { get; init; }
         public bool LeavesDecal { get; init; }
+        /// <summary>Pivot in the image (default: the sprite's own origin).</summary>
+        public Vector2? Origin { get; init; }
     }
 
-    private readonly record struct Decal(Vector2 Position, float Rotation, float Scale, string Sprite, Color Color);
+    private readonly record struct Decal(Vector2 Position, float Rotation, float Scale, string Sprite, Color Color)
+    {
+        public Vector2? Origin { get; init; }
+    }
 
     private readonly record struct TracerLine(Vector2 From, Vector2 To, float Life, Color Color);
 

@@ -13,6 +13,8 @@
     "legs": "actor.legs",
     "down": "actor.player.down",
     "dead": "actor.player.dead",
+    "mount": "actor.player.mount",
+    "kick": "actor.legs.kick",
     "bloodTint": "#ffffff"
   },
   "sounds": { "death": "sound.player_death" }

@@ -92,7 +92,7 @@
     },
     "arena": {
       "name": "Test room",
-      "intro": "Below: a lone enemy. Right: two enemies. Space to finish off, R to reset everything."
+      "intro": "Below: a lone enemy. Up: a dog. Right: two enemies. Space to finish off, R to reset everything."
     },
     "offices": {
       "name": "Offices",

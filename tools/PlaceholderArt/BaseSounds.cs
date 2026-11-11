@@ -16,6 +16,8 @@ public static class BaseSounds
         p.Wav("audio/hit_blunt.wav", HitBlunt());
         p.Wav("audio/hit_sharp.wav", HitSharp());
         p.Wav("audio/punch.wav", Punch());
+        p.Wav("audio/crush.wav", Crush());
+        p.Wav("audio/tear.wav", Tear());
         p.Wav("audio/throw.wav", Whoosh(0.24, 0.07, 600, 2800, 12, flutter: 0.6));
         p.Wav("audio/clank.wav", Clank());
         p.Wav("audio/pickup.wav", Pickup());
@@ -148,6 +150,34 @@ public static class BaseSounds
             .Mix(Dsp.Noise(n, rng).BandPass(900, 1.2).Env(Dsp.Perc(0.001, 0.03)), 0, 0.9)
             .Mix(Dsp.Noise(n, rng).HighPass(2000).Env(Dsp.Perc(0.0003, 0.008)), 0, 0.6)
             .SoftClip(2.2);
+    }
+
+    /// <summary>Skull giving way: heavy thud, a burst of cracks, then a wet squelch.</summary>
+    static float[] Crush()
+    {
+        var rng = new Random(14);
+        double n = 0.5;
+        var o = Dsp.Silence(n)
+            .Mix(Dsp.Osc(n, t => 42 + 80 * Math.Exp(-t / 0.025)).Env(Dsp.Perc(0.001, 0.09)), 0, 1.1)
+            .Mix(Dsp.Noise(n, rng).LowPass(900).Env(Dsp.Perc(0.0005, 0.04)), 0, 0.9);
+        for (int i = 0; i < 7; i++)
+            o.Mix(Dsp.Noise(0.03, rng).HighPass(2200 + rng.Next(2500)).Env(Dsp.Perc(0.0002, 0.004 + rng.NextDouble() * 0.004)), 0.004 + i * 0.006 + rng.NextDouble() * 0.004, 0.7);
+        o.Mix(Dsp.Noise(0.32, rng).BandPass(t => 700 + 500 * Math.Sin(t * 38) * Math.Exp(-t / 0.1), 2.5).Env(Dsp.Perc(0.01, 0.12)), 0.03, 0.8);
+        return o.SoftClip(2.4);
+    }
+
+    /// <summary>Flesh ripping: crackling sinew over a rising, tearing hiss, ending with a wet snap.</summary>
+    static float[] Tear()
+    {
+        var rng = new Random(15);
+        double n = 0.45;
+        var o = Dsp.Silence(n)
+            .Mix(Dsp.Noise(0.3, rng).BandPass(t => 450 + 2600 * t / 0.3, 3).Env(Dsp.Ahr(0.04, 0.18, 0.08)), 0, 0.8);
+        for (int i = 0; i < 16; i++)
+            o.Mix(Dsp.Noise(0.02, rng).BandPass(1200 + rng.Next(3000), 4).Env(Dsp.Perc(0.0002, 0.003)), 0.01 + rng.NextDouble() * 0.27, 0.8);
+        o.Mix(Dsp.Osc(0.1, t => 160 * Math.Exp(-t / 0.03)).Env(Dsp.Perc(0.001, 0.03)), 0.29, 0.8)
+         .Mix(Dsp.Noise(0.15, rng).BandPass(800, 1.5).Env(Dsp.Perc(0.002, 0.05)), 0.29, 0.9);
+        return o.SoftClip(2);
     }
 
     /// <summary>Metal object hitting a wall: inharmonic partials with different decays.</summary>

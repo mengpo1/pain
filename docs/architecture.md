@@ -44,6 +44,10 @@ cible éligible (au sol, en train de se relever, ou étourdie si les règles le 
 obstacle, choisie de façon déterministe (la plus proche, pénalité si elle n'est pas devant) ; puis
 coups successifs décrits par l'arme (`execution`), le dernier tue. L'IA utilise exactement ces
 fonctions pour achever le joueur ; quand un allié achève déjà la cible, elle attend à proximité.
+L'animation choisie (`ExecutionPose`) fixe où se met le bourreau et dans quel sens : à cheval sur la
+poitrine face à la tête, ou debout à côté de la tête. Le corps achevé ne bouge plus et garde son
+orientation. Le Desktop (`GoreLayer`) garde la trace des dégâts visibles : tête éclatée, morceaux
+arrachés (le corps est alors dessiné pièce par pièce).
 
 ### Collisions
 

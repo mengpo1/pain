@@ -51,6 +51,9 @@ public static class NoctArt
         var legs = new Canvas(128, 32);
         for (int f = 0; f < 4; f++) Actors.LegsFrame(legs, f, G(0.62f), G(0.44f));
         pack.Png("sprites/actors/legs.png", Warm(legs, 205, 0.3f));
+        var kick = new Canvas(32, 32);
+        Actors.LegsKick(kick, G(0.62f), G(0.44f));
+        pack.Png("sprites/actors/legs_kick.png", Warm(kick, 209, 0.3f));
 
         int seed = 210;
         foreach (var (name, sprite) in Weapons.All())
@@ -158,6 +161,11 @@ public static class NoctArt
         cooling.Map((_, _, p) => p.Shade(0.84f));
         dead.Draw(Warm(cooling, seed + 3, 0.25f));
         pack.Png($"sprites/actors/{name}_dead.png", dead);
+
+        int mountSize = size + 8;
+        var mount = new Canvas(mountSize, mountSize);
+        Actors.HumanMount(mount, look, mountSize / 2f, mountSize / 2f);
+        pack.Png($"sprites/actors/{name}_mount.png", Warm(mount, seed + 4));
     }
 
     static void Creatures(Pack pack)
@@ -198,6 +206,11 @@ public static class NoctArt
             pack.Png($"sprites/fx/blood_{i}.png", splat);
         }
         pack.Png("sprites/fx/blood_drop.png", Effects.Drop(blood));
+        var gore = Effects.Gore(blood, G(0.99f), G(0.7f), 120);
+        gore.Blur(0.4f);
+        Grain(gore, 225, 0.03f);
+        pack.Png("sprites/fx/gore.png", gore);
+        pack.Png("sprites/fx/gib.png", Effects.Gib(blood, G(1f), 121));
         pack.Png("sprites/fx/spark.png", Effects.Spark(Rgba.White, G(0.85f)));
         pack.Png("sprites/fx/shard.png", Effects.Shard(G(0.72f, 0.85f), G(1f, 0.95f)));
         pack.Png("sprites/fx/smoke.png", Effects.Smoke(G(0.55f)));

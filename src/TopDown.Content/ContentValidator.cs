@@ -30,6 +30,12 @@ internal static class ContentValidator
 
             if (weapon.FireRate <= 0f) d.Error(source, "'fireRate' must be > 0.");
             if (weapon.Execution.Strikes < 1) d.Error(source, "'execution.strikes' must be at least 1.");
+            foreach (var (anatomy, variant) in weapon.Execution.Against)
+            {
+                if (variant.Strikes is < 1) d.Error(source, $"'execution.against.{anatomy}.strikes' must be at least 1.");
+                if (!defs.Actors.Values.Any(a => a.Anatomy == anatomy))
+                    d.Warning(source, $"'execution.against.{anatomy}': no character has this anatomy.");
+            }
             if (weapon.Range <= 0f) d.Error(source, "'range' must be > 0.");
             Sound(assets, d, source, weapon.Sounds.Attack, weapon.Sounds.Hit, weapon.Sounds.Empty, weapon.Sounds.Pickup);
         }
@@ -42,8 +48,11 @@ internal static class ContentValidator
             Reference(defs.Weapons, d, source, "weapon", actor.WeaponId);
             Reference(defs.Weapons, d, source, "weapon", actor.NaturalWeaponId);
             Sprite(assets, d, source, actor.Sprites.Body);
-            foreach (string? sprite in new[] { actor.Sprites.Legs, actor.Sprites.Down, actor.Sprites.Dead })
+            foreach (string? sprite in new[] { actor.Sprites.Legs, actor.Sprites.Down, actor.Sprites.Dead, actor.Sprites.Mount, actor.Sprites.Kick, actor.Sprites.Torso })
                 if (sprite is not null) Sprite(assets, d, source, sprite);
+            foreach (BodyPart part in actor.Sprites.Parts) Sprite(assets, d, source, part.Sprite);
+            if (actor.Sprites.Parts.Count > 0 && actor.Sprites.Torso is null)
+                d.Warning(source, "'sprites.parts' needs 'sprites.torso' (the body without its parts).");
             Sound(assets, d, source, actor.Sounds.Death, actor.Sounds.Hurt, actor.Sounds.Alert);
         }
 
@@ -93,6 +102,9 @@ internal static class ContentValidator
             if (!content.Levels.ContainsKey(id)) d.Error("game.json", $"'extraLevels' references unknown level '{id}'.");
         if (!content.Locales.ContainsKey(game.FallbackLanguage)) d.Error("game.json", $"No texts for the fallback language '{game.FallbackLanguage}'.");
         Sound(content.Assets, d, "game.json", game.MenuMusic);
+        GameSounds s = game.Sounds;
+        Sound(content.Assets, d, "game.json", s.UiMove, s.UiSelect, s.Pickup, s.Throw, s.Bounce, s.Impact, s.Footstep,
+            s.ObjectiveComplete, s.LevelComplete, s.Crush, s.Tear);
     }
 
     private static void ValidateLevel(ContentDatabase content, LevelDefinition level, DiagnosticList d)

@@ -139,6 +139,46 @@ public sealed class ExecutionDefinition
 
     /// <summary>Noise of each blow (shots use the weapon's noise).</summary>
     public float NoiseRadius { get; set; }
+
+    /// <summary>
+    /// Possible looks of the execution; one is drawn at random each time. Empty: a shot when the
+    /// gun can fire, a weapon blow otherwise.
+    /// </summary>
+    public List<ExecutionAnimation> Animations { get; set; } = new();
+
+    /// <summary>Changes for some victims, by anatomy (for example "quadruped").</summary>
+    public Dictionary<string, ExecutionVariant> Against { get; set; } = new();
+}
+
+/// <summary>Execution settings that replace the weapon's own against one kind of victim.</summary>
+public sealed class ExecutionVariant
+{
+    public int? Strikes { get; set; }
+    public List<ExecutionAnimation>? Animations { get; set; }
+}
+
+/// <summary>
+/// How an execution looks. It also decides where the executioner stands and which way it faces:
+/// astride the victim facing its head, or on its feet beside the head.
+/// </summary>
+public enum ExecutionAnimation
+{
+    /// <summary>Beside the head, weapon blow downwards.</summary>
+    Smash,
+    /// <summary>Astride the chest, slams the head into the floor.</summary>
+    HeadBash,
+    /// <summary>Beside the head, kicks it.</summary>
+    Stomp,
+    /// <summary>Astride the chest, stabs.</summary>
+    Stab,
+    /// <summary>Beside the head, point-blank shot.</summary>
+    Shoot,
+    /// <summary>An animal bites from above the head.</summary>
+    Bite,
+    /// <summary>Kneeling on a beast, tears a leg off with each blow.</summary>
+    TearLegs,
+    /// <summary>Astride a beast, pulls its head until it comes off.</summary>
+    TearHead,
 }
 
 public sealed class ThrowDefinition

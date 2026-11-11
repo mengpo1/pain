@@ -33,7 +33,7 @@ public sealed class WorldRenderer
 
     public ThemeColors Colors => _colors;
 
-    public void Draw(SpriteBatch batch, GameWorld world, Camera2D camera, EffectsLayer effects, float alpha, float time,
+    public void Draw(SpriteBatch batch, GameWorld world, Camera2D camera, EffectsLayer effects, GoreLayer gore, float alpha, float time,
         Func<Actor, bool> isVisible, Func<Actor, float> flash)
     {
         Rectangle view = camera.VisibleWorld;
@@ -61,7 +61,7 @@ public sealed class WorldRenderer
 
         foreach (Actor actor in world.Actors)
         {
-            if ((!actor.IsAlive || actor.IsDown) && isVisible(actor)) DrawFallen(batch, actor, alpha);
+            if ((!actor.IsAlive || actor.IsDown) && isVisible(actor)) DrawFallen(batch, actor, alpha, gore);
         }
 
         foreach (WorldWeapon weapon in world.Weapons)
@@ -226,9 +226,8 @@ public sealed class WorldRenderer
         batch.Draw(frame.Texture, position, frame.Source, tint, weapon.Rotation, frame.Origin, 1f, SpriteEffects.None, 0f);
     }
 
-    private void DrawFallen(SpriteBatch batch, Actor actor, float alpha)
+    private void DrawFallen(SpriteBatch batch, Actor actor, float alpha, GoreLayer gore)
     {
-        SpriteFrame frame = _assets.Sprite(FallenSprite(actor));
         Vector2 position = ToXna(NVector2.Lerp(actor.PreviousPosition, actor.Position, alpha));
         float wobble = actor.State switch
         {
@@ -236,8 +235,83 @@ public sealed class WorldRenderer
             ActorState.BeingExecuted => MathF.Sin(actor.StateElapsed * 45f) * 0.04f,
             _ => 0f,
         };
-        batch.Draw(frame.Texture, position, frame.Source, _colors.Actor, actor.Facing + wobble, frame.Origin, FallScale(actor), SpriteEffects.None, 0f);
+
+        // Under an execution: the body jolts with each blow, the part being pulled stretches out.
+        int pulled = -1;
+        float tug = 0f;
+        if (actor.State == ActorState.BeingExecuted && actor.Executioner is { } executioner)
+        {
+            float jolt = Fade(SinceLastBlow(executioner), JoltTime);
+            position += SafeNormalize(ToXna(ExecutionPose.HeadOf(actor) - executioner.Position)) * (JoltDistance * jolt);
+            pulled = gore.NextPart(actor, executioner.ExecutionAnimation);
+            tug = 1.2f + 2.8f * Fade(SinceLastBlow(executioner), 0.18f) + MathF.Sin(actor.StateElapsed * 40f) * 0.4f;
+        }
+
+        float rotation = actor.Facing + wobble;
+        float scale = FallScale(actor);
+        ActorSprites sprites = actor.Definition.Sprites;
+        BodyDamage? damage = gore.Damage(actor);
+        bool inPieces = sprites.Torso is not null && sprites.Parts.Count > 0 && (damage?.Torn.Count > 0 || pulled >= 0);
+        if (!inPieces)
+        {
+            SpriteFrame frame = _assets.Sprite(FallenSprite(actor));
+            batch.Draw(frame.Texture, position, frame.Source, _colors.Actor, rotation, frame.Origin, scale, SpriteEffects.None, 0f);
+        }
+        else
+        {
+            DrawParts(batch, actor, damage, position, rotation, scale, over: false, pulled, tug);
+            SpriteFrame torso = _assets.Sprite(sprites.Torso);
+            batch.Draw(torso.Texture, position, torso.Source, _colors.Actor, rotation, torso.Origin, scale, SpriteEffects.None, 0f);
+            DrawParts(batch, actor, damage, position, rotation, scale, over: true, pulled, tug);
+            if (damage is not null) DrawStumps(batch, actor, damage, position, rotation, scale);
+        }
+
+        // A head beaten in: more and more gore, burst on the last blow.
+        if (damage is { HeadWounds: > 0f })
+        {
+            SpriteFrame frame = _assets.Sprite(EffectSprites.Gore);
+            Vector2 head = position + Rotate(new Vector2(actor.Radius * ExecutionPose.HeadDistance * scale, 0f), rotation);
+            float size = (0.45f + 0.55f * damage.HeadWounds) * scale;
+            batch.Draw(frame.Texture, head, frame.Source, Blood(actor), rotation, frame.Origin, size, SpriteEffects.None, 0f);
+        }
     }
+
+    /// <summary>Body parts still attached, under or over the torso. The pulled one stretches out.</summary>
+    private void DrawParts(SpriteBatch batch, Actor actor, BodyDamage? damage, Vector2 position, float rotation, float scale, bool over, int pulled, float tug)
+    {
+        ActorSprites sprites = actor.Definition.Sprites;
+        for (int i = 0; i < sprites.Parts.Count; i++)
+        {
+            BodyPart part = sprites.Parts[i];
+            if (part.Over != over || damage?.Torn.Contains(i) == true) continue;
+            Vector2 offset = Vector2.Zero;
+            if (i == pulled)
+            {
+                PartShape shape = _assets.PartShape(part.Sprite, sprites.Torso!);
+                offset = SafeNormalize(shape.Center - shape.Joint) * tug;
+            }
+
+            SpriteFrame frame = _assets.Sprite(part.Sprite);
+            batch.Draw(frame.Texture, position + Rotate(offset * scale, rotation), frame.Source, _colors.Actor, rotation, frame.Origin, scale, SpriteEffects.None, 0f);
+        }
+    }
+
+    /// <summary>Bloody stumps where parts were torn off.</summary>
+    private void DrawStumps(SpriteBatch batch, Actor actor, BodyDamage damage, Vector2 position, float rotation, float scale)
+    {
+        ActorSprites sprites = actor.Definition.Sprites;
+        SpriteFrame drop = _assets.Sprite(EffectSprites.BloodDrop);
+        SpriteFrame gib = _assets.Sprite(EffectSprites.Gib);
+        foreach (int i in damage.Torn)
+        {
+            PartShape shape = _assets.PartShape(sprites.Parts[i].Sprite, sprites.Torso!);
+            Vector2 joint = position + Rotate(shape.Joint * scale, rotation);
+            batch.Draw(drop.Texture, joint, drop.Source, Blood(actor), rotation, drop.Origin, 2.4f * scale, SpriteEffects.None, 0f);
+            batch.Draw(gib.Texture, joint, gib.Source, Blood(actor), rotation + i, gib.Origin, 0.8f * scale, SpriteEffects.None, 0f);
+        }
+    }
+
+    private Color Blood(Actor actor) => ColorParser.Parse(actor.Definition.Sprites.BloodTint, Color.White).MultiplyBy(_colors.Blood);
 
     private static string FallenSprite(Actor actor) =>
         (actor.IsAlive ? actor.Definition.Sprites.Down : actor.Definition.Sprites.Dead)
@@ -272,6 +346,11 @@ public sealed class WorldRenderer
         float facing = actor.PreviousFacing + Geo.AngleDifference(actor.PreviousFacing, actor.Facing) * alpha;
         Vector2 forward = new(MathF.Cos(facing), MathF.Sin(facing));
         Vector2 right = new(-forward.Y, forward.X);
+        if (actor.State == ActorState.Executing)
+        {
+            DrawExecutioner(batch, world, actor, time, position, facing, flatColor);
+            return;
+        }
 
         float swing = 0f;
         float lunge = 0f;
@@ -288,8 +367,6 @@ public sealed class WorldRenderer
         // Actor timings use the simulation clock (pauses and hitstops included).
         float sinceAttack = world.Time - actor.LastAttackTime;
         float recoil = actor.Weapon is { Definition.IsFirearm: true } && sinceAttack < 0.08f ? -2.5f : 0f;
-        if (actor.State == ActorState.Executing)
-            lunge = 2f + (sinceAttack < 0.12f ? (1f - sinceAttack / 0.12f) * 7f : 0f);
         Vector2 bodyPosition = position + forward * (lunge + recoil);
 
         WeaponDefinition? held = actor.Weapon?.Definition;
@@ -306,6 +383,103 @@ public sealed class WorldRenderer
         float stunWobble = actor.State == ActorState.Stunned ? MathF.Sin(time * 40f) * 0.15f : 0f;
         batch.Draw(body.Texture, bodyPosition, body.Source, flatColor ?? _colors.Actor, facing + stunWobble, body.Origin, 1f, SpriteEffects.None, 0f);
     }
+
+    /// <summary>
+    /// An executioner at work. Astride: leans back to lift, slams forward on each blow (or heaves
+    /// backwards to tear). Standing: kicks, weapon raised then brought down, point-blank shot, bite.
+    /// </summary>
+    private void DrawExecutioner(SpriteBatch batch, GameWorld world, Actor actor, float time, Vector2 position, float facing, Color? flatColor)
+    {
+        Vector2 forward = new(MathF.Cos(facing), MathF.Sin(facing));
+        Vector2 right = new(-forward.Y, forward.X);
+        ExecutionLook look = LookOf(actor, time);
+        float sinceAttack = world.Time - actor.LastAttackTime;
+        float recoil = actor.Weapon is { Definition.IsFirearm: true } && sinceAttack < 0.08f ? -2.5f : 0f;
+        Vector2 bodyPosition = position + forward * (look.Lean + recoil);
+
+        if (look.Legs is { } legs && flatColor is null)
+        {
+            SpriteFrame legFrame = _assets.Sprite(legs);
+            batch.Draw(legFrame.Texture, position, legFrame.Source, _colors.Actor, facing, legFrame.Origin, 1f, SpriteEffects.None, 0f);
+        }
+
+        if (actor.Weapon?.Definition is { } held)
+        {
+            SpriteFrame weaponFrame = _assets.Sprite(held.SpriteId);
+            Vector2 hold = look.Astride
+                ? forward * (AstrideHandReach + look.Reach) + right * 2f
+                : forward * (held.HoldOffset.X + look.Reach) + right * held.HoldOffset.Y;
+            hold = Rotate(hold, look.Swing);
+            batch.Draw(weaponFrame.Texture, bodyPosition + hold, weaponFrame.Source, flatColor ?? _colors.Weapon, facing + look.Swing,
+                weaponFrame.Origin, 1f, SpriteEffects.None, 0f);
+        }
+
+        SpriteFrame body = _assets.Sprite(look.Sprite, time);
+        batch.Draw(body.Texture, bodyPosition, body.Source, flatColor ?? _colors.Actor, facing, body.Origin, look.Scale, SpriteEffects.None, 0f);
+    }
+
+    /// <summary>Sprite and offsets of an executioner's body, from the timing of its blows.</summary>
+    private static ExecutionLook LookOf(Actor actor, float time)
+    {
+        ActorSprites sprites = actor.Definition.Sprites;
+        string mount = sprites.Mount ?? sprites.Body;
+        float since = SinceLastBlow(actor);
+        // 1 = ready for the next blow (arm raised, head lifted), 0 = the blow just landed.
+        float raise = actor.ExecutionStrikesDone == 0
+            ? Smooth(actor.NextStrikeAt > 0f ? actor.ExecutionElapsed / actor.NextStrikeAt : 1f)
+            : since < ImpactHold ? 0f : Smooth((since - ImpactHold) / RaiseTime);
+        float jerk = Fade(since, 0.18f);
+
+        switch (actor.ExecutionAnimation)
+        {
+            case ExecutionAnimation.HeadBash:
+                return new ExecutionLook(mount, 2.5f - 4f * raise, 1f + 0.07f * raise, 0f, 0f, null, true);
+            case ExecutionAnimation.Stab:
+                return new ExecutionLook(mount, 2f - 3f * raise, 1f + 0.05f * raise, 0f, 4f - 6f * raise, null, true);
+            case ExecutionAnimation.TearHead:
+            case ExecutionAnimation.TearLegs:
+                float strain = MathF.Sin(time * 38f) * 0.5f * (1f - jerk);
+                return new ExecutionLook(mount, 0.8f - 4.3f * jerk + strain, 1f + 0.05f * jerk, 0f, 0f, null, true);
+            case ExecutionAnimation.Stomp:
+                float kick = Fade(since, 0.14f);
+                return new ExecutionLook(sprites.Body, -2.5f * kick + 1f * (1f - raise), 1f, 0f, 0f, kick > 0.2f ? sprites.Kick ?? sprites.Legs : null, false);
+            case ExecutionAnimation.Bite:
+                return new ExecutionLook(sprites.Body, 6f * (1f - raise), 1f, 0f, 0f, null, false);
+            case ExecutionAnimation.Shoot:
+                return new ExecutionLook(sprites.Body, 0f, 1f, 0f, 0f, null, false);
+            default:
+                // Weapon raised behind the shoulder, brought down on the head.
+                return new ExecutionLook(sprites.Body, 3f * (1f - raise), 1f, -1.9f * raise, 0f, null, false);
+        }
+    }
+
+    /// <summary>Time since the executioner's last blow (very large before the first one).</summary>
+    private static float SinceLastBlow(Actor executioner) =>
+        executioner.ExecutionStrikesDone > 0 ? executioner.ExecutionElapsed - executioner.LastStrikeAt : float.MaxValue;
+
+    /// <summary>1 right after an event, 0 after <paramref name="duration"/>.</summary>
+    private static float Fade(float since, float duration) => since < duration ? 1f - since / duration : 0f;
+
+    private static float Smooth(float t)
+    {
+        t = Math.Clamp(t, 0f, 1f);
+        return t * t * (3f - 2f * t);
+    }
+
+    private static Vector2 SafeNormalize(Vector2 v) => v.LengthSquared() > 0.0001f ? Vector2.Normalize(v) : Vector2.Zero;
+
+    /// <summary>How an executioner looks right now.</summary>
+    /// <param name="Lean">Offset of the body along the facing (forward on a blow).</param>
+    /// <param name="Swing">Weapon rotation from the facing.</param>
+    /// <param name="Reach">Extra forward offset of the weapon.</param>
+    /// <param name="Legs">Legs drawn under the body (kick), if any.</param>
+    private readonly record struct ExecutionLook(string Sprite, float Lean, float Scale, float Swing, float Reach, string? Legs, bool Astride);
+
+    private const float ImpactHold = 0.05f;
+    private const float RaiseTime = 0.16f;
+    private const float JoltTime = 0.12f;
+    private const float JoltDistance = 1.8f;
+    private const float AstrideHandReach = 9f;
 
     private void DrawProjectiles(SpriteBatch batch, GameWorld world, float alpha)
     {

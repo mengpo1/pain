@@ -71,7 +71,7 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler.
 | Viser | souris |
 | Attaquer | clic gauche (maintenu pour les armes automatiques) |
 | Ramasser / lancer l'arme | clic droit (échange si une arme est au sol) |
-| Achever un ennemi à terre ou qui se relève / interagir | Espace (aux poings, puis clic gauche pour chaque coup) |
+| Achever un ennemi à terre ou qui se relève / interagir | Espace (aux poings, puis clic gauche pour chaque coup : à cheval, la tête cognée au sol, ou coups de pied ; un chien y laisse ses pattes ou sa tête) |
 | Verrouiller une cible | clic molette ou E |
 | Regarder plus loin | Maj |
 | Recommencer | R |
@@ -79,8 +79,8 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler.
 | Plein écran | F11 |
 
 Un repère discret entoure l'ennemi que vous pouvez achever. La **salle d'essai** (menu Jouer, après la
-campagne, ou `--level arena`) réunit un ennemi seul, deux ennemis ensemble, une batte, un tuyau et un
-pistolet pour tester les combats. Les réglages de rythme sont dans `Content/Base/game.json` (`rules`,
+campagne, ou `--level arena`) réunit un ennemi seul, un chien, deux ennemis ensemble, une batte, un
+tuyau et un pistolet pour tester les combats. Les réglages de rythme sont dans `Content/Base/game.json` (`rules`,
 `feel`), les armes et les personnages (voir [docs/content.md](docs/content.md)) ; `F9` les recharge.
 
 Toutes les touches se changent dans `settings.json`, dans le dossier utilisateur dont le chemin

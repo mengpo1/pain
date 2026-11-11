@@ -28,6 +28,7 @@ public sealed class PlayScreen : Screen
     private readonly ModifierDefinition _modifier;
     private readonly Camera2D _camera = new();
     private readonly EffectsLayer _effects = new();
+    private readonly GoreLayer _gore = new();
     private readonly WorldRenderer _renderer;
     private readonly PostProcessor _post;
     private readonly Hud _hud;
@@ -81,6 +82,7 @@ public sealed class PlayScreen : Screen
         _attempt++;
         _world = GameWorld.Create(Level, Session.Content.Definitions, seed: _attempt * 7919, _modifier);
         _effects.Clear();
+        _gore.Clear();
         _hud.Clear();
         _visibility.Clear();
         _flashUntil.Clear();
@@ -249,25 +251,27 @@ public sealed class PlayScreen : Screen
                 Flash(hit.Target);
                 if (hit.Damage > 0f)
                     _effects.BloodSpray(WorldRenderer.ToXna(hit.Target.Position), WorldRenderer.ToXna(hit.Direction), 10, Blood(hit.Target));
-                if (hit.Method == HitMethod.Melee || hit.Method == HitMethod.Thrown) Impact(Feel.Hit, hit.Source, hit.Target);
+                if (hit.Method == HitMethod.Melee || hit.Method == HitMethod.Thrown) Impact(Feel.Hit, hit.Source, hit.Target, hit.Direction);
                 break;
             case ActorKnockedDown down:
                 _effects.Smoke(WorldRenderer.ToXna(down.Target.Position), colors.Fx * 0.25f, 2);
-                Impact(Feel.Knockdown, down.Source, down.Target);
+                Impact(Feel.Knockdown, down.Source, down.Target, down.Source is { } source ? FromTo(source, down.Target) : NVector2.Zero);
                 break;
             case ActorKilled killed:
                 Audio.Play(killed.Victim.Definition.Sounds.Death, killed.Victim.Position);
                 _effects.BloodSpray(WorldRenderer.ToXna(killed.Victim.Position), WorldRenderer.ToXna(killed.Direction), 18, Blood(killed.Victim));
                 _effects.BloodPool(WorldRenderer.ToXna(killed.Victim.Position + killed.Direction * 8f), Blood(killed.Victim), killed.Victim.Radius / 11f);
-                if (killed.Method != HitMethod.Execution) Impact(Feel.Kill, killed.Killer, killed.Victim);
+                if (killed.Method != HitMethod.Execution) Impact(Feel.Kill, killed.Killer, killed.Victim, killed.Direction);
                 if (killed.Victim == _lockTarget) _lockTarget = null;
                 break;
             case ExecutionStrike strike:
                 if (!strike.Shot) Audio.Play(strike.Weapon.Sounds.Hit ?? Sounds.Impact, strike.Victim.Position);
                 Flash(strike.Victim);
-                _effects.BloodSpray(WorldRenderer.ToXna(strike.Victim.Position), WorldRenderer.ToXna(FromTo(strike.Executioner, strike.Victim)),
-                    strike.Final ? 16 : 6, Blood(strike.Victim));
-                Impact(strike.Final ? Feel.ExecutionFinish : Feel.ExecutionStrike, strike.Executioner, strike.Victim);
+                GoreSound gore = _gore.Strike(strike, _effects, Session.Assets, Blood(strike.Victim), colors.Actor);
+                if (gore == GoreSound.Crush) Audio.Play(Sounds.Crush, strike.Victim.Position);
+                else if (gore == GoreSound.Tear) Audio.Play(Sounds.Tear, strike.Victim.Position);
+                Impact(strike.Final ? Feel.ExecutionFinish : Feel.ExecutionStrike, strike.Executioner, strike.Victim,
+                    ExecutionPose.HeadOf(strike.Victim) - strike.Executioner.Position);
                 break;
             case PlayerDied:
                 _hud.Clear();
@@ -325,13 +329,14 @@ public sealed class PlayScreen : Screen
     private FeelSettings Feel => Session.Content.Game.Feel;
 
     /// <summary>Hitstop and camera shake, only for impacts the player takes part in.</summary>
-    private void Impact(ImpactFeel feel, Actor? source, Actor target)
+    private void Impact(ImpactFeel feel, Actor? source, Actor target, NVector2 direction)
     {
         bool playerHurt = target.IsPlayer;
         if (!playerHurt && source is not { IsPlayer: true }) return;
         ImpactFeel applied = playerHurt ? Feel.PlayerHurt : feel;
         _hitstop = MathF.Min(Feel.MaxHitstop, MathF.Max(_hitstop, applied.Hitstop));
         _camera.Shake(applied.Shake);
+        _camera.Punch(WorldRenderer.ToXna(direction), applied.Punch);
     }
 
     private void Flash(Actor actor) => _flashUntil[actor] = _time + Feel.HitFlash;
@@ -390,7 +395,7 @@ public sealed class PlayScreen : Screen
         float alpha = _paused ? 1f : _accumulator / Step;
         UpdateVisibility();
         _post.BeginScene(_renderer.Colors.Background);
-        _renderer.Draw(batch, _world, _camera, _effects, alpha, _time, _isVisible, _flashAmount);
+        _renderer.Draw(batch, _world, _camera, _effects, _gore, alpha, _time, _isVisible, _flashAmount);
         _post.EndScene(batch, _camera, CollectLights(), _paused ? 0f : dt);
 
         Host.Debug.DrawWorld(batch, Session.Assets.Pixel, _world, _camera, _aimWorld);
@@ -459,10 +464,4 @@ public sealed class PlayScreen : Screen
     }
 
     public override void Dispose() => _post.Dispose();
-}
-
-internal static class ColorExtensions
-{
-    public static Color MultiplyBy(this Color a, Color b) =>
-        new(a.R * b.R / 255, a.G * b.G / 255, a.B * b.B / 255, a.A * b.A / 255);
 }

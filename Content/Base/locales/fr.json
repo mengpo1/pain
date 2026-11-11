@@ -92,7 +92,7 @@
     },
     "arena": {
       "name": "Salle d'essai",
-      "intro": "En bas : un ennemi seul. À droite : deux ennemis. Espace pour achever, R pour tout remettre à zéro."
+      "intro": "En bas : un ennemi seul. En haut : un chien. À droite : deux ennemis. Espace pour achever, R pour tout remettre à zéro."
     },
     "offices": {
       "name": "Bureaux",
