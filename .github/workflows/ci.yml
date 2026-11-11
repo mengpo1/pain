@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    name: Build and tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build Game.slnx -c Release
+      - run: dotnet test tests/Game.Tests -c Release --no-build
+
+  # Runs the real game (OpenGL software rendering), the AI playing both sides of every mission.
+  smoke-linux:
+    name: Game smoke test (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri
+      - run: dotnet build src/Game.Desktop -c Release
+      - name: Play every mission
+        run: |
+          game=src/Game.Desktop/bin/Release/net10.0/OpenTactics.dll
+          for mission in first_contact night_extraction patrol_sweep; do
+            xvfb-run -a -s "-screen 0 1280x800x24" dotnet $game --pack horizon --mission $mission --seed 1 --autoplay --mute --frames 600 --size 1280x800 --screenshot horizon-$mission.png
+          done
+          for mission in hold_the_mill to_the_bridge; do
+            xvfb-run -a -s "-screen 0 1280x800x24" dotnet $game --pack mistvale --mission $mission --seed 1 --autoplay --mute --frames 600 --size 1280x800 --screenshot mistvale-$mission.png
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-linux
+          path: '*.png'
+
+  # Informational: hosted macOS runners may not provide an OpenGL context.
+  smoke-macos:
+    name: Game smoke test (macOS, informational)
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build src/Game.Desktop -c Release
+      - run: dotnet src/Game.Desktop/bin/Release/net10.0/OpenTactics.dll --pack horizon --mission first_contact --seed 1 --autoplay --mute --frames 300 --size 1280x800 --screenshot macos.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-macos
+          path: '*.png'

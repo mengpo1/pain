@@ -46,6 +46,7 @@ public sealed class GameHost : XnaGame
         Options = options;
         Paths = new AppPaths(options.ContentRoot, options.ModsRoot);
         Log.Open(Paths.LogFile);
+        Log.Info($"User folder (settings, log): {Paths.UserDirectory}");
         Settings = UserSettings.Load(Paths.SettingsFile);
         if (options.Language is not null) Settings.Language = options.Language;
 
@@ -171,7 +172,6 @@ public sealed class GameHost : XnaGame
         float dt = Options.Screenshot is not null ? 1f / 60f : (float)gameTime.ElapsedGameTime.TotalSeconds;
         Input.Enabled = IsActive || Options.Autoplay;
         Input.Update();
-        Session.Ui.MouseOverUi = false;
         if (Input.KeyPressed(Keys.F11)) ToggleFullscreen();
         _screen?.Update(dt);
         Session.Audio.Update(dt);
@@ -182,6 +182,9 @@ public sealed class GameHost : XnaGame
     {
         GraphicsDevice.SetRenderTarget(null);
         GraphicsDevice.Clear(Color.Black);
+        // Widgets report the mouse during Draw; Update reads last frame's value, so a click on the
+        // interface is never also taken as a click on the map below.
+        Session.Ui.MouseOverUi = false;
         _screen?.Draw(_batch);
         base.Draw(gameTime);
 

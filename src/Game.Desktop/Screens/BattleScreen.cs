@@ -82,7 +82,14 @@ public sealed class BattleScreen : Screen
         }
 
         UpdateHover();
-        if (Idle && PlayerControls) HandlePlayerInput();
+        if (Idle && PlayerControls)
+        {
+            // Leave aiming once the unit can no longer pay for another shot of that mode.
+            if (_view.Targeting is { } targeting && (_view.Selected is not { IsActive: true } shooter
+                || shooter.Tu < Core.Battle.Combat.CombatRules.AttackTu(shooter, targeting.Weapon.Definition, targeting.Mode)))
+                _view.Targeting = null;
+            HandlePlayerInput();
+        }
     }
 
     private bool Idle => !_playback.IsAnimating && !_playback.HasPending && !_battle.IsBusy;
@@ -242,8 +249,6 @@ public sealed class BattleScreen : Screen
             if (_view.Targeting is { } targeting && selected is not null)
             {
                 Execute(new AttackCommand(selected.Id, targeting.Weapon.Id, targeting.Mode, tile));
-                if (targeting.Weapon.Definition.Mode(targeting.Mode) is not null && selected.Tu < Core.Battle.Combat.CombatRules.AttackTu(selected, targeting.Weapon.Definition, targeting.Mode))
-                    _view.Targeting = null;
             }
             else if (_battle.UnitAt(tile) is { Faction: Faction.Player, IsActive: true } clicked)
             {
