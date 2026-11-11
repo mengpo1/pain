@@ -98,6 +98,7 @@ public sealed class WorldRenderer
         DrawProjectiles(batch, world, alpha);
         effects.DrawTop(batch, _assets);
         DrawDecor(batch, world, DecorLayer.Top);
+        DrawRoofs(batch, world, view);
         batch.End();
 
         batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, RasterizerState.CullNone, null, camera.SceneTransform);
@@ -248,6 +249,70 @@ public sealed class WorldRenderer
             if (Open(1, 0)) batch.Draw(pixel, new Rectangle(tile.Right - shade, tile.Y, shade, tile.Height), _wallShade);
         }
     }
+
+    private readonly Dictionary<LevelRoof, float> _roofOpacity = new();
+    private float _roofClock;
+
+    /// <summary>Roofs above the buildings, fading out while the player is under them (with what stands on them).</summary>
+    private void DrawRoofs(SpriteBatch batch, GameWorld world, Rectangle view)
+    {
+        LevelDefinition level = world.Level;
+        if (level.Roofs.Count == 0) return;
+        float dt = MathF.Max(0f, world.Time - _roofClock);
+        _roofClock = world.Time;
+        float size = level.TileSize;
+        System.Numerics.Vector2 player = world.Player.Position;
+        foreach (LevelRoof roof in level.Roofs)
+        {
+            var area = new RectangleF(roof.X * size, roof.Y * size, roof.Width * size, roof.Height * size);
+            bool inside = player.X > area.X && player.X < area.X + area.Width && player.Y > area.Y && player.Y < area.Y + area.Height;
+            float target = inside ? roof.InsideOpacity : 1f;
+            float current = _roofOpacity.TryGetValue(roof, out float o) ? o : target;
+            current += (target - current) * MathF.Min(1f, dt * RoofFadeSpeed);
+            _roofOpacity[roof] = current;
+            if (current <= 0.01f) continue;
+
+            Color tint = _colors.Wall * current;
+            if (_shadow.Enabled)
+            {
+                Vector2 offset = ToXna(_shadow.Offset) * 2f;
+                batch.Draw(_assets.Pixel, new Rectangle((int)(area.X + offset.X), (int)(area.Y + offset.Y), (int)area.Width, (int)area.Height), _shadowColor * current);
+            }
+            SpriteFrame frame = _assets.Sprite(roof.Sprite);
+            for (float y = area.Y; y < area.Y + area.Height - 0.5f; y += size)
+            {
+                for (float x = area.X; x < area.X + area.Width - 0.5f; x += size)
+                {
+                    var destination = new Rectangle((int)x, (int)y, (int)MathF.Min(size, area.X + area.Width - x), (int)MathF.Min(size, area.Y + area.Height - y));
+                    if (!destination.Intersects(view)) continue;
+                    var source = new Rectangle(frame.Source.X, frame.Source.Y, (int)(frame.Source.Width * destination.Width / size), (int)(frame.Source.Height * destination.Height / size));
+                    batch.Draw(frame.Texture, destination, source, tint);
+                }
+            }
+
+            // A parapet: lit rim on the top and left edges, shaded on the others.
+            int rim = Math.Max(1, (int)MathF.Round(_walls.RimWidth)), shade = Math.Max(1, (int)MathF.Round(_walls.ShadeWidth));
+            var r = new Rectangle((int)area.X, (int)area.Y, (int)area.Width, (int)area.Height);
+            batch.Draw(_assets.Pixel, new Rectangle(r.X, r.Y, r.Width, rim), _wallRim * current);
+            batch.Draw(_assets.Pixel, new Rectangle(r.X, r.Y, rim, r.Height), _wallRim * current);
+            batch.Draw(_assets.Pixel, new Rectangle(r.X, r.Bottom - shade, r.Width, shade), _wallShade * current);
+            batch.Draw(_assets.Pixel, new Rectangle(r.Right - shade, r.Y, shade, r.Height), _wallShade * current);
+
+            foreach (LevelDecor decor in level.Decor)
+            {
+                if (decor.Layer != DecorLayer.Roof) continue;
+                System.Numerics.Vector2 p = level.ToWorld(decor.Position);
+                if (p.X < area.X || p.X > area.X + area.Width || p.Y < area.Y || p.Y > area.Y + area.Height) continue;
+                SpriteFrame d = _assets.Sprite(decor.Sprite);
+                batch.Draw(d.Texture, ToXna(p), d.Source, _colors.Decor * current, Geo.DegToRad(decor.RotationDegrees), d.Origin, decor.Scale, SpriteEffects.None, 0f);
+            }
+        }
+    }
+
+    /// <summary>How fast a roof fades in or out (1/s).</summary>
+    private const float RoofFadeSpeed = 6f;
+
+    private readonly record struct RectangleF(float X, float Y, float Width, float Height);
 
     private void DrawDecor(SpriteBatch batch, GameWorld world, DecorLayer layer)
     {
@@ -565,7 +630,9 @@ public sealed class WorldRenderer
             Vector2 at = position;
             if (actor.State == ActorState.Stunned) at += new Vector2(MathF.Sin(time * 47f), MathF.Cos(time * 41f)) * 0.6f;
             if (actor.LeapPhase == LeapPhase.Crouch) at += new Vector2(MathF.Sin(time * 70f), MathF.Cos(time * 61f)) * 0.8f;
-            DrawAnimatedBody(batch, actor, animation, AnimationTime(animation, pose), at, facing, 1f, flatColor, time);
+            // A leap in the air reads as height: the body grows a little towards the top of its arc.
+            float scale = actor.LeapPhase == LeapPhase.Airborne ? LeapScale(actor) : 1f;
+            DrawAnimatedBody(batch, actor, animation, AnimationTime(animation, pose), at, facing, scale, flatColor, time);
             return;
         }
 

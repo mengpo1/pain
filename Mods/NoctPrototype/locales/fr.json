@@ -11,7 +11,7 @@
   "noctproto": {
     "title": "LE DERNIER SIGNAL",
     "camLabel": "CAM-03 // {level}",
-    "level": { "installation": { "name": "Installation K-12" } },
+    "level": { "installation": { "name": "Installation K-12" }, "demo": { "name": "Scène de démonstration" } },
     "objective": {
       "reachFacility": "Atteignez l'installation",
       "findRadioRoom": "Explorez le bâtiment : trouvez la salle radio",

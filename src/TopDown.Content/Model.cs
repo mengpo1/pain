@@ -119,6 +119,12 @@ public sealed class CameraSettings
     public float FarLookMax { get; set; } = 320f;
     public float ShakeDecay { get; set; } = 4f;
     public float MaxShake { get; set; } = 12f;
+
+    /// <summary>Slow drift of the view, like a camera hovering high above (world units, 0 = steady).</summary>
+    public float Sway { get; set; }
+
+    /// <summary>Seconds for one sway cycle.</summary>
+    public float SwayPeriod { get; set; } = 9f;
 }
 
 /// <summary>Visual identity of a game: colours, fonts, post-processing. Never gameplay.</summary>

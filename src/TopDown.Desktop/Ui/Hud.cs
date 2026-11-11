@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TopDown.Content;
+using TopDown.Core.Ai;
 using TopDown.Core.Definitions;
 using TopDown.Core.World;
 using TopDown.Desktop.Graphics;
@@ -97,7 +98,11 @@ public sealed class Hud
     public void Draw(SpriteBatch batch, GameWorld world, Rectangle screen, float time, string levelName)
     {
         float margin = 24f * _ui.Scale;
-        if (Surveillance) DrawSurveillanceFrame(batch, screen, time, levelName, margin);
+        if (Surveillance)
+        {
+            DrawSurveillanceFrame(batch, screen, time, levelName, margin);
+            DrawTelemetry(batch, world, screen, time, margin);
+        }
 
         if (world.Objectives.Current is { } objective && world.Outcome == WorldOutcome.Playing)
         {
@@ -252,6 +257,76 @@ public sealed class Hud
         string name = bindings[0].ToString().Replace("Mouse:", "Mouse", StringComparison.Ordinal);
         string key = $"input.{name}";
         return T.Has(key) ? T.Get(key) : name;
+    }
+
+    /// <summary>Grid position of the tracked subject and the strength of the camera's uplink (under the clock).</summary>
+    private void DrawTelemetry(SpriteBatch batch, GameWorld world, Rectangle screen, float time, float margin)
+    {
+        System.Numerics.Vector2 p = world.Player.Position;
+        string grid = T.Format("hud.grid", ("x", $"{p.X / 10f:0000.0}"), ("y", $"{p.Y / 10f:0000.0}"));
+        float y = margin + 26f * _ui.Scale;
+        _ui.Text(batch, grid, new Vector2(screen.Width - margin, y), 16f, C.Text * 0.75f, Align.Right, 0f);
+
+        // Uplink: four bars wavering with a slow noise, weaker while a transmission is coming in.
+        float wave = 0.5f + 0.5f * MathF.Sin(time * 0.7f) * MathF.Sin(time * 1.9f + 1f);
+        int bars = Math.Clamp((int)MathF.Round(2.2f + wave * 2f - (_transmission is not null ? 1f : 0f)), 1, 4);
+        float bar = 5f * _ui.Scale, gap = 3f * _ui.Scale, height = 16f * _ui.Scale;
+        float x0 = screen.Width - margin - 4 * (bar + gap);
+        float baseY = y + 26f * _ui.Scale + height;
+        for (int i = 0; i < 4; i++)
+        {
+            float h = height * (i + 1) / 4f;
+            Color color = i < bars ? C.Text * 0.85f : C.Text * 0.2f;
+            Primitives.FillRect(batch, _ui.Assets.Pixel, new Vector2(x0 + i * (bar + gap), baseY - h), new Vector2(bar, h), color);
+        }
+        _ui.Text(batch, T.Get("hud.uplink"), new Vector2(x0 - 8f * _ui.Scale, baseY - 18f * _ui.Scale), 15f, C.Text * 0.7f, Align.Right, 0f);
+    }
+
+    /// <summary>
+    /// Detection markers of the surveillance feed: brackets on the creatures hunting the subject ("?" on the
+    /// merely suspicious ones), and a notch on the edge of the image for hunters out of frame.
+    /// </summary>
+    public void DrawMarkers(SpriteBatch batch, GameWorld world, Camera2D camera, Rectangle screen, Func<Actor, bool> isVisible, float time)
+    {
+        if (!Surveillance || world.Outcome != WorldOutcome.Playing) return;
+        Texture2D pixel = _ui.Assets.Pixel;
+        Actor player = world.Player;
+        foreach (Actor actor in world.Actors)
+        {
+            if (!actor.IsAlive || actor.Brain is not { } brain || !actor.IsHostileTo(player)) continue;
+            bool hunting = brain.State is AiState.Chase or AiState.Awakening;
+            bool wary = brain.State is AiState.Suspicious or AiState.Investigate or AiState.Search;
+            if (!hunting && !wary) continue;
+
+            Vector2 at = camera.WorldToScreen(WorldRenderer.ToXna(actor.Position));
+            bool onScreen = screen.Contains((int)at.X, (int)at.Y);
+            Color color = (hunting ? C.Text : C.Text * 0.55f) * (hunting && (int)(time * 4f) % 2 == 0 ? 1f : 0.75f);
+            if (onScreen && isVisible(actor))
+            {
+                float r = (actor.Radius * camera.Zoom) + 8f * _ui.Scale, tick = 7f * _ui.Scale;
+                foreach (var (sx, sy) in new[] { (-1f, -1f), (1f, -1f), (-1f, 1f), (1f, 1f) })
+                {
+                    var corner = at + new Vector2(sx * r, sy * r);
+                    Primitives.Line(batch, pixel, corner, corner - new Vector2(sx * tick, 0f), color, 2f);
+                    Primitives.Line(batch, pixel, corner, corner - new Vector2(0f, sy * tick), color, 2f);
+                }
+                if (wary) _ui.Text(batch, "?", at + new Vector2(r + 4f, -r - 6f), 16f, color, shadow: 0f);
+            }
+            else if (hunting && !onScreen)
+            {
+                // A notch on the frame edge, pointing towards the hunter.
+                Vector2 center = new(screen.Width * 0.5f, screen.Height * 0.5f);
+                Vector2 dir = at - center;
+                if (dir.LengthSquared() < 1f) continue;
+                dir.Normalize();
+                float scale = MathF.Min((screen.Width * 0.5f - 40f) / MathF.Max(0.001f, MathF.Abs(dir.X)), (screen.Height * 0.5f - 40f) / MathF.Max(0.001f, MathF.Abs(dir.Y)));
+                Vector2 tip = center + dir * scale;
+                Vector2 side = new(-dir.Y, dir.X);
+                float s = 9f * _ui.Scale;
+                Primitives.Line(batch, pixel, tip, tip - dir * s + side * s * 0.6f, color, 2f);
+                Primitives.Line(batch, pixel, tip, tip - dir * s - side * s * 0.6f, color, 2f);
+            }
+        }
     }
 
     private void DrawSurveillanceFrame(SpriteBatch batch, Rectangle screen, float time, string levelName, float margin)

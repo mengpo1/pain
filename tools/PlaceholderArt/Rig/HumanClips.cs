@@ -7,7 +7,11 @@ public enum ClipKind { Upper, Full, Legs }
 
 /// <summary>One drawn frame: a pose, how long it shows, the held weapon's angle (degrees, null = along the forearm)
 /// and side of the body, an event, and the blood pool under a dead body.</summary>
-public sealed record RigFrame(HumanPose Pose, float Duration, float? WeaponAngle = null, bool WeaponOver = true, string? Event = null, float Pool = 0f);
+public sealed record RigFrame(HumanPose Pose, float Duration, float? WeaponAngle = null, bool WeaponOver = true, string? Event = null, float Pool = 0f)
+{
+    /// <summary>Body heat for thermal palettes (1 = alive and active; lower when resting, dying, cooling).</summary>
+    public float Heat { get; init; } = 1f;
+}
 
 public sealed record RigClip(string Name, ClipKind Kind, bool Loop, List<RigFrame> Frames);
 

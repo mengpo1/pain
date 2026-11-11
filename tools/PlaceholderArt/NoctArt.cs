@@ -1,3 +1,5 @@
+using PlaceholderArt.Rig;
+
 namespace PlaceholderArt;
 
 /// <summary>
@@ -10,30 +12,6 @@ public static class NoctArt
 {
     internal static Rgba G(float v, float a = 1f) => Rgba.Grey(v, a);
 
-    static readonly HumanLook Player = new()
-    {
-        Body = G(0.80f), BodyShade = G(0.66f), BodyLight = G(0.95f), Skin = G(0.98f), SkinShade = G(0.88f),
-        Hair = G(0.84f), Pants = G(0.70f), Shoes = G(0.50f), Collar = G(0.73f),
-    };
-
-    static readonly HumanLook Guard = new()
-    {
-        Body = G(0.78f), BodyShade = G(0.64f), BodyLight = G(0.92f), Skin = G(0.98f), SkinShade = G(0.88f),
-        Hair = G(0.82f), Pants = G(0.68f), Shoes = G(0.50f),
-    };
-
-    static readonly HumanLook Thug = new()
-    {
-        Body = G(0.81f), BodyShade = G(0.66f), BodyLight = G(0.94f), Skin = G(0.99f), SkinShade = G(0.90f),
-        Hair = null, Pants = G(0.70f), Shoes = G(0.50f),
-    };
-
-    static readonly HumanLook Brute = new()
-    {
-        Body = G(0.86f), BodyShade = G(0.72f), BodyLight = G(0.97f), Skin = G(0.97f), SkinShade = G(0.85f),
-        Hair = G(0.9f, 0.3f), Pants = G(0.70f), Shoes = G(0.50f), BareArms = true, Scale = 1.35f, Bulk = 1.08f,
-    };
-
     static readonly CreatureLook Creature = new()
     {
         Body = G(0.23f), BodyDark = G(0.14f), Rim = G(0.4f), Limb = G(0.17f), LimbLight = G(0.32f),
@@ -42,10 +20,7 @@ public static class NoctArt
 
     public static void Generate(Pack pack)
     {
-        Humans(pack, "player", Player, 32, 48, 201);
-        Humans(pack, "guard", Guard, 32, 48, 202);
-        Humans(pack, "thug", Thug, 32, 48, 203);
-        Humans(pack, "brute", Brute, 40, 56, 204);
+        // The humans come from the rig (ThermalHumans), like in the action pack.
         Creatures(pack);
 
         var legs = new Canvas(128, 32);
@@ -58,6 +33,8 @@ public static class NoctArt
         int seed = 210;
         foreach (var (name, sprite) in Weapons.All())
             pack.Png($"sprites/weapons/{name}.png", Cold(sprite, 0.2f, 0.55f, G(0.8f), 0.65f, seed++));
+        foreach (HeldWeapons.Held held in HeldWeapons.All())
+            pack.Png($"sprites/weapons/{held.Name}_held.png", Cold(held.Sprite, 0.18f, 0.5f, G(0.7f), 0.5f, seed++));
 
         Fx(pack);
         Tiles(pack);
@@ -85,9 +62,9 @@ public static class NoctArt
         });
 
     /// <summary>Warm body: softened edges, a white heat halo and grain.</summary>
-    internal static Canvas Warm(Canvas c, int seed, float halo = 0.5f)
+    internal static Canvas Warm(Canvas c, int seed, float halo = 0.5f, float blur = 0.4f)
     {
-        c.Blur(0.4f);
+        c.Blur(blur);
         c.Glow(Rgba.White, 2f, halo);
         Grain(c, seed, 0.035f);
         return c;
@@ -142,43 +119,6 @@ public static class NoctArt
     }
 
     // ------------------------------------------------------------------ actors
-
-    static void Humans(Pack pack, string name, HumanLook look, int size, int downSize, int seed)
-    {
-        var stand = new Canvas(size, size);
-        Actors.HumanStanding(stand, look, size / 2f, size / 2f);
-        pack.Png($"sprites/actors/{name}.png", Warm(stand, seed));
-
-        var down = new Canvas(downSize, downSize);
-        Actors.HumanDown(down, look, downSize / 2f, downSize / 2f);
-        var cooling = down.Clone();
-        pack.Png($"sprites/actors/{name}_down.png", Warm(down, seed + 1));
-
-        // dead: a warm pool on the floor and a body that has started to cool (dimmer, weaker halo)
-        float k = downSize / 48f;
-        var dead = new Canvas(downSize, downSize);
-        HeatPool(dead, downSize / 2f + 6f * k, downSize / 2f + 1.5f * k, 15f * k, seed + 2);
-        cooling.Map((_, _, p) => p.Shade(0.84f));
-        dead.Draw(Warm(cooling, seed + 3, 0.25f));
-        pack.Png($"sprites/actors/{name}_dead.png", dead);
-
-        int mountSize = size + 8;
-        var mount = new Canvas(mountSize, mountSize);
-        Actors.HumanMount(mount, look, mountSize / 2f, mountSize / 2f);
-        pack.Png($"sprites/actors/{name}_mount.png", Warm(mount, seed + 4));
-
-        var crawl = new Canvas(downSize * 4, downSize);
-        for (int frame = 0; frame < 4; frame++) Actors.HumanCrawl(crawl, look, downSize * (frame + 0.5f), downSize / 2f, frame);
-        pack.Png($"sprites/actors/{name}_crawl.png", Warm(crawl, seed + 5));
-
-        int partSeed = seed + 6;
-        foreach (Actors.HumanPart part in Enum.GetValues<Actors.HumanPart>())
-        {
-            var piece = new Canvas(downSize, downSize);
-            Actors.HumanDownPart(piece, look, downSize / 2f, downSize / 2f, part);
-            pack.Png($"sprites/actors/{name}_{part.ToString().ToLowerInvariant()}.png", Warm(piece, partSeed++, 0.35f));
-        }
-    }
 
     static void Creatures(Pack pack)
     {
@@ -422,5 +362,51 @@ public static class NoctArt
         c.Fill(Shape.Rect(2f, 7.2f, 8f, 1.6f).Or(Shape.Polygon((7.5f, 3f), (14.5f, 8f), (7.5f, 13f), (9.6f, 8f))), Rgba.White);
         c.Outline(G(0.05f, 0.6f));
         return c;
+    }
+
+    // ------------------------------------------------------------------ thermal rig (same animations as the action pack)
+
+    /// <summary>Thermal "white hot" ramp: cooler rims, a brighter core, no hue.</summary>
+    internal static Palette Thermal(Palette palette, Mat material, float heat) =>
+        palette.Set(material, G(heat * 0.55f), G(heat * 0.8f), G(heat), G(MathF.Min(1f, heat * 1.1f + 0.04f)));
+
+    /// <summary>Seen by the thermal camera: light straight from the lens (the core reads hotter), no ink outline.</summary>
+    internal static readonly RenderStyle ThermalStyle = new()
+    {
+        Light = System.Numerics.Vector3.UnitZ, LightBand = 0.93f, ShadeBand = 0.62f, Ink = null, ContactDepth = 2.2f,
+    };
+
+    static Palette HumanHeat(float top, float trim, float shirt, float pants, float skin, float hair)
+    {
+        var p = new Palette();
+        foreach (var (m, v) in new[] { (Mat.Top, top), (Mat.Trim, trim), (Mat.Shirt, shirt), (Mat.Pants, pants), (Mat.Shoes, 0.34f), (Mat.Dark, 0.26f),
+                     (Mat.Skin, skin), (Mat.Hair, hair), (Mat.Belt, pants * 0.85f), (Mat.Eye, skin * 0.8f), (Mat.Mouth, 1f), (Mat.Glow, 1f) })
+            Thermal(p, m, v);
+        return p;
+    }
+
+    static readonly BloodColors WarmBlood = new(G(0.4f), G(0.52f), G(0.64f));
+
+    /// <summary>
+    /// Thermal versions of the action pack's rig humans, under the same ids, so a mod reusing those characters
+    /// keeps every animation but shows them as heat signatures.
+    /// </summary>
+    public static void ThermalHumans(Pack pack, params string[] names)
+    {
+        var builds = new Dictionary<string, (HumanBuild Build, bool Heavy)>
+        {
+            ["player"] = (new HumanBuild { Palette = HumanHeat(0.66f, 0.6f, 0.74f, 0.58f, 0.97f, 0.7f), Hair = HairStyle.Short, OpenJacket = true }, false),
+            ["guard"] = (new HumanBuild { Palette = HumanHeat(0.62f, 0.58f, 0.7f, 0.56f, 0.96f, 0.66f), Hair = HairStyle.Slick, OpenJacket = true }, false),
+            ["thug"] = (new HumanBuild { Palette = HumanHeat(0.68f, 0.6f, 0.7f, 0.58f, 0.98f, 0.9f), Hair = HairStyle.Bald, Stripes = true }, false),
+            ["brute"] = (new HumanBuild { Palette = HumanHeat(0.72f, 0.64f, 0.72f, 0.6f, 0.97f, 0.75f), Hair = HairStyle.Buzz, BareArms = true, Scale = 1.3f, Bulk = 1.1f }, true),
+        };
+        int seed = 260;
+        foreach (string name in names)
+        {
+            var (build, heavy) = builds[name];
+            bool big = build.Scale > 1.1f;
+            RigHumans.Generate(pack, pack.Rig, name, build, WarmBlood, seed++, heavy, ThermalStyle, big ? 56 : 44, big ? 68 : 52,
+                finish: (c, s) => Warm(c, s, 0.35f, 0.28f));
+        }
     }
 }

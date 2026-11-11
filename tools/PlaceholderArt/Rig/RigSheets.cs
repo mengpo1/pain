@@ -17,6 +17,8 @@ public sealed class RigManifest
 
     public void Animation(string id, string json) => _animations[id] = json;
 
+    public bool IsEmpty => _textures.Count == 0 && _animations.Count == 0;
+
     public string ToJson(string comment)
     {
         var sb = new StringBuilder();
@@ -84,16 +86,26 @@ public static class RigHumans
     }
 
     public static void Generate(Pack pack, RigManifest manifest, string name, HumanBuild build, BloodColors blood, int seed,
-        bool heavy = false, RenderStyle? style = null, int upperSize = 44, int fullSize = 48)
+        bool heavy = false, RenderStyle? style = null, int upperSize = 44, int fullSize = 48,
+        Func<float, Palette>? heat = null, Action<Canvas, int>? finish = null, IEnumerable<RigClip>? clips = null, bool stills = true)
     {
         style ??= new RenderStyle();
         string folder = $"sprites/actors/{name}";
         var standing = new HashSet<int>(HumanPart.Upper);
         var legs = new HashSet<int>(HumanPart.Legs);
 
-        Canvas Draw(HumanPose pose, int size, ClipKind kind, float pool = 0f, Func<Prim, bool>? only = null)
+        int frameSeed = seed * 1000;
+        Canvas Draw(HumanPose pose, int size, ClipKind kind, float pool = 0f, Func<Prim, bool>? only = null, float bodyHeat = 1f)
+        {
+            Canvas drawn = DrawRaw(pose, size, kind, pool, only, bodyHeat);
+            finish?.Invoke(drawn, frameSeed++);
+            return drawn;
+        }
+
+        Canvas DrawRaw(HumanPose pose, int size, ClipKind kind, float pool, Func<Prim, bool>? only, float bodyHeat)
         {
             List<Prim> prims = HumanModel.Build(pose, build);
+            Palette palette = heat?.Invoke(bodyHeat) ?? build.Palette;
             Func<Prim, bool> include = only ?? (kind switch
             {
                 ClipKind.Upper => p => standing.Contains(p.Part),
@@ -101,7 +113,7 @@ public static class RigHumans
                 _ => _ => true,
             });
             var origin = new Vector2(size / 2f, size / 2f);
-            Canvas body = TopDownRenderer.Render(prims, build.Palette, size, size, origin, style, include);
+            Canvas body = TopDownRenderer.Render(prims, palette, size, size, origin, style, include);
             if (pool <= 0f) return body;
             float k = build.Scale;
             Canvas under = Pool(size, size / 2f + 3f * k, size / 2f + 1.5f * k, 15.5f * k * pool, blood, seed);
@@ -109,7 +121,7 @@ public static class RigHumans
             return under;
         }
 
-        foreach (RigClip clip in HumanClips.All(heavy))
+        foreach (RigClip clip in clips ?? HumanClips.All(heavy))
         {
             int size = clip.Kind == ClipKind.Full ? fullSize : upperSize;
             var frames = new List<Canvas>();
@@ -118,7 +130,7 @@ public static class RigHumans
             for (int i = 0; i < clip.Frames.Count; i++)
             {
                 RigFrame frame = clip.Frames[i];
-                frames.Add(Draw(frame.Pose, size, clip.Kind, frame.Pool));
+                frames.Add(Draw(frame.Pose, size, clip.Kind, frame.Pool, bodyHeat: frame.Heat));
                 HumanSkeleton k = HumanModel.Pose(frame.Pose, build);
                 Vector3 fore = k.WristRight - k.ElbowRight;
                 float angle = frame.WeaponAngle ?? MathF.Atan2(fore.Y, fore.X) * 180f / MathF.PI;
@@ -130,6 +142,8 @@ public static class RigHumans
             RigSheets.Write(pack, manifest, id, $"{folder}/{clip.Name.Replace('.', '_')}.png", frames, clip.Frames.Select(f => f.Duration).ToList(),
                 clip.Loop, events, armed ? points : null);
         }
+
+        if (!stills) return;
 
         // Still sprites used outside the animation set (menus, decals, the dismemberment pieces).
         pack.Png($"sprites/actors/{name}.png", Draw(HumanClips.Unarmed, upperSize, ClipKind.Upper));
@@ -144,5 +158,36 @@ public static class RigHumans
         ];
         foreach (var (part, id) in pieces)
             pack.Png($"sprites/actors/{name}_{part}.png", Draw(HumanClips.Lying, fullSize, ClipKind.Full, only: p => p.Part == id));
+    }
+}
+
+/// <summary>Creature sheets from <see cref="BeastClip"/>s (four-legged rig) with heat-dependent palettes.</summary>
+public static class RigBeasts
+{
+    public static void Generate(Pack pack, string name, IEnumerable<BeastClip> clips, BeastBuild build, Func<float, Palette> heat, RenderStyle style,
+        int size, BloodColors blood, Action<Canvas, int> finish, int seed)
+    {
+        int frameSeed = seed * 1000;
+        foreach (BeastClip clip in clips)
+        {
+            var frames = new List<Canvas>();
+            var events = new Dictionary<int, string>();
+            for (int i = 0; i < clip.Frames.Count; i++)
+            {
+                BeastFrame frame = clip.Frames[i];
+                Canvas body = TopDownRenderer.Render(BeastModel.Build(frame.Pose, build), heat(frame.Heat), size, size, new Vector2(size / 2f, size / 2f), style);
+                finish(body, frameSeed++);
+                if (frame.Pool > 0f)
+                {
+                    Canvas under = RigHumans.Pool(size, size / 2f, size / 2f + 2f, size * 0.17f * frame.Pool, blood, seed);
+                    under.Draw(body);
+                    body = under;
+                }
+                frames.Add(body);
+                if (frame.Event is { } e) events[i] = e;
+            }
+            RigSheets.Write(pack, pack.Rig, $"actor.{name}.{clip.Name}", $"sprites/actors/{name}/{clip.Name.Replace('.', '_')}.png", frames,
+                clip.Frames.Select(f => f.Duration).ToList(), clip.Loop, events, null);
+        }
     }
 }

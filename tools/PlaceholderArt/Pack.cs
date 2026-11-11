@@ -7,6 +7,9 @@ public sealed class Pack(string root)
 
     public List<string> Written { get; } = [];
 
+    /// <summary>Generated sprite sheets of this pack, written as <c>assets.rig.json</c> at the end.</summary>
+    public Rig.RigManifest Rig { get; } = new();
+
     public void Png(string relativePath, Canvas canvas)
     {
         Write(relativePath, canvas.ToPng());

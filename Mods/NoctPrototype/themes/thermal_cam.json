@@ -5,6 +5,8 @@
   "background": "#030304",
   "tints": { "floor": "#ffffff", "wall": "#ffffff", "actor": "#ffffff", "weapon": "#ffffff", "decor": "#ffffff", "fx": "#ffffff", "blood": "#ffffff" },
   "shadow": { "enabled": false },
+  // Walls and roofs read as solid structures: a faint warm rim, a cold edge.
+  "walls": { "rim": "#ffffff40", "rimWidth": 2, "shade": "#000000b0", "shadeWidth": 4 },
   "ui": {
     "font": "font.mono",
     "text": "#e8e8e8",
@@ -25,7 +27,7 @@
     "videoNoise": 0.35,
     "rollingBar": 0.8,
     "heatGlow": 0.9,
-    "darkness": 0.34,
+    "darkness": 0.26,
     "darknessColor": "#000000",
     "playerLightRadius": 250,
     "playerLightIntensity": 1.0,

@@ -5,11 +5,12 @@
  "legend": {
   ".": "ground_gravel",
   ",": "floor_dirt",
-  "_": "floor_concrete",
+  "_": "floor_slab",
   "g": "floor_grate",
-  "#": "wall_plaster",
+  "#": "wall_concrete",
   "x": "fence",
-  "=": "glass"
+  "=": "glass",
+  "a": "asphalt"
  },
  "doorSymbols": {
   "D": {
@@ -42,11 +43,11 @@
   "x.#______#....#_______#_________#________#...x",
   "x.#______#....#_______#_________#________#...x",
   "x.####B###....###=#=#######D#########=#=##...x",
-  "x............................................x",
-  "x..,,,,,,....................................x",
-  "x..,,,,,,.....................,,,,,,,........x",
-  "x..,,,,,,.....................,,,,,,,........x",
-  "x.............................,,,,,,,........x",
+  "xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaax",
+  "xaa,,,,,,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaax",
+  "xaa,,,,,,aaaaaaaaaaaaaaaaaaaaa,,,,,,,aaaaaaaax",
+  "xaa,,,,,,aaaaaaaaaaaaaaaaaaaaa,,,,,,,aaaaaaaax",
+  "xaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,,,,,,,aaaaaaaax",
   "xxxxxxxx,,,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "x............................................x",
   "x............................................x",
@@ -349,6 +350,218 @@
    ],
    "blocksProjectiles": true,
    "blocksVision": false
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    3.5,
+    10.5
+   ],
+   "size": [
+    2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    3.5,
+    11.6
+   ],
+   "size": [
+    2,
+    0.9
+   ],
+   "rotationDegrees": 4
+  },
+  {
+   "sprite": "prop.tank",
+   "position": [
+    7.6,
+    10.4
+   ],
+   "size": [
+    1.4,
+    1.4
+   ]
+  },
+  {
+   "sprite": "prop.pipes",
+   "position": [
+    44.2,
+    9.5
+   ],
+   "size": [
+    0.5,
+    3
+   ],
+   "rotationDegrees": 90
+  },
+  {
+   "sprite": "prop.pipes",
+   "position": [
+    44.2,
+    15.5
+   ],
+   "size": [
+    0.5,
+    3
+   ],
+   "rotationDegrees": 90
+  },
+  {
+   "sprite": "prop.tires",
+   "position": [
+    2.2,
+    21.6
+   ],
+   "size": [
+    0.9,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.pallets",
+   "position": [
+    13.2,
+    23.8
+   ],
+   "size": [
+    1,
+    1
+   ]
+  },
+  {
+   "sprite": "prop.rubble",
+   "position": [
+    20.6,
+    23.9
+   ],
+   "size": [
+    1.2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    19.5,
+    20.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    35.5,
+    20.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    14.5,
+    26.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    30.5,
+    26.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    40.2,
+    27.6
+   ],
+   "size": [
+    2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    40.2,
+    28.8
+   ],
+   "size": [
+    2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.van",
+   "position": [
+    35.5,
+    31.2
+   ],
+   "size": [
+    3,
+    1.4
+   ]
+  },
+  {
+   "sprite": "prop.tank",
+   "position": [
+    43,
+    31.6
+   ],
+   "size": [
+    1.4,
+    1.4
+   ]
+  },
+  {
+   "sprite": "prop.rubble",
+   "position": [
+    18,
+    31.3
+   ],
+   "size": [
+    1.2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.pallets",
+   "position": [
+    11.5,
+    30.8
+   ],
+   "size": [
+    1,
+    1
+   ]
+  },
+  {
+   "sprite": "prop.tires",
+   "position": [
+    27.5,
+    31.8
+   ],
+   "size": [
+    0.9,
+    0.9
+   ]
   }
  ],
  "decor": [
@@ -368,6 +581,62 @@
     4
    ],
    "layer": "floor"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    17.5,
+    4.5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    29,
+    5.5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    38,
+    5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    18,
+    15.5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    27,
+    14
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    37,
+    16
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    5,
+    16
+   ],
+   "layer": "roof"
   }
  ],
  "items": [
@@ -659,5 +928,63 @@
    ]
   }
  ],
- "ambience": "ambience.facility"
+ "ambience": "ambience.facility",
+ "roofs": [
+  {
+   "x": 14,
+   "y": 2,
+   "width": 11,
+   "height": 7,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 24,
+   "y": 2,
+   "width": 11,
+   "height": 7,
+   "sprite": "roof.metal"
+  },
+  {
+   "x": 34,
+   "y": 2,
+   "width": 8,
+   "height": 7,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 14,
+   "y": 8,
+   "width": 28,
+   "height": 4,
+   "sprite": "roof.metal"
+  },
+  {
+   "x": 14,
+   "y": 11,
+   "width": 9,
+   "height": 9,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 22,
+   "y": 11,
+   "width": 11,
+   "height": 9,
+   "sprite": "roof.metal"
+  },
+  {
+   "x": 32,
+   "y": 11,
+   "width": 10,
+   "height": 9,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 2,
+   "y": 13,
+   "width": 8,
+   "height": 7,
+   "sprite": "roof.metal"
+  }
+ ]
 }

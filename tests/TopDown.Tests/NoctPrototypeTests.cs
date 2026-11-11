@@ -60,7 +60,7 @@ public class NoctPrototypeTests
         Assert.Equal(["base", PackId], database.LoadedPacks.Select(p => p.Manifest.Id));
         Assert.Equal("thermal_cam", database.Theme.Id);
         Assert.Equal(["installation"], database.PlayableCampaign.Select(l => l.Id));
-        Assert.Empty(database.PlayableExtraLevels);
+        Assert.Equal(["noct_demo"], database.PlayableExtraLevels.Select(l => l.Id));
         Assert.False(database.Game.RestartWhileAlive);
         Assert.True(database.Game.Hud.Survival);
     }
@@ -124,6 +124,9 @@ public class NoctPrototypeTests
         Teleport(world, 29.5f, 5);
         Run(world, 0.2f);
 
+        // It uncurls and heats up first (its awakening), then gives chase.
+        Assert.Equal(AiState.Awakening, watcher.Brain.State);
+        Run(world, watcher.Definition.Ai.WakeTime);
         Assert.Equal(AiState.Chase, watcher.Brain.State);
     }
 

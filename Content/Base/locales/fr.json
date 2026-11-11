@@ -54,6 +54,8 @@
     "outOfAmmo": "Plus de munitions : lancez l'arme !",
     "collected": "Récupéré : {item}",
     "rec": "REC",
+    "grid": "GRILLE {x} E / {y} N",
+    "uplink": "LIAISON",
     "reloading": "RECHARGEMENT",
     "transmission": "TRANSMISSION",
     "medkits": { "one": "{count} soin", "other": "{count} soins" },

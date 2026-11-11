@@ -31,6 +31,7 @@ public sealed class LevelDefinition
     public List<LevelDoor> Doors { get; set; } = new();
     public List<LevelProp> Props { get; set; } = new();
     public List<LevelDecor> Decor { get; set; } = new();
+    public List<LevelRoof> Roofs { get; set; } = new();
     public List<LevelLight> Lights { get; set; } = new();
     public List<LevelItem> Items { get; set; } = new();
     public List<LevelInteractable> Interactables { get; set; } = new();
@@ -155,6 +156,25 @@ public enum DecorLayer
 {
     Floor,
     Top,
+    /// <summary>On a roof: drawn with it, and fades away with it.</summary>
+    Roof,
+}
+
+/// <summary>
+/// Purely visual roof over a building: drawn above everything inside, it fades out while the player is under
+/// it and back in when the player leaves (what is inside stays hidden from the outside).
+/// </summary>
+public sealed class LevelRoof
+{
+    /// <summary>Covered area in tiles: left, top, width, height.</summary>
+    public float X { get; set; }
+    public float Y { get; set; }
+    public float Width { get; set; }
+    public float Height { get; set; }
+    /// <summary>Texture tiled over the area (one tile per map tile).</summary>
+    public string Sprite { get; set; } = "";
+    /// <summary>Opacity while the player is under it (0 = fully open).</summary>
+    public float InsideOpacity { get; set; }
 }
 
 /// <summary>Purely visual element: never collides.</summary>

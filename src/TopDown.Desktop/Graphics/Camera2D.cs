@@ -12,6 +12,7 @@ public sealed class Camera2D
     private readonly Random _random = new(3);
     private float _trauma;
     private Vector2 _punch;
+    private float _swayTime;
 
     public Vector2 Position { get; private set; }
     public Vector2 ShakeOffset { get; private set; }
@@ -101,6 +102,7 @@ public sealed class Camera2D
         float blend = 1f - MathF.Exp(-settings.FollowSharpness * dt);
         Position = Vector2.Lerp(Position, desired, blend);
 
+        _swayTime += dt;
         _trauma = MathF.Max(0f, _trauma - settings.ShakeDecay * dt);
         float shake = _trauma * _trauma * settings.MaxShake * shakeScale;
         ShakeOffset = shake > 0.01f
@@ -108,6 +110,13 @@ public sealed class Camera2D
             : Vector2.Zero;
         _punch *= MathF.Exp(-PunchRecovery * dt);
         ShakeOffset += _punch * shakeScale;
+
+        // Hovering drift: two slow sines at unrelated rates, so the path never visibly repeats.
+        if (settings.Sway > 0f)
+        {
+            float w = MathF.Tau / MathF.Max(0.5f, settings.SwayPeriod);
+            ShakeOffset += new Vector2(MathF.Sin(_swayTime * w), MathF.Sin(_swayTime * w * 0.73f + 1.3f)) * settings.Sway;
+        }
     }
 
     /// <summary>How fast a camera jolt settles back (1/s).</summary>

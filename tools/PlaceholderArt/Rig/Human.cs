@@ -36,6 +36,14 @@ public sealed record HumanBuild
 
     /// <summary>Extra width across the shoulders and the chest.</summary>
     public float Bulk { get; init; } = 1f;
+
+    /// <summary>Limb lengths and head size against a regular figure (creatures: long arms, small head).</summary>
+    public float Arms { get; init; } = 1f;
+    public float Legs { get; init; } = 1f;
+    public float Head { get; init; } = 1f;
+
+    /// <summary>No ears, nose or hair: a smooth skull with eye and mouth hot spots.</summary>
+    public bool Featureless { get; init; }
 }
 
 /// <summary>Where a hand or foot target is given.</summary>
@@ -124,7 +132,7 @@ public static class HumanModel
         k.Waist = waist;
         Basis chest = waist.Moved(0f, 0f, 4.6f * s).Turn(pose.Twist * 0.55f).Lean(pose.Bend * 0.5f).Roll(pose.Side * 0.5f);
         k.Chest = chest;
-        k.HeadRadius = 5f * (1f + (s - 1f) * 0.45f);
+        k.HeadRadius = 5f * (1f + (s - 1f) * 0.45f) * build.Head;
         k.Head = chest.Moved(0.3f * s, 0f, 3.4f * s).Turn(pose.HeadTurn).Lean(pose.HeadNod).Roll(pose.HeadTilt).Moved(0.8f * s, 0f, k.HeadRadius - 0.4f);
 
         k.ShoulderRight = chest.At(-0.2f * s, 7.3f * s * w, 1.4f * s);
@@ -136,16 +144,17 @@ public static class HumanModel
             _ => pelvis.At(local * s),
         };
 
-        (k.ElbowRight, k.WristRight) = Reach(k.ShoulderRight, Target(pose.HandRight, pose.HandSpace), UpperArm * s, Forearm * s, pelvis.Dir(pose.ElbowRight));
-        (k.ElbowLeft, k.WristLeft) = Reach(k.ShoulderLeft, Target(pose.HandLeft, pose.HandSpace), UpperArm * s, Forearm * s, pelvis.Dir(pose.ElbowLeft));
+        float arm = s * build.Arms, leg = s * build.Legs;
+        (k.ElbowRight, k.WristRight) = Reach(k.ShoulderRight, Target(pose.HandRight, pose.HandSpace), UpperArm * arm, Forearm * arm, pelvis.Dir(pose.ElbowRight));
+        (k.ElbowLeft, k.WristLeft) = Reach(k.ShoulderLeft, Target(pose.HandLeft, pose.HandSpace), UpperArm * arm, Forearm * arm, pelvis.Dir(pose.ElbowLeft));
         k.HandRight = k.WristRight + Vector3.Normalize(k.WristRight - k.ElbowRight) * 1.3f * s;
         k.HandLeft = k.WristLeft + Vector3.Normalize(k.WristLeft - k.ElbowLeft) * 1.3f * s;
 
         float hip = 3.2f * s * MathF.Sqrt(w);
         k.HipRight = pelvis.At(0f, hip, -1.2f * s);
         k.HipLeft = pelvis.At(0f, -hip, -1.2f * s);
-        (k.KneeRight, k.AnkleRight) = Reach(k.HipRight, Target(pose.FootRight, pose.FootSpace), Thigh * s, Shin * s, pelvis.Dir(pose.KneeRight));
-        (k.KneeLeft, k.AnkleLeft) = Reach(k.HipLeft, Target(pose.FootLeft, pose.FootSpace), Thigh * s, Shin * s, pelvis.Dir(pose.KneeLeft));
+        (k.KneeRight, k.AnkleRight) = Reach(k.HipRight, Target(pose.FootRight, pose.FootSpace), Thigh * leg, Shin * leg, pelvis.Dir(pose.KneeRight));
+        (k.KneeLeft, k.AnkleLeft) = Reach(k.HipLeft, Target(pose.FootLeft, pose.FootSpace), Thigh * leg, Shin * leg, pelvis.Dir(pose.KneeLeft));
         k.FootRight = FootFrame(pelvis, k.KneeRight, k.AnkleRight, pose.FootTurnRight, pose.FootPointRight, pose.FeetAlongShins);
         k.FootLeft = FootFrame(pelvis, k.KneeLeft, k.AnkleLeft, pose.FootTurnLeft, pose.FootPointLeft, pose.FeetAlongShins);
         return k;
@@ -212,8 +221,8 @@ public static class HumanModel
         prims.Add(new Bone(k.Chest.At(0.2f * s, 0f, 2.2f * s), k.Head.At(-0.6f, 0f, -r * 0.55f), 2.3f * s, 2.1f * s)
             { Group = 1, Part = HumanPart.Head, Material = Mat.Skin });
         prims.Add(new Ball(k.Head.Origin, r) { Group = 1, Part = HumanPart.Head, Material = Mat.Skin, Frame = k.Head, Paint = p => HeadPaint(p, r, build) });
-        prims.Add(new Ball(k.Head.At(r * 0.92f, 0f, -r * 0.18f), 1.05f) { Group = 1, Part = HumanPart.Head, Material = Mat.Skin });
-        if (build.Hair != HairStyle.Long)
+        if (!build.Featureless) prims.Add(new Ball(k.Head.At(r * 0.92f, 0f, -r * 0.18f), 1.05f) { Group = 1, Part = HumanPart.Head, Material = Mat.Skin });
+        if (build.Hair != HairStyle.Long && !build.Featureless)
             foreach (int side in new[] { -1, 1 })
                 prims.Add(new Ball(k.Head.At(-0.2f, side * r * 0.96f, -r * 0.12f), 1.15f) { Group = 1, Part = HumanPart.Head, Material = Mat.Skin });
         if (build.Hair == HairStyle.Cap)
@@ -297,6 +306,13 @@ public static class HumanModel
     {
         Vector3 q = p / r;
         float ay = MathF.Abs(q.Y);
+        if (build.Featureless)
+        {
+            // Two glowing eye slits high on the front of a smooth skull, a hot mouth below.
+            if (q.X > 0.6f && ay > 0.18f && ay < 0.46f && q.Z > 0.05f && q.Z < 0.32f) return Mat.Glow;
+            if (q.X > 0.75f && ay < 0.3f && q.Z < -0.2f && q.Z > -0.5f) return Mat.Mouth;
+            return Mat.Skin;
+        }
         // Face details first: they only show when the face is turned up (lying, looking up).
         if (q.X > 0.7f && ay > 0.2f && ay < 0.5f && q.Z > -0.02f && q.Z < 0.24f) return Mat.Eye;
         if (q.X > 0.82f && ay < 0.24f && q.Z < -0.38f && q.Z > -0.55f) return Mat.Mouth;

@@ -54,6 +54,8 @@
     "outOfAmmo": "Out of ammo: throw it!",
     "collected": "Picked up: {item}",
     "rec": "REC",
+    "grid": "GRID {x} E / {y} N",
+    "uplink": "UPLINK",
     "reloading": "RELOADING",
     "transmission": "TRANSMISSION",
     "medkits": { "one": "{count} medkit", "other": "{count} medkits" },

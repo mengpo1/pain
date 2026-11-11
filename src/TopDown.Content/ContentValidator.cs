@@ -204,6 +204,11 @@ internal static class ContentValidator
 
         foreach (LevelProp prop in level.Props) Sprite(content.Assets, d, source, prop.Sprite);
         foreach (LevelDecor decor in level.Decor) Sprite(content.Assets, d, source, decor.Sprite);
+        foreach (LevelRoof roof in level.Roofs)
+        {
+            Sprite(content.Assets, d, source, roof.Sprite);
+            if (roof.Width <= 0f || roof.Height <= 0f) d.Error(source, "A roof needs a width and a height.");
+        }
         foreach (LevelItem item in level.Items)
         {
             Sprite(content.Assets, d, source, item.Sprite);

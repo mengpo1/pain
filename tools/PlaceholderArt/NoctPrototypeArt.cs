@@ -1,3 +1,5 @@
+using PlaceholderArt.Rig;
+
 namespace PlaceholderArt;
 
 /// <summary>
@@ -18,6 +20,7 @@ public static class NoctPrototypeArt
         Sheet(pack, "scavenger", 40, frame => (c, x, y) => Scavenger(c, x, y, frame), halo: 0.3f, seed: 301);
         Sheet(pack, "leaper", 40, frame => (c, x, y) => Leaper(c, x, y, frame), halo: 0.4f, seed: 302);
         Sheet(pack, "watcher", 52, frame => (c, x, y) => Watcher(c, x, y, frame), halo: 0.12f, seed: 303);
+        AnimatedCreatures(pack);
 
         pack.Png("sprites/props/locker.png", Locker(open: false));
         pack.Png("sprites/props/locker_open.png", Locker(open: true));
@@ -35,6 +38,14 @@ public static class NoctPrototypeArt
 
         pack.Png("sprites/tiles/ground_gravel.png", Gravel());
         pack.Png("sprites/tiles/fence.png", Fence());
+
+        // Structure seen from far above: slabs, asphalt, thick concrete walls, roofs; industrial objects.
+        pack.Png("sprites/tiles/floor_slab.png", Slab());
+        pack.Png("sprites/tiles/asphalt.png", Asphalt());
+        pack.Png("sprites/tiles/wall_concrete.png", ConcreteWall());
+        pack.Png("sprites/tiles/roof_flat.png", RoofFlat());
+        pack.Png("sprites/tiles/roof_metal.png", RoofMetal());
+        foreach (var (name, sprite) in Industrial.All()) pack.Png($"sprites/props/{name}.png", sprite);
     }
 
     // ------------------------------------------------------------------ creatures
@@ -298,11 +309,11 @@ public static class NoctPrototypeArt
     static Canvas Gravel()
     {
         var rng = new Random(351);
-        var c = Canvas.Generate(32, 32, (x, y) => G(0.11f + 0.06f * Noise.Tile(x / 32f, y / 32f, 4, 4, 3, 351)), wrap: true);
+        var c = Canvas.Generate(32, 32, (x, y) => G(0.17f + 0.06f * Noise.Tile(x / 32f, y / 32f, 4, 4, 3, 351)), wrap: true);
         for (int i = 0; i < 26; i++)
         {
             float x = rng.NextSingle() * 32f, y = rng.NextSingle() * 32f, r = 0.5f + rng.NextSingle() * 1.1f;
-            c.Fill(Shape.Circle(x, y, r), G(0.17f + rng.NextSingle() * 0.08f));
+            c.Fill(Shape.Circle(x, y, r), G(0.24f + rng.NextSingle() * 0.1f));
         }
         NoctArt.Grain(c, 352, 0.025f);
         return c;
@@ -323,4 +334,86 @@ public static class NoctPrototypeArt
         c.Fill(Shape.Circle(16f, 16f, 2.4f), G(0.5f));
         return c;
     }
+
+    // ------------------------------------------------------------------ animated creatures (rig)
+
+    static Palette CreatureHeat(float flesh, float fur, float bone, float claw, float heat)
+    {
+        // Body heat fades towards the floor's cold as the creature rests or dies; hot spots go first.
+        float k = 0.35f + 0.65f * heat;
+        var p = new Palette();
+        NoctArt.Thermal(p, Mat.Flesh, flesh * k);
+        NoctArt.Thermal(p, Mat.Fur, fur * k);
+        NoctArt.Thermal(p, Mat.Bone, bone * k);
+        NoctArt.Thermal(p, Mat.Claw, claw * k);
+        NoctArt.Thermal(p, Mat.Glow, heat > 0.6f ? 1f : 0.35f + heat * 0.6f);
+        NoctArt.Thermal(p, Mat.Mouth, heat > 0.6f ? 0.9f : 0.3f + heat * 0.5f);
+        foreach (Mat m in new[] { Mat.Skin, Mat.Top, Mat.Trim, Mat.Shirt, Mat.Pants, Mat.Shoes, Mat.Belt, Mat.Hair, Mat.Dark, Mat.Eye })
+            NoctArt.Thermal(p, m, flesh * k * (m is Mat.Shoes or Mat.Dark ? 0.85f : 1f));
+        return p;
+    }
+
+    static readonly BloodColors CreatureBlood = new(G(0.3f), G(0.42f), G(0.52f));
+
+    static void AnimatedCreatures(Pack pack)
+    {
+        RenderStyle style = NoctArt.ThermalStyle;
+        RigBeasts.Generate(pack, "scavenger", CreatureClips.Scavenger(), CreatureClips.ScavengerBuild,
+            h => CreatureHeat(0.68f, 0.5f, 0.38f, 0.3f, h), style, 48, CreatureBlood, (c, s) => NoctArt.Warm(c, s, 0.28f, 0.25f), 311);
+        RigBeasts.Generate(pack, "leaper", CreatureClips.Leaper(), CreatureClips.LeaperBuild,
+            h => CreatureHeat(0.76f, 0.55f, 0.42f, 0.34f, h), style, 48, CreatureBlood, (c, s) => NoctArt.Warm(c, s, 0.36f, 0.25f), 312);
+        RigHumans.Generate(pack, pack.Rig, "watcher", CreatureClips.WatcherBuild(CreatureHeat(0.6f, 0.5f, 0.45f, 0.4f, 1f)), CreatureBlood, 313,
+            style: style, upperSize: 60, fullSize: 64, heat: h => CreatureHeat(0.6f, 0.5f, 0.45f, 0.4f, h),
+            finish: (c, s) => NoctArt.Warm(c, s, 0.12f, 0.25f), clips: CreatureClips.Watcher(), stills: false);
+    }
+
+    // ------------------------------------------------------------------ structure tiles (thermal, seamless 32 px)
+
+    static Canvas Thermal32(Func<int, int, float> heat, int seed) => Canvas.Generate(32, 32, (x, y) =>
+    {
+        float g = heat(x, y) + (Noise.Hash(x, y, seed) - 0.5f) * 0.035f;
+        return G(Math.Clamp(g, 0f, 1f));
+    }, wrap: true);
+
+    static float N(int x, int y, int period, int seed) => Noise.Tile((x + 0.5f) / 32f, (y + 0.5f) / 32f, period, period, 2, seed);
+
+    /// <summary>Indoor concrete slabs: 16 px squares, darker joints, faint stains.</summary>
+    static Canvas Slab() => Thermal32((x, y) =>
+    {
+        if (x % 16 == 0 || y % 16 == 0) return 0.2f;
+        return 0.3f + N(x, y, 4, 601) * 0.06f - (N(x, y, 2, 602) > 0.7f ? 0.03f : 0f);
+    }, 603);
+
+    /// <summary>Cold asphalt with a painted line (paint reads a touch warmer).</summary>
+    static Canvas Asphalt() => Thermal32((x, y) =>
+    {
+        float g = 0.22f + N(x, y, 8, 604) * 0.05f;
+        if (y >= 15 && y <= 16 && x % 16 < 10) g = 0.38f;
+        return Noise.Hash(x, y, 605) > 0.95f ? g + 0.05f : g;
+    }, 606);
+
+    /// <summary>Top of a thick concrete wall: lighter than the floors, a centre seam, rebar marks.</summary>
+    static Canvas ConcreteWall() => Thermal32((x, y) =>
+    {
+        float g = 0.46f + N(x, y, 4, 607) * 0.05f;
+        if (y == 15 || y == 16) g -= 0.06f;
+        if (x % 8 == 3 && (y == 6 || y == 25)) g += 0.08f;
+        return g;
+    }, 608);
+
+    /// <summary>Flat tar roof: dark membrane, lighter seams every 16 px, gravel specks.</summary>
+    static Canvas RoofFlat() => Thermal32((x, y) =>
+    {
+        float g = 0.3f + N(x, y, 4, 609) * 0.05f;
+        if (x % 16 == 0 || y % 16 == 0) g += 0.08f;
+        return Noise.Hash(x, y, 610) > 0.93f ? g + 0.06f : g;
+    }, 611);
+
+    /// <summary>Corrugated metal roof: ribs every 4 px.</summary>
+    static Canvas RoofMetal() => Thermal32((x, y) =>
+    {
+        int r = x % 4;
+        float g = r == 0 ? 0.22f : r == 1 ? 0.38f : 0.31f;
+        return g + N(x, y, 4, 612) * 0.03f;
+    }, 613);
 }

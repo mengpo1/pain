@@ -464,6 +464,7 @@ public sealed class PlayScreen : Screen
         Rectangle screen = Host.GraphicsDevice.Viewport.Bounds;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
         string levelName = T.Get(Level.NameKey);
+        _hud.DrawMarkers(batch, _world, _camera, screen, _isVisible, _time);
         _hud.Draw(batch, _world, screen, _time, levelName);
         if (_world.Outcome == WorldOutcome.Defeat) _hud.DrawDeath(batch, screen, _outcomeTime);
         if (_world.Outcome == WorldOutcome.Victory) _hud.DrawVictory(batch, screen, _world, _time, _levelIndex + 1 < _playlist.Count);

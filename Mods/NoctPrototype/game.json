@@ -2,7 +2,7 @@
   // Survival horror on the action engine: only data changes. The base pack's files are untouched.
   "titleKey": "noctproto.title",
   "campaign": ["installation"],
-  "extraLevels": [],
+  "extraLevels": ["noct_demo"],
   "theme": "thermal_cam",
   "menuMusic": "music.dread",
   // R reloads while alive; it restarts after death (or from the pause menu).
@@ -15,8 +15,11 @@
     "score": { "enabled": false }
   },
   "camera": {
-    "viewHeight": 360,
-    "followSharpness": 10,
+    // A surveillance camera high above: a wider view, a lazy follow and a slow hovering drift.
+    "viewHeight": 430,
+    "followSharpness": 5,
+    "sway": 6,
+    "swayPeriod": 11,
     "lookAhead": 0.16,
     "lookAheadMax": 70,
     "farLook": 0.45,
