@@ -6,7 +6,7 @@ public static class NoctSounds
     public static void Generate(Pack p)
     {
         p.Wav("audio/ambience_drone.wav", AmbienceDrone(), peak: 0.35, loop: true);
-        p.Wav("audio/music_dread.wav", MusicDread(), peak: 0.4, loop: true);
+        p.Wav("audio/music_dread.wav", Music.Dread(), peak: 0.5, loop: true);
         p.Wav("audio/creature_growl.wav", Growl());
         p.Wav("audio/creature_screech.wav", Screech());
         p.Wav("audio/static.wav", Static());
@@ -60,48 +60,6 @@ public static class NoctSounds
             o.Mix(Dsp.Osc(len, f, Wave.Sine, rng.NextDouble()).Env(t => Math.Min(1, t / 0.004) * Math.Exp(-t / decay)), 0, 1.0 / (1 + k));
         }
         return o.Mix(Dsp.Noise(len, rng).BandPass(f0 * 4, 3).Env(Dsp.Perc(0.01, 0.08)), 0, 0.3).FadeOut(0.3);
-    }
-
-    /// <summary>24 s loop of slow, overlapping, detuned low pads drifting between dark chords, with faint high tones.</summary>
-    static float[] MusicDread()
-    {
-        const double len = 24;
-        var rng = new Random(202);
-        var pads = new Loop(len);
-        var sub = new Loop(len);
-        var high = new Loop(len);
-        (double At, double Dur, int[] Notes)[] chords =
-        [
-            (0, 10, [38, 45, 53]),  // D2 A2 F3
-            (8, 10, [34, 41, 49]),  // Bb1 F2 Db3
-            (16, 10, [31, 38, 44]), // G1 D2 Ab2 (wraps over the loop point)
-        ];
-        foreach (var (at, dur, notes) in chords)
-        {
-            foreach (int m in notes) pads.Add(DarkPad(Dsp.Midi(m), dur, rng), at);
-            sub.Add(Dsp.Osc(dur, Dsp.Midi(notes[0])).Env(Dsp.Swell(dur, 3, 4)), at);
-        }
-        high.Add(GlassTone(Dsp.Midi(81), 6), 11).Add(GlassTone(Dsp.Midi(80), 5), 21, 0.8);
-
-        pads.Apply(s => s.Reverb(0.95, 0.6, 0.55)).Normalize(1);
-        sub.Normalize(1);
-        high.Apply(s => s.Echo(0.6, 0.45, 0.5).Reverb(0.95, 0.4, 0.6)).Normalize(1);
-        return new Loop(len).Mix(pads, 0.6).Mix(sub, 0.35).Mix(high, 0.18).Take();
-    }
-
-    static float[] DarkPad(double f, double len, Random rng)
-    {
-        var o = Dsp.Silence(len);
-        foreach (double detune in new[] { -0.011, 0.0, 0.009 })
-            o.Mix(Dsp.Osc(len, f * (1 + detune), Wave.Saw, rng.NextDouble()), 0, 0.33);
-        return o.LowPass(t => 260 + 320 * Math.Pow(Math.Sin(Math.PI * t / len), 2), 0.9).Env(Dsp.Swell(len, 3.5, 4.0));
-    }
-
-    static float[] GlassTone(double f, double len)
-    {
-        var swell = Dsp.Swell(len, 1.5, 3);
-        return Dsp.Osc(len, t => f * (1 + 0.002 * Math.Sin(Tau * 0.3 * t))).Mix(Dsp.Osc(len, f * 2.003), 0, 0.25)
-            .Env(t => swell(t) * (0.75 + 0.25 * Math.Sin(Tau * 3.1 * t)));
     }
 
     /// <summary>Low, rough growl: jittery saw/square through vowel-like band-passes with a fast "rattle".</summary>

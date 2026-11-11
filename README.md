@@ -130,7 +130,8 @@ docs/                 formats et guides
     macOS** ; le jeu réel sur les cinq niveaux sous Linux ; le jeu lancé et rendu sous **macOS** (Apple
     Silicon) sur un niveau.
 - **Non vérifié** : une vraie session de jeu sur un Mac ou un PC Windows avec carte graphique, et le son
-  (pas de carte son dans l'environnement de développement : le jeu le détecte et continue sans audio).
+  et les musiques (pas de carte son dans l'environnement de développement : le jeu le détecte et
+  continue sans audio ; les musiques sont contrôlées par mesures de volume, de spectre et de bouclage).
 - Post-traitement sans shaders compilés (le compilateur d'effets de MonoGame exige Wine hors Windows) :
   obscurité, lumières, grain, vignette, lignes de balayage et parasites sont faits par mélanges de
   couleurs. Un vrai rendu thermique (conversion en niveaux de gris) passe par des sprites adaptés, comme

@@ -95,7 +95,9 @@
     "sound.complete": "assets/audio/complete.wav",
     "sound.player_death": "assets/audio/player_death.wav",
     "sound.dog_bark": "assets/audio/dog_bark.wav",
-    "music.action": "assets/audio/music_action.wav"
+    "music.action": "assets/audio/music_action.wav",
+    "music.hunt": "assets/audio/music_hunt.wav",
+    "music.menu": "assets/audio/music_menu.wav"
   },
   "fonts": {
     "font.ui": "assets/fonts/DejaVuSans-Bold.ttf",

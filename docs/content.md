@@ -71,7 +71,7 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 | `kind` | `melee` ou `firearm` |
 | `canDrop` | `false` pour les armes naturelles (poings, griffes) |
 | `damage`, `damageType` | dégâts et type (comparés aux résistances des personnages) |
-| `range` | allonge de mêlée, ou distance maximale des balles |
+| `range` | allonge de mêlée (du centre de l'attaquant au bord de la cible ; un personnage a un rayon de 10) ou distance maximale des balles |
 | `arcDegrees`, `attackDuration`, `hitDelay`, `maxTargets` | mêlée : angle, durée, instant de l'impact, cibles max |
 | `fireRate`, `automatic` | attaques par seconde, tir maintenu |
 | `knockdown`, `knockdownDuration`, `knockback` | renversement et recul de la cible |
@@ -164,7 +164,7 @@ Choisis dans le menu, ils s'appliquent au joueur et à la perception des ennemis
 ```json
 {
   "titleKey": "game.title", "defaultLanguage": "fr", "fallbackLanguage": "en",
-  "campaign": ["first_night", "warehouse", "offices"], "theme": "neon", "menuMusic": "music.action",
+  "campaign": ["first_night", "warehouse", "offices"], "theme": "neon", "menuMusic": "music.menu",
   "rules": {
     "unarmedWeaponId": "unarmed", "pickupRadius": 24, "pickupWhileArmed": "swap",
     "dropWeaponOnKnockdown": true, "dropWeaponOnDeath": true, "doorsKnockDown": true,

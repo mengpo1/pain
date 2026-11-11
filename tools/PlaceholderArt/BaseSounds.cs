@@ -28,7 +28,9 @@ public static class BaseSounds
         p.Wav("audio/ui_select.wav", UiSelect(), peak: 0.7);
         p.Wav("audio/complete.wav", Complete());
         p.Wav("audio/player_death.wav", PlayerDeath());
-        p.Wav("audio/music_action.wav", MusicAction(), peak: 0.6, loop: true);
+        p.Wav("audio/music_action.wav", Music.Action(), peak: 0.7, loop: true);
+        p.Wav("audio/music_hunt.wav", Music.Hunt(), peak: 0.7, loop: true);
+        p.Wav("audio/music_menu.wav", Music.Menu(), peak: 0.6, loop: true);
         p.Wav("audio/dog_bark.wav", DogBark());
     }
 
@@ -279,103 +281,4 @@ public static class BaseSounds
         mix.Mix(Dsp.Noise(n, rng).LowPass(500).Env(Dsp.Perc(0.002, 0.1)), 0, 0.5);
         return mix.Reverb(0.7, 0.4, 0.25).SoftClip(1.3);
     }
-
-    // ------------------------------------------------------------------ music
-
-    /// <summary>
-    /// 16 s seamless loop at 120 BPM (8 bars): four-on-the-floor drums, pulsing 16th-note synth bass over
-    /// Dm - Bb - F - C, a soft pad, and a delayed arpeggio in the second half.
-    /// </summary>
-    static float[] MusicAction()
-    {
-        const double beat = 0.5, step = beat / 4, length = 16;
-        var drums = new Loop(length);
-        var bass = new Loop(length);
-        var pad = new Loop(length);
-        var arp = new Loop(length);
-        var rng = new Random(31);
-        var kick = Kick(rng);
-        var snare = Snare(rng);
-        var hat = Hat(rng, 0.018);
-        var openHat = Hat(rng, 0.11);
-        int[] roots = [38, 34, 41, 36];                       // D2 Bb1 F2 C2, two bars each
-        int[][] chords = [[62, 65, 69], [62, 65, 70], [60, 65, 69], [60, 64, 67]];
-        int[] arpOrder = [0, 1, 2, 3, 2, 1, 0, 1];
-
-        for (int s = 0; s < 128; s++)
-        {
-            double t = s * step;
-            int bar = s / 16, inBar = s % 16, block = s / 32;
-
-            if (inBar % 4 == 0) drums.Add(kick, t);
-            if (inBar == 4 || inBar == 12) drums.Add(snare, t, 0.8);
-            if (bar % 2 == 1 && inBar == 14) drums.Add(openHat, t, 0.35);
-            else drums.Add(hat, t, inBar % 4 == 2 ? 0.4 : 0.15);
-            if (bar == 7 && inBar >= 13) drums.Add(snare, t, 0.3 + 0.12 * (inBar - 13));
-
-            int note = roots[block] + (inBar % 4 == 2 ? 12 : 0);
-            if (s % 32 == 30) note = roots[block] + 7;
-            if (s % 32 == 31) note = roots[block] + 10;
-            double vel = inBar % 4 == 0 ? 1.0 : inBar % 4 == 2 ? 0.85 : 0.6;
-            bass.Add(BassNote(Dsp.Midi(note), step * 0.8, vel), t, vel);
-
-            if (bar >= 4)
-            {
-                int k = arpOrder[s % arpOrder.Length];
-                int m = k == 3 ? chords[block][0] + 12 : chords[block][k];
-                arp.Add(ArpNote(Dsp.Midi(m + 12), step * 0.6), t, inBar % 4 == 0 ? 1.0 : 0.7);
-            }
-        }
-        for (int b = 0; b < 4; b++)
-            foreach (int m in chords[b])
-                pad.Add(PadNote(Dsp.Midi(m), 4.4), b * 4.0);
-
-        drums.Apply(s => s.Reverb(0.5, 0.5, 0.1));
-        arp.Apply(s => s.Echo(beat * 0.75, 0.35, 0.45));
-        pad.Apply(s => s.Reverb(0.8, 0.4, 0.35));
-        foreach (var l in new[] { drums, bass, pad, arp }) l.Normalize(1);
-
-        return new Loop(length).Mix(drums, 0.85).Mix(bass, 0.7).Mix(pad, 0.28).Mix(arp, 0.22).Take();
-    }
-
-    static float[] Kick(Random rng)
-    {
-        double n = 0.38;
-        return Dsp.Osc(n, t => 48 + 120 * Math.Exp(-t / 0.03)).Env(Dsp.Perc(0.0015, 0.14))
-            .Mix(Dsp.Noise(n, rng).HighPass(2500).Env(t => Math.Exp(-t / 0.0025)), 0, 0.35)
-            .SoftClip(1.6)
-            .FadeOut(0.06);
-    }
-
-    static float[] Snare(Random rng)
-    {
-        double n = 0.3;
-        return Dsp.Silence(n)
-            .Mix(Dsp.Noise(n, rng).BandPass(2000, 0.6).Env(Dsp.Perc(0.001, 0.09)))
-            .Mix(Dsp.Noise(n, rng).HighPass(5500).Env(Dsp.Perc(0.001, 0.04)), 0, 0.5)
-            .Mix(Dsp.Osc(n, t => 175 + 40 * Math.Exp(-t / 0.01)).Env(Dsp.Perc(0.001, 0.05)), 0, 0.6)
-            .Reverb(0.6, 0.4, 0.3)
-            .SoftClip(1.4)
-            .FadeOut(0.06);
-    }
-
-    static float[] Hat(Random rng, double decay) =>
-        Dsp.Noise(decay * 6 + 0.01, rng).HighPass(7000).Env(Dsp.Perc(0.0008, decay));
-
-    static float[] BassNote(double f, double len, double vel)
-    {
-        double n = len + 0.1;
-        return Dsp.Osc(n, f * 1.004, Wave.Saw).Mix(Dsp.Osc(n, f / 1.004, Wave.Saw)).Mix(Dsp.Osc(n, f, Wave.Square), 0, 0.3)
-            .LowPass(t => 160 + 1500 * vel * Math.Exp(-t / 0.06), 1.6)
-            .Env(Dsp.Ahr(0.003, len, 0.025))
-            .FadeOut(0.02);
-    }
-
-    static float[] ArpNote(double f, double len) =>
-        Dsp.Osc(len + 0.2, f, Wave.Square).LowPass(t => 900 + 2500 * Math.Exp(-t / 0.05)).Env(Dsp.Ahr(0.002, len * 0.3, 0.06)).FadeOut(0.03);
-
-    static float[] PadNote(double f, double len) =>
-        Dsp.Osc(len, f * 1.005, Wave.Saw, 0.1).Mix(Dsp.Osc(len, f / 1.005, Wave.Saw, 0.6)).Mix(Dsp.Osc(len, f * 0.5, Wave.Triangle), 0, 0.5)
-            .LowPass(t => 700 + 500 * Math.Sin(Math.PI * t / len), 0.8)
-            .Env(Dsp.Swell(len, 0.5, 1.0));
 }

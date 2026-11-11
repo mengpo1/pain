@@ -114,6 +114,26 @@ public class ShippedContentTests
         Assert.Contains(database.PlayableExtraLevels, level => level.Id == "arena");
     }
 
+    [Theory]
+    [InlineData("bat")]
+    [InlineData("pipe")]
+    [InlineData("machete")]
+    public void Long_melee_weapons_hit_where_the_knife_cannot(string weaponId)
+    {
+        ContentDatabase database = Load();
+        GameWorld world = GameWorld.Create(database.Levels["arena"], database.Definitions);
+        Actor player = world.Player;
+        Actor dummy = world.SpawnActor(database.Definitions.Actor("thug"), false, player.Position, MathF.PI);
+        // A gap of about one body between the two characters, straight ahead.
+        dummy.Position = player.Position + System.Numerics.Vector2.UnitX * (player.Radius + dummy.Radius + 22f);
+
+        world.Combat.ResolveMelee(player, database.Definitions.Weapon("knife"));
+        Assert.DoesNotContain(world.Events.OfType<ActorHit>(), hit => hit.Target == dummy);
+
+        world.Combat.ResolveMelee(player, database.Definitions.Weapon(weaponId));
+        Assert.Contains(world.Events.OfType<ActorHit>(), hit => hit.Target == dummy);
+    }
+
     [Fact]
     public void Every_text_exists_in_french_and_english()
     {

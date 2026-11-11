@@ -7,7 +7,7 @@
   // Listed in the level menu after the campaign.
   "extraLevels": ["arena"],
   "theme": "neon",
-  "menuMusic": "music.action",
+  "menuMusic": "music.menu",
   "rules": {
     // Damage between allies, per kind of attack (allies always collide physically).
     "friendlyFire": { "melee": false, "projectiles": true, "thrown": false, "explosions": true, "doors": true },
