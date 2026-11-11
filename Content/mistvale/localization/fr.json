@@ -109,11 +109,14 @@
     "item_out_of_reach": "L'objet est hors de portée.",
     "item_too_heavy": "Les corps ne se portent pas encore.",
     "cannot_move_there": "L'objet ne peut pas aller là.",
-    "no_room": "Plus de place."
+    "no_room": "Plus de place.",
+    "panicking": "Cette unité n'obéit plus ce tour-ci."
   },
   "info": {
     "enemy_spotted": "Ennemi repéré !",
-    "grenade_primed": "Grenade amorcée : lancez-la avant la fin du tour."
+    "grenade_primed": "Grenade amorcée : lancez-la avant la fin du tour.",
+    "panicked": "{name} panique !",
+    "berserk": "{name} devient incontrôlable !"
   },
   "game": {
     "title": "Brumeval",

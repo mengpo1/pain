@@ -31,6 +31,13 @@ internal sealed class MoveAction : BattleAction
         return (CommandResult.Ok, new MoveAction(unit, path.Steps));
     }
 
+    /// <summary>A walk the unit does not choose (panic): null if there is no path.</summary>
+    internal static MoveAction? Forced(Battle battle, BattleUnit unit, Position destination)
+    {
+        PathResult path = battle.FindPath(unit, destination);
+        return path.Found ? new MoveAction(unit, path.Steps) : null;
+    }
+
     public override bool Advance(Battle battle)
     {
         if (!_unit.IsActive || _next >= _steps.Count) return true;

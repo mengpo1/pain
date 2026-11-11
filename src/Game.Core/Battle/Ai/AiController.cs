@@ -44,7 +44,7 @@ public sealed class AiController
 
         foreach (BattleUnit unit in _battle.ActiveUnitsOf(_battle.CurrentFaction).OrderBy(u => u.Id))
         {
-            if (unit.Done) continue;
+            if (unit.Done || unit.MoraleState != MoraleState.None) continue;
             int count = _actions.GetValueOrDefault(unit);
             if (count >= MaxActionsPerTurn || unit.Tu <= MinUsefulTu)
             {

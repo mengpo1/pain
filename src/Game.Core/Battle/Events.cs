@@ -48,6 +48,8 @@ public sealed record ItemLanded(int ItemId, Position Tile) : BattleEvent;
 
 public sealed record GrenadePrimed(int UnitId, int ItemId, int Fuse) : BattleEvent;
 
+public sealed record UnitPanicked(int UnitId, MoraleState State) : BattleEvent;
+
 public sealed record ItemMoved(int UnitId, int ItemId, string Slot) : BattleEvent;
 
 public sealed record WeaponReloaded(int UnitId, int WeaponId, int AmmoId) : BattleEvent;

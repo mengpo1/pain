@@ -176,6 +176,12 @@ public sealed class BattleScreen : Screen
                 Session.Audio.Play(sounds.Explosion, Pan(explosion.Center.Tile));
                 if (IsVisible(explosion.Center.Tile)) Follow(explosion.Center.Tile);
                 break;
+            case UnitPanicked panicked when _battle.GetUnit(panicked.UnitId) is { } shaken && BattleRenderer.IsShown(_battle, _view, shaken):
+                string panicKey = panicked.State == MoraleState.Berserk ? "info.berserk" : "info.panicked";
+                _hud.Show(Texts.Format(panicKey, ("name", UnitNames.Of(shaken, Texts))), 2.5f);
+                Follow(shaken.Position);
+                _playback.Wait(0.6f);
+                break;
             case GrenadePrimed:
                 _hud.Show(Texts.Get("info.grenade_primed"), 2f);
                 break;

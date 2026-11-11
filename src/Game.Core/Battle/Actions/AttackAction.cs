@@ -48,6 +48,10 @@ internal sealed class AttackAction : BattleAction
         return (CommandResult.Ok, new AttackAction(unit, weapon!, command.Mode, command.Target, reaction: false));
     }
 
+    /// <summary>An attack the unit does not choose (berserk); TU and ammo are checked when it starts.</summary>
+    internal static AttackAction Forced(BattleUnit attacker, BattleItem weapon, AttackMode mode, Position target) =>
+        new(attacker, weapon, mode, target, reaction: false);
+
     /// <summary>A reaction snap shot (or blow), queued by <see cref="ReactionFire"/>; TU are checked again when it fires.</summary>
     public static AttackAction Reaction(BattleUnit reactor, BattleItem weapon, AttackMode mode, Position target) =>
         new(reactor, weapon, mode, target, reaction: true);

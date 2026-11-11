@@ -76,7 +76,21 @@ public static class TurnRules
 
             unit.Stun = Math.Max(0, unit.Stun - rules.StunRecovery);
             if (unit.Status == UnitStatus.Unconscious && unit.Health > 0 && unit.Stun < unit.Health) WakeUp(battle, unit);
+            if (unit.IsActive && battle.Turn > 1) TestMorale(battle, unit);
         }
+    }
+
+    /// <summary>
+    /// OXCE BattleUnit::prepareMorale: the unit loses control with a chance of 100 − 2 × morale %
+    /// (only below 50 morale); one time in three it goes berserk, otherwise it panics.
+    /// </summary>
+    private static void TestMorale(Battle battle, BattleUnit unit)
+    {
+        unit.MoraleState = MoraleState.None;
+        int chance = 100 - 2 * unit.Morale;
+        if (chance <= 0 || !battle.Random.Percent(chance)) return;
+        unit.MoraleState = battle.Random.Next(0, 2) == 0 ? MoraleState.Berserk : MoraleState.Panicking;
+        battle.Emit(new UnitPanicked(unit.Id, unit.MoraleState));
     }
 
     /// <summary>End of a side's turn: sliding doors close if nobody stands in the doorway.</summary>

@@ -90,7 +90,8 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 | Perte en étant blessé | ✅ | `100 × (PV perdus × ((110 − bravoure) × 10 / 100) / 10) / 100`, et −1 par nouvelle blessure. |
 | Morts | ✅ | Alliés de la victime : −12 à bravoure 50 (formule OXCE) ; autres camps : +10 ; tueur : +20 (ennemi) ou pénalité (ami, civil). |
 | Grades et commandement | ❌ | Tous les modificateurs valent 100 %. |
-| Panique et berserk | ❌ | Lot 2 (test de début de tour `100 − 2 × moral`). |
+| Panique et berserk | ✅ | Début du tour du camp (à partir du tour 2) : perte de contrôle avec une chance de `100 − 2 × moral` % ; une fois sur trois berserk, sinon panique. Panique : la moitié du temps l'unité lâche ce qu'elle tient et fuit jusqu'à 5 cases, sinon elle reste figée ; berserk : jusqu'à 10 rafales (ou tirs rapides) sur l'ennemi visible le plus proche, sinon au hasard. Ensuite UT à 0 et moral +15. Les ordres du joueur sont refusés pendant ce temps. |
+| Récupération naturelle du moral | ✅ | Aucune par défaut, comme OXCE. |
 
 ### Vision (`TileEngine::calculateFOV`, `visible`)
 
@@ -157,7 +158,6 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 |---|---|
 | Inventaire | 🟡 Déplacement d'objets entre mains, ceinture, sac et sol avec les coûts en UT des emplacements (`RuleInventory::getCost`) ; panneau en liste, pas encore la grille d'OXCE ; poids et encombrement non appliqués. |
 | Feu, fumée (création, propagation, dégâts) | ❌ Algorithmes relevés dans les sources (`prepareNewTurn`). |
-| Panique, berserk, états particuliers | ❌ |
 | Expérience et progression | ❌ |
 | Sauvegarde de bataille et de campagne | ❌ |
 | Geoscape (temps, bases, recherche, fabrication, véhicules, interceptions, économie) | ❌ Lot 3. |

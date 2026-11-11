@@ -147,11 +147,14 @@
     "item_out_of_reach": "The item is out of reach.",
     "item_too_heavy": "Bodies cannot be carried yet.",
     "cannot_move_there": "The item cannot go there.",
-    "no_room": "No room there."
+    "no_room": "No room there.",
+    "panicking": "This unit has lost control this turn."
   },
   "info": {
     "enemy_spotted": "Enemy spotted!",
-    "grenade_primed": "Grenade primed: throw it before the end of the turn."
+    "grenade_primed": "Grenade primed: throw it before the end of the turn.",
+    "panicked": "{name} panics!",
+    "berserk": "{name} goes berserk!"
   },
   "stat": {
     "tu": "Time units",

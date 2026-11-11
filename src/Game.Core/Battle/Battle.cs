@@ -175,6 +175,7 @@ public sealed class Battle
         if (unit is null) return CommandResult.Refused("error.no_unit");
         if (unit.Faction != CurrentFaction) return CommandResult.Refused("error.not_your_turn");
         if (!unit.IsActive) return CommandResult.Refused("error.unit_down");
+        if (unit.MoraleState != MoraleState.None) return CommandResult.Refused("error.panicking");
 
         return command switch
         {
@@ -253,6 +254,9 @@ public sealed class Battle
         TurnRules.StartFactionTurn(this, next);
         VisionSystem.Refresh(this);
         Emit(new TurnStarted(Turn, next));
+        // Units that lost control act first, lowest id first (the stack runs the last pushed first).
+        foreach (BattleUnit unit in ActiveUnitsOf(next).Where(u => u.MoraleState != MoraleState.None).OrderByDescending(u => u.Id))
+            _actions.Add(new PanicAction(unit));
         CheckOutcome();
     }
 

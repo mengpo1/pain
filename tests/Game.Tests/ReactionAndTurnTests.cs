@@ -212,3 +212,61 @@ public class AiTests
         Assert.NotEqual(Faction.Hostile, battle.CurrentFaction);
     }
 }
+
+public class MoraleTests
+{
+    /// <summary>A demoralised soldier facing an alien at the start of the second turn.</summary>
+    private static (Battle Battle, BattleUnit Soldier) Shaken(ulong seed, int morale)
+    {
+        Battle battle = TestWorld.Battle(seed: seed);
+        BattleUnit soldier = battle.Soldier(Faction.Player, 5, 5, direction: 2, weapon: "rifle");
+        BattleUnit alien = battle.Soldier(Faction.Hostile, 12, 5, direction: 2);
+        alien.Stats[StatIds.Health] = 10_000;
+        alien.Health = 10_000;
+        battle.Start();
+        soldier.Morale = morale;
+        for (int i = 0; i < 3; i++) battle.Do(new EndTurnCommand());
+        return (battle, soldier);
+    }
+
+    [Fact]
+    public void High_morale_never_breaks()
+    {
+        (Battle battle, BattleUnit soldier) = Shaken(1, 50);
+        Assert.DoesNotContain(battle.Events, e => e is UnitPanicked);
+        Assert.Equal(60, soldier.Tu);
+    }
+
+    [Fact]
+    public void Broken_units_panic_or_go_berserk_then_rest_with_no_tu()
+    {
+        var states = new HashSet<MoraleState>();
+        for (ulong seed = 1; seed <= 30; seed++)
+        {
+            (Battle battle, BattleUnit soldier) = Shaken(seed, 0);
+            UnitPanicked panic = Assert.Single(battle.Events.OfType<UnitPanicked>(), e => e.UnitId == soldier.Id);
+            states.Add(panic.State);
+            Assert.Equal(0, soldier.Tu);
+            Assert.Equal(15, soldier.Morale);
+            Assert.Equal(MoraleState.None, soldier.MoraleState);
+            if (panic.State == MoraleState.Berserk) Assert.Contains(battle.Events, e => e is ShotFired shot && shot.ShooterId == soldier.Id);
+        }
+
+        Assert.Contains(MoraleState.Berserk, states);
+        Assert.Contains(MoraleState.Panicking, states);
+    }
+
+    [Fact]
+    public void Morale_loss_from_a_death_depends_on_bravery()
+    {
+        Battle battle = TestWorld.Battle();
+        BattleUnit brave = battle.Soldier(Faction.Player, 1, 1);
+        BattleUnit timid = battle.Soldier(Faction.Player, 2, 1);
+        BattleUnit victim = battle.Soldier(Faction.Player, 3, 1);
+        brave.Stats[StatIds.Bravery] = 100;
+        timid.Stats[StatIds.Bravery] = 10;
+        Game.Core.Battle.Combat.DamageRules.Damage(battle, null, victim, 0, -6, 10, 1000, battle.Rules.DamageTypes["flat"]);
+        Assert.Equal(100 - 2, brave.Morale);   // (110 − 100) × 10 / 100 = 1 → 2
+        Assert.Equal(100 - 20, timid.Morale);  // (110 − 10) × 10 / 100 = 10 → 20
+    }
+}

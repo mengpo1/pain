@@ -3,6 +3,18 @@ using Game.Core.Definitions;
 
 namespace Game.Core.Battle;
 
+/// <summary>Loss of control after a failed morale test (OXCE panic and berserk).</summary>
+public enum MoraleState
+{
+    None,
+
+    /// <summary>Drops what it holds and flees, or freezes.</summary>
+    Panicking,
+
+    /// <summary>Fires wildly at the nearest enemy in sight.</summary>
+    Berserk,
+}
+
 public enum UnitStatus
 {
     Active,
@@ -57,6 +69,9 @@ public sealed class BattleUnit
     public bool Kneeling { get; internal set; }
 
     public UnitStatus Status { get; internal set; }
+
+    /// <summary>Panic or berserk this turn: the unit acts on its own, then rests with 0 TU.</summary>
+    public MoraleState MoraleState { get; internal set; }
 
     public int Tu { get; internal set; }
     public int Energy { get; internal set; }
