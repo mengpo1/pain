@@ -29,6 +29,7 @@ internal static class ContentValidator
             }
 
             if (weapon.FireRate <= 0f) d.Error(source, "'fireRate' must be > 0.");
+            if (weapon.Execution.Strikes < 1) d.Error(source, "'execution.strikes' must be at least 1.");
             if (weapon.Range <= 0f) d.Error(source, "'range' must be > 0.");
             Sound(assets, d, source, weapon.Sounds.Attack, weapon.Sounds.Hit, weapon.Sounds.Empty, weapon.Sounds.Pickup);
         }
@@ -88,6 +89,8 @@ internal static class ContentValidator
         if (game.Campaign.Count == 0) d.Warning("game.json", "The campaign is empty.");
         foreach (string id in game.Campaign)
             if (!content.Levels.ContainsKey(id)) d.Error("game.json", $"The campaign references unknown level '{id}'.");
+        foreach (string id in game.ExtraLevels)
+            if (!content.Levels.ContainsKey(id)) d.Error("game.json", $"'extraLevels' references unknown level '{id}'.");
         if (!content.Locales.ContainsKey(game.FallbackLanguage)) d.Error("game.json", $"No texts for the fallback language '{game.FallbackLanguage}'.");
         Sound(content.Assets, d, "game.json", game.MenuMusic);
     }

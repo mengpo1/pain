@@ -20,10 +20,12 @@ public sealed class WorldRenderer
     private readonly ThemeColors _colors;
     private readonly ShadowStyle _shadow;
     private readonly Color _shadowColor;
+    private readonly float _fallDuration;
 
-    public WorldRenderer(AssetCache assets, ThemeDefinition theme)
+    public WorldRenderer(AssetCache assets, ThemeDefinition theme, FeelSettings feel)
     {
         _assets = assets;
+        _fallDuration = feel.FallDuration;
         _colors = new ThemeColors(theme);
         _shadow = theme.Shadow;
         _shadowColor = ColorParser.Parse(theme.Shadow.Color, new Color(0, 0, 0, 100));
@@ -31,7 +33,8 @@ public sealed class WorldRenderer
 
     public ThemeColors Colors => _colors;
 
-    public void Draw(SpriteBatch batch, GameWorld world, Camera2D camera, EffectsLayer effects, float alpha, float time, Func<Actor, bool> isVisible)
+    public void Draw(SpriteBatch batch, GameWorld world, Camera2D camera, EffectsLayer effects, float alpha, float time,
+        Func<Actor, bool> isVisible, Func<Actor, float> flash)
     {
         Rectangle view = camera.VisibleWorld;
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, RasterizerState.CullNone, null, camera.Transform);
@@ -76,6 +79,7 @@ public sealed class WorldRenderer
             if (weapon.IsFlying) DrawWorldWeapon(batch, weapon, alpha);
         }
 
+        DrawExecutionMarker(batch, world, time);
         DrawProjectiles(batch, world, alpha);
         effects.DrawTop(batch, _assets);
         DrawDecor(batch, world, DecorLayer.Top);
@@ -83,7 +87,41 @@ public sealed class WorldRenderer
 
         batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, RasterizerState.CullNone, null, camera.Transform);
         effects.DrawAdditive(batch, _assets);
+        DrawHitFlashes(batch, world, alpha, isVisible, flash);
         batch.End();
+    }
+
+    /// <summary>Characters just hit flash white for a few frames (additive pass).</summary>
+    private void DrawHitFlashes(SpriteBatch batch, GameWorld world, float alpha, Func<Actor, bool> isVisible, Func<Actor, float> flash)
+    {
+        foreach (Actor actor in world.Actors)
+        {
+            float amount = flash(actor);
+            if (amount <= 0f || !isVisible(actor)) continue;
+            Vector2 position = ToXna(NVector2.Lerp(actor.PreviousPosition, actor.Position, alpha));
+            bool fallen = !actor.IsAlive || actor.IsDown;
+            SpriteFrame frame = _assets.Sprite(fallen ? FallenSprite(actor) : actor.Definition.Sprites.Body);
+            batch.Draw(frame.Texture, position, frame.Source, Color.White * amount, actor.Facing, frame.Origin, fallen ? FallScale(actor) : 1f, SpriteEffects.None, 0f);
+        }
+    }
+
+    /// <summary>Discreet marker on the target the player can finish off right now.</summary>
+    private void DrawExecutionMarker(SpriteBatch batch, GameWorld world, float time)
+    {
+        Actor player = world.Player;
+        if (!player.CanAct || !world.Rules.Execution.Enabled || world.Combat.FindExecutionTarget(player) is not { } target) return;
+        Vector2 center = ToXna(target.Position);
+        float size = target.Radius + 7f + MathF.Sin(time * 10f) * 1.5f;
+        Color color = _colors.Accent * 0.9f;
+        for (int i = 0; i < 4; i++)
+        {
+            float angle = time * 1.5f + i * MathF.PI / 2f;
+            Vector2 corner = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * size;
+            Vector2 along = new Vector2(MathF.Cos(angle + 2.35f), MathF.Sin(angle + 2.35f)) * 5f;
+            Vector2 across = new Vector2(MathF.Cos(angle - 2.35f), MathF.Sin(angle - 2.35f)) * 5f;
+            Primitives.Line(batch, _assets.Pixel, corner, corner + along, color, 2f);
+            Primitives.Line(batch, _assets.Pixel, corner, corner + across, color, 2f);
+        }
     }
 
     private void DrawTiles(SpriteBatch batch, GameWorld world, Rectangle view, TileLayer layer, Vector2 offset, Color? overrideColor)
@@ -190,12 +228,28 @@ public sealed class WorldRenderer
 
     private void DrawFallen(SpriteBatch batch, Actor actor, float alpha)
     {
-        string? sprite = actor.IsAlive ? actor.Definition.Sprites.Down : actor.Definition.Sprites.Dead;
-        sprite ??= actor.Definition.Sprites.Down ?? actor.Definition.Sprites.Body;
-        SpriteFrame frame = _assets.Sprite(sprite);
+        SpriteFrame frame = _assets.Sprite(FallenSprite(actor));
         Vector2 position = ToXna(NVector2.Lerp(actor.PreviousPosition, actor.Position, alpha));
-        float wobble = actor.State == ActorState.GettingUp ? MathF.Sin(actor.StateTimer * 30f) * 0.1f : 0f;
-        batch.Draw(frame.Texture, position, frame.Source, _colors.Actor, actor.Facing + wobble, frame.Origin, 1f, SpriteEffects.None, 0f);
+        float wobble = actor.State switch
+        {
+            ActorState.GettingUp => MathF.Sin(actor.StateTimer * 30f) * 0.1f,
+            ActorState.BeingExecuted => MathF.Sin(actor.StateElapsed * 45f) * 0.04f,
+            _ => 0f,
+        };
+        batch.Draw(frame.Texture, position, frame.Source, _colors.Actor, actor.Facing + wobble, frame.Origin, FallScale(actor), SpriteEffects.None, 0f);
+    }
+
+    private static string FallenSprite(Actor actor) =>
+        (actor.IsAlive ? actor.Definition.Sprites.Down : actor.Definition.Sprites.Dead)
+        ?? actor.Definition.Sprites.Down ?? actor.Definition.Sprites.Body;
+
+    /// <summary>A body slams to the floor: slightly bigger for a few frames, then settles.</summary>
+    private float FallScale(Actor actor)
+    {
+        bool justFell = actor.State is ActorState.KnockedDown or ActorState.Dead;
+        if (!justFell || _fallDuration <= 0f || actor.StateElapsed >= _fallDuration) return 1f;
+        float t = actor.StateElapsed / _fallDuration;
+        return 1f + 0.18f * (1f - t);
     }
 
     private void DrawStanding(SpriteBatch batch, GameWorld world, Actor actor, float alpha, float time)
@@ -223,13 +277,19 @@ public sealed class WorldRenderer
         float lunge = 0f;
         if (actor.CurrentAttack is { } attack && attack.AttackDuration > 0f)
         {
-            float t = Math.Clamp(actor.AttackElapsed / attack.AttackDuration, 0f, 1f);
-            swing = (t * 2f - 1f) * Geo.DegToRad(attack.ArcDegrees) * 0.5f;
-            lunge = MathF.Sin(t * MathF.PI) * 3f;
+            // Fast swing ending at the hit, then a short follow-through. Alternates sides (left/right punches).
+            float side = actor.AttackCount % 2 == 0 ? 1f : -1f;
+            float t = Math.Clamp(actor.AttackElapsed / MathF.Max(attack.HitDelay, 0.01f), 0f, 1f);
+            float after = Math.Clamp((actor.AttackElapsed - attack.HitDelay) / MathF.Max(attack.AttackDuration - attack.HitDelay, 0.01f), 0f, 1f);
+            swing = side * ((t * 2f - 1f) + after * 0.25f) * Geo.DegToRad(attack.ArcDegrees) * 0.5f;
+            lunge = (t < 1f ? t : 1f - after) * 5f;
         }
 
-        float recoil = actor.Weapon is { Definition.IsFirearm: true } && time - actor.LastAttackTime < 0.08f ? -2f : 0f;
-        if (actor.State == ActorState.Executing) lunge = MathF.Abs(MathF.Sin(actor.ExecutionElapsed * 14f)) * 4f;
+        // Actor timings use the simulation clock (pauses and hitstops included).
+        float sinceAttack = world.Time - actor.LastAttackTime;
+        float recoil = actor.Weapon is { Definition.IsFirearm: true } && sinceAttack < 0.08f ? -2.5f : 0f;
+        if (actor.State == ActorState.Executing)
+            lunge = 2f + (sinceAttack < 0.12f ? (1f - sinceAttack / 0.12f) * 7f : 0f);
         Vector2 bodyPosition = position + forward * (lunge + recoil);
 
         WeaponDefinition? held = actor.Weapon?.Definition;

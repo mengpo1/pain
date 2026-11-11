@@ -59,7 +59,8 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
   "damage": 100, "damageType": "bullet", "range": 900, "fireRate": 4, "automatic": false,
   "magazineSize": 12, "pellets": 1, "spreadDegrees": 3, "projectileSpeed": 2300,
   "recoil": 3, "noiseRadius": 650, "muzzleDistance": 20, "holdOffset": [12, 3],
-  "whenEmpty": "click", "executionDuration": 0.35,
+  "whenEmpty": "click",
+  "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
   "throw": { "speed": 700, "damage": 0, "knockdown": true, "knockdownDuration": 2 },
   "sounds": { "attack": "sound.pistol", "hit": null, "empty": "sound.empty", "pickup": "sound.pickup" }
 }
@@ -74,13 +75,29 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 | `arcDegrees`, `attackDuration`, `hitDelay`, `maxTargets` | mêlée : angle, durée, instant de l'impact, cibles max |
 | `fireRate`, `automatic` | attaques par seconde, tir maintenu |
 | `knockdown`, `knockdownDuration`, `knockback` | renversement et recul de la cible |
+| `stunDuration` | étourdit une cible debout (0 = non) |
 | `noiseRadius` | rayon dans lequel les ennemis entendent (0 = silencieux) |
 | `magazineSize`, `pellets`, `spreadDegrees` | munitions, plombs par tir, dispersion |
 | `projectileSpeed` | vitesse des balles ; `0` = tir instantané |
 | `muzzleDistance`, `holdOffset` | position du canon et de l'arme dans les mains (avant, droite) |
 | `whenEmpty` | `click`, `throw` (lancée automatiquement) ou `drop` |
-| `executionDuration` | durée pour achever un ennemi à terre avec cette arme |
+| `execution` | achèvement avec cette arme (voir ci-dessous) |
 | `throw` | comportement une fois lancée (`damage` > 0 : létale, comme un couteau) |
+
+### Achèvement (`execution`)
+
+Une seule mécanique pour toutes les armes, paramétrée par arme ; elle sert au joueur comme aux ennemis.
+
+| Propriété | Sens | Exemples du contenu |
+|---|---|---|
+| `mode` | `strike` (coups) ou `shot` (tir à bout portant ; coups de crosse si l'arme est vide) | armes à feu : `shot` |
+| `strikes` | nombre de coups, le dernier tue | poings 3, tuyau 2, batte 1 |
+| `windUp` | délai entre l'engagement et le premier coup | couteau 0,08 ; batte 0,16 |
+| `strikeInterval` | délai minimal entre deux coups | poings 0,12 |
+| `strikeOnInput` | le joueur donne chaque coup avec la touche d'attaque | poings : `true` |
+| `autoStrikeDelay` | sans appui, un coup part quand même après ce délai (jamais bloqué) | poings 0,6 |
+| `recovery` | temps avant de pouvoir agir après le coup final | 0,1 à 0,25 |
+| `noiseRadius` | bruit de chaque coup (le tir utilise le bruit de l'arme) | |
 
 ## Personnages et ennemis (`characters/`, `enemies/`)
 
@@ -89,7 +106,7 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
   "id": "guard", "nameKey": "actor.guard.name", "faction": "enemy",
   "health": 100, "radius": 10, "speed": 85, "runSpeed": 175, "acceleration": 3000, "friction": 2200,
   "weaponId": "pistol", "naturalWeaponId": null,
-  "knockdownImmune": false, "hitStunDuration": 0.15, "getUpDuration": 0.4,
+  "knockdownImmune": false, "knockdownResistStun": 0.3, "hitStunDuration": 0.15, "getUpDuration": 0.4,
   "damageMultipliers": { "blunt": 0, "sharp": 0.5 },
   "countsForObjectives": true,
   "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead", "bloodTint": "#ffffff" },
@@ -103,7 +120,12 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 }
 ```
 
-- Des factions différentes sont hostiles. Le joueur est de faction `player`.
+- Des factions différentes sont hostiles. Le joueur est de faction `player`. Entre alliés, seules
+  les attaques autorisées par `rules.friendlyFire` blessent ; les collisions physiques restent.
+- `speed`, `acceleration`, `friction` règlent la réactivité : avec 215 / 9000 / 9000, le joueur
+  atteint sa vitesse en 0,03 s et fait demi-tour en 0,05 s.
+- `knockdownResistStun` : un personnage `knockdownImmune` frappé par une attaque renversante
+  vacille ce temps-là à la place.
 - `damageMultipliers` par type de dégâts : `0` = immunisé (le colosse ignore les battes),
   `"execution": 0` empêche d'achever.
 - `ai.behavior` : `guard` (poste fixe, regarde autour), `patrol` (suit la ronde du niveau),
@@ -144,18 +166,50 @@ Choisis dans le menu, ils s'appliquent au joueur et à la perception des ennemis
   "titleKey": "game.title", "defaultLanguage": "fr", "fallbackLanguage": "en",
   "campaign": ["first_night", "warehouse", "offices"], "theme": "neon", "menuMusic": "music.action",
   "rules": {
-    "friendlyFire": true, "unarmedWeaponId": "unarmed", "pickupRadius": 24, "pickupWhileArmed": "swap",
+    "unarmedWeaponId": "unarmed", "pickupRadius": 24, "pickupWhileArmed": "swap",
     "dropWeaponOnKnockdown": true, "dropWeaponOnDeath": true, "doorsKnockDown": true,
     "enemiesHaveInfiniteAmmo": true, "thrownHarmSpeed": 260,
-    "execution": { "enabled": true, "range": 20, "durationMultiplier": 1, "cancelByMoving": true },
+    "friendlyFire": { "melee": false, "projectiles": true, "thrown": false, "explosions": true, "doors": true },
+    "execution": { "enabled": true, "range": 24, "durationMultiplier": 1, "cancelByMoving": false,
+                   "allowOnStunned": false, "enemiesCanExecute": true },
+    "combat": { "inputBuffer": 0.15, "bulletsHitDowned": true, "hitOnStunnedKnocksDown": true },
     "score": { "enabled": true, "comboWindow": 3, "points": { "melee": 400, "firearm": 300, "thrown": 600, "door": 800, "execution": 500 } }
   },
-  "camera": { "viewHeight": 400, "zoom": 1, "followSharpness": 10, "lookAhead": 0.22, "lookAheadMax": 90,
+  "camera": { "viewHeight": 400, "zoom": 1, "followSharpness": 16, "lookAhead": 0.22, "lookAheadMax": 90,
               "farLook": 0.6, "farLookMax": 300, "shakeDecay": 4, "maxShake": 12 },
   "sounds": { "uiMove": "...", "uiSelect": "...", "pickup": "...", "throw": "...", "bounce": "...",
-              "impact": "...", "footstep": "...", "objectiveComplete": "...", "levelComplete": "..." }
+              "impact": "...", "footstep": "...", "objectiveComplete": "...", "levelComplete": "..." },
+  "extraLevels": ["arena"],
+  "feel": {
+    "hit": { "hitstop": 0.02, "shake": 0.06 }, "knockdown": { "hitstop": 0.045, "shake": 0.16 },
+    "kill": { "hitstop": 0.06, "shake": 0.22 }, "executionStrike": { "hitstop": 0.035, "shake": 0.14 },
+    "executionFinish": { "hitstop": 0.08, "shake": 0.32 }, "playerHurt": { "hitstop": 0.06, "shake": 0.45 },
+    "maxHitstop": 0.1, "hitFlash": 0.08, "fallDuration": 0.09
+  }
 }
 ```
+
+### Règles de combat
+
+| Réglage | Sens |
+|---|---|
+| `friendlyFire.melee / projectiles / thrown / explosions / doors` | dégâts entre alliés par type d'attaque (par défaut : mêlée et armes lancées non, balles et portes oui) |
+| `execution.range` | écart maximal (bord à bord) pour achever |
+| `execution.durationMultiplier` | multiplie tous les temps d'achèvement |
+| `execution.cancelByMoving` | une touche de déplacement annule l'achèvement (désactivé : c'est un engagement) |
+| `execution.allowOnStunned` | achever un personnage étourdi encore debout |
+| `execution.enemiesCanExecute` | les ennemis achèvent le joueur à terre |
+| `combat.inputBuffer` | une attaque, un ramassage ou Espace pressé un peu trop tôt est retenu ce temps-là |
+| `combat.bulletsHitDowned` | les balles touchent les personnages au sol (indépendant de l'achèvement) |
+| `combat.hitOnStunnedKnocksDown` | tout coup sur un personnage étourdi le renverse |
+
+### Ressenti (`feel`)
+
+Présentation uniquement, jamais les règles. Pour chaque type d'impact où le joueur est impliqué :
+`hitstop` (micro-arrêt en secondes) et `shake` (secousse de 0 à 1). `playerHurt` remplace les autres
+quand c'est le joueur qui est touché. `maxHitstop` plafonne le gel cumulé, `hitFlash` règle le flash
+blanc d'un personnage touché, `fallDuration` la chute visible au sol. `extraLevels` liste des niveaux
+proposés après la campagne (la salle d'essai `arena`).
 
 `camera.viewHeight` fixe la hauteur de monde visible : tous les écrans voient la même zone.
 

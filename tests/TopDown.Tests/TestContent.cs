@@ -18,12 +18,14 @@ internal static class TestContent
             {
                 Id = "unarmed", Kind = WeaponKind.Melee, CanDrop = false, Damage = 0, DamageType = "unarmed",
                 Range = 16, ArcDegrees = 90, AttackDuration = 0.2f, HitDelay = 0.05f, FireRate = 3f,
-                Knockdown = true, KnockdownDuration = 2f, ExecutionDuration = 1f,
+                Knockdown = true, KnockdownDuration = 2f, Knockback = 160f,
+                Execution = new ExecutionDefinition { Strikes = 3, WindUp = 0.1f, StrikeInterval = 0.12f, StrikeOnInput = true, AutoStrikeDelay = 0.4f, Recovery = 0.1f },
             },
             ["bat"] = new()
             {
                 Id = "bat", Kind = WeaponKind.Melee, SpriteId = "weapon.bat", Damage = 100, DamageType = "blunt",
                 Range = 24, ArcDegrees = 120, AttackDuration = 0.25f, HitDelay = 0.07f, FireRate = 2.5f,
+                Execution = new ExecutionDefinition { Strikes = 1, WindUp = 0.15f, Recovery = 0.1f },
                 Throw = new ThrowDefinition { Speed = 700, Damage = 0, Knockdown = true, KnockdownDuration = 2f },
             },
             ["knife"] = new()
@@ -37,6 +39,7 @@ internal static class TestContent
                 Id = "pistol", Kind = WeaponKind.Firearm, SpriteId = "weapon.pistol", Damage = 100, DamageType = "bullet",
                 Range = 900, FireRate = 4, MagazineSize = 3, SpreadDegrees = 0, ProjectileSpeed = 2300,
                 NoiseRadius = 600, MuzzleDistance = 20,
+                Execution = new ExecutionDefinition { Mode = ExecutionMode.Shot, Strikes = 2, WindUp = 0.1f, StrikeInterval = 0.15f, Recovery = 0.1f },
             },
             ["revolver"] = new()
             {
@@ -62,6 +65,11 @@ internal static class TestContent
             {
                 Id = "thug", Faction = "enemy", Health = 100, Radius = 10, Speed = 90, RunSpeed = 185, WeaponId = "bat",
                 Ai = new AiDefinition { VisionRange = 400, ReactionTime = 0.2f, TurnSpeedDegrees = 720 },
+            },
+            ["brawler"] = new()
+            {
+                Id = "brawler", Faction = "enemy", Health = 100, Radius = 10, Speed = 90, RunSpeed = 190, Acceleration = 5000, Friction = 5000,
+                Ai = new AiDefinition { VisionRange = 400, ReactionTime = 0.15f, TurnSpeedDegrees = 720 },
             },
             ["brute"] = new()
             {

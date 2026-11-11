@@ -74,6 +74,47 @@ public class ShippedContentTests
     }
 
     [Fact]
+    public void The_player_starts_stops_and_turns_around_almost_instantly()
+    {
+        ContentDatabase database = Load();
+        GameWorld world = GameWorld.Create(database.Levels["arena"], database.Definitions);
+        Actor player = world.Player;
+        const float dt = 1f / 120f;
+        var right = new PlayerCommands { Move = System.Numerics.Vector2.UnitX, AimTarget = player.Position + new System.Numerics.Vector2(100, 0) };
+        var left = right with { Move = -System.Numerics.Vector2.UnitX };
+
+        float StepsUntil(PlayerCommands commands, Func<float, bool> done)
+        {
+            int steps = 0;
+            while (!done(player.Velocity.X) && steps < 120)
+            {
+                world.Step(dt, commands);
+                steps++;
+            }
+
+            return steps * dt;
+        }
+
+        float speed = player.Definition.Speed;
+        Assert.True(StepsUntil(right, v => v >= speed * 0.99f) <= 0.04f, "time to full speed");
+        Assert.True(StepsUntil(left, v => v <= -speed * 0.99f) <= 0.06f, "time to turn around");
+        Assert.True(StepsUntil(default, v => MathF.Abs(v) < 1f) <= 0.04f, "time to stop");
+    }
+
+    [Fact]
+    public void The_test_room_has_the_expected_setup()
+    {
+        ContentDatabase database = Load();
+        GameWorld world = GameWorld.Create(database.Levels["arena"], database.Definitions);
+
+        Assert.Null(world.Player.Weapon);
+        Assert.Equal(3, world.Actors.Count(a => !a.IsPlayer && a.Weapon is null));
+        Assert.Contains(world.Weapons, w => !w.Weapon.Definition.IsFirearm);
+        Assert.Contains(world.Weapons, w => w.Weapon.Definition.IsFirearm);
+        Assert.Contains(database.PlayableExtraLevels, level => level.Id == "arena");
+    }
+
+    [Fact]
     public void Every_text_exists_in_french_and_english()
     {
         ContentDatabase database = Load("noct_inspired");

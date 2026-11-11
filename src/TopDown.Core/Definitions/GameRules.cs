@@ -11,7 +11,8 @@ public enum PickupWhileArmed
 /// <summary>Global gameplay rules of a game. Content packs can override any value.</summary>
 public sealed class GameRules
 {
-    public bool FriendlyFire { get; set; } = true;
+    /// <summary>Which kinds of attack can hurt characters of the same faction.</summary>
+    public FriendlyFireRules FriendlyFire { get; set; } = new();
     public string UnarmedWeaponId { get; set; } = "unarmed";
     public float PickupRadius { get; set; } = 24f;
     public PickupWhileArmed PickupWhileArmed { get; set; } = PickupWhileArmed.Swap;
@@ -26,17 +27,48 @@ public sealed class GameRules
     public float ThrownHarmSpeed { get; set; } = 260f;
 
     public ExecutionRules Execution { get; set; } = new();
+    public CombatRules Combat { get; set; } = new();
     public ScoreRules Score { get; set; } = new();
+}
+
+/// <summary>
+/// Damage between allies, per kind of attack. Allies always collide physically; these flags only
+/// decide whether an attack can hurt them.
+/// </summary>
+public sealed class FriendlyFireRules
+{
+    public bool Melee { get; set; }
+    public bool Projectiles { get; set; } = true;
+    public bool Thrown { get; set; }
+    /// <summary>Reserved for explosive weapons (none in the current content).</summary>
+    public bool Explosions { get; set; } = true;
+    /// <summary>A door kicked open knocks down whoever stands behind it, allies included.</summary>
+    public bool Doors { get; set; } = true;
+}
+
+public sealed class CombatRules
+{
+    /// <summary>An attack, pickup or interaction pressed slightly too early is kept this long (seconds).</summary>
+    public float InputBuffer { get; set; } = 0.15f;
+    /// <summary>Bullets hit characters lying on the floor (independent from executions).</summary>
+    public bool BulletsHitDowned { get; set; } = true;
+    /// <summary>Any hit on a dazed (stunned) character knocks it down.</summary>
+    public bool HitOnStunnedKnocksDown { get; set; } = true;
 }
 
 public sealed class ExecutionRules
 {
     public bool Enabled { get; set; } = true;
-    /// <summary>Maximum gap between the player's edge and the target's edge.</summary>
-    public float Range { get; set; } = 20f;
+    /// <summary>Maximum gap between the executioner's edge and the target's edge.</summary>
+    public float Range { get; set; } = 24f;
+    /// <summary>Multiplies every execution timing (wind-up, intervals, recovery).</summary>
     public float DurationMultiplier { get; set; } = 1f;
-    /// <summary>Moving cancels the execution.</summary>
-    public bool CancelByMoving { get; set; } = true;
+    /// <summary>Moving cancels the execution (off: an execution is a commitment).</summary>
+    public bool CancelByMoving { get; set; }
+    /// <summary>Dazed characters still standing can be executed.</summary>
+    public bool AllowOnStunned { get; set; }
+    /// <summary>Enemies finish off a player on the floor.</summary>
+    public bool EnemiesCanExecute { get; set; } = true;
 }
 
 public sealed class ScoreRules

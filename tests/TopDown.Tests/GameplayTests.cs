@@ -201,7 +201,7 @@ public class GameplayTests
         var actors = Enumerable.Range(0, 60)
             .Select(i => TestContent.Enemy(i % 2 == 0 ? "guard" : "thug", 10 + i % 15 * 3, 3 + i / 15 * 8))
             .ToArray();
-        GameWorld world = World(new LevelDefinitionBuilder(map, new Vector2(2, 20)).With(actors).Build(), Definitions(rules => rules.FriendlyFire = false));
+        GameWorld world = World(new LevelDefinitionBuilder(map, new Vector2(2, 20)).With(actors).Build(), Definitions(rules => rules.FriendlyFire.Projectiles = false));
         foreach (Actor enemy in world.Actors.Where(a => !a.IsPlayer)) enemy.Brain!.AlertTo(world.Player);
         // Keep the player alive so the AI keeps chasing and shooting.
         world.Player.Health = float.MaxValue;

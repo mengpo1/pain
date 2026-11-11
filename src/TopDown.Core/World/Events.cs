@@ -37,9 +37,9 @@ public sealed record MeleeSwing(Actor Attacker, WeaponDefinition Weapon) : GameE
 
 public sealed record WeaponEmpty(Actor Owner, WeaponDefinition Weapon) : GameEvent;
 
-public sealed record ActorHit(Actor Target, Vector2 Direction, HitMethod Method, string DamageType, float Damage, WeaponDefinition? Weapon) : GameEvent;
+public sealed record ActorHit(Actor Target, Actor? Source, Vector2 Direction, HitMethod Method, string DamageType, float Damage, WeaponDefinition? Weapon) : GameEvent;
 
-public sealed record ActorKnockedDown(Actor Target, HitMethod Method) : GameEvent;
+public sealed record ActorKnockedDown(Actor Target, Actor? Source, HitMethod Method) : GameEvent;
 
 public sealed record ActorKilled(Actor Victim, Actor? Killer, Vector2 Direction, HitMethod Method, string DamageType) : GameEvent;
 
@@ -60,6 +60,9 @@ public sealed record NoiseMade(Vector2 Position, float Radius) : GameEvent;
 public sealed record EnemyAlerted(Actor Enemy) : GameEvent;
 
 public sealed record ExecutionStarted(Actor Executioner, Actor Victim) : GameEvent;
+
+/// <summary>One blow (or the shot) of an execution. <paramref name="Final"/> is the killing blow.</summary>
+public sealed record ExecutionStrike(Actor Executioner, Actor Victim, WeaponDefinition Weapon, int Index, bool Final, bool Shot) : GameEvent;
 
 public sealed record ItemCollected(Actor Actor, ItemPickup Item) : GameEvent;
 

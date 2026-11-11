@@ -48,8 +48,13 @@ public sealed class ContentDatabase
         Themes.TryGetValue(Game.Theme, out ThemeDefinition? theme) ? theme : Themes.Values.FirstOrDefault() ?? new ThemeDefinition { Id = "fallback" };
 
     /// <summary>Campaign levels that exist and are valid, in order.</summary>
-    public IReadOnlyList<LevelDefinition> PlayableCampaign =>
-        Game.Campaign.Where(id => Levels.ContainsKey(id) && !InvalidLevels.Contains(id)).Select(id => Levels[id]).ToList();
+    public IReadOnlyList<LevelDefinition> PlayableCampaign => Playable(Game.Campaign);
+
+    /// <summary>Extra levels (test scenes…) that exist and are valid.</summary>
+    public IReadOnlyList<LevelDefinition> PlayableExtraLevels => Playable(Game.ExtraLevels);
+
+    private List<LevelDefinition> Playable(IEnumerable<string> ids) =>
+        ids.Where(id => Levels.ContainsKey(id) && !InvalidLevels.Contains(id)).Select(id => Levels[id]).ToList();
 
     public Localizer CreateLocalizer(string? language) =>
         new(Locales, language ?? Game.DefaultLanguage, Game.FallbackLanguage);

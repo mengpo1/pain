@@ -191,11 +191,17 @@ public class CombatTests
         Assert.Equal(ActorState.KnockedDown, target.State);
         Assert.True(target.IsAlive);
 
-        Run(world, 2.05f);
-        Assert.Equal(ActorState.GettingUp, target.State);
+        // Record when each state starts: down for the weapon's knockdown duration (2 s), then up.
+        var starts = new Dictionary<ActorState, float>();
+        float knockedAt = world.Time;
+        for (int i = 0; i < 360 && !starts.ContainsKey(ActorState.Active); i++)
+        {
+            world.Step(Dt, default);
+            starts.TryAdd(target.State, world.Time - knockedAt);
+        }
 
-        Run(world, 1f);
-        Assert.Equal(ActorState.Active, target.State);
+        Assert.InRange(starts[ActorState.GettingUp], 2f - 0.15f, 2f + Dt * 2);
+        Assert.InRange(starts[ActorState.Active] - starts[ActorState.GettingUp], 0.4f - Dt * 2, 0.4f + Dt * 2);
     }
 
     [Fact]
@@ -209,18 +215,21 @@ public class CombatTests
 
         Run(world, 0.05f, new PlayerCommands { InteractPressed = true, AimTarget = target.Position });
         Assert.Equal(ActorState.Executing, world.Player.State);
+        Assert.Equal(ActorState.BeingExecuted, target.State);
 
-        Run(world, 1.2f, new PlayerCommands { AimTarget = target.Position });
+        // Fists: one attack press per blow, the third kills.
+        for (int i = 0; i < 3; i++) Run(world, 0.15f, new PlayerCommands { AttackPressed = true, AimTarget = target.Position });
+        Run(world, 0.2f);
         Assert.False(target.IsAlive);
         Assert.Equal(ActorState.Active, world.Player.State);
         Assert.Equal(HitMethod.Execution, Event<ActorKilled>(world)!.Method);
     }
 
     [Fact]
-    public void Moving_cancels_an_execution()
+    public void Moving_cancels_an_execution_when_the_rules_say_so()
     {
         GameWorld world = World(new LevelDefinitionBuilder(Room(10, 5), new Vector2(2, 2))
-            .With(Enemy("dummy", 2.8f, 2)).Build());
+            .With(Enemy("dummy", 2.8f, 2)).Build(), Definitions(rules => rules.Execution.CancelByMoving = true));
         Actor target = Target(world);
         Run(world, 0.1f, Aim(world, TileCenter(6, 2), attack: true));
         Run(world, 0.05f, new PlayerCommands { InteractPressed = true });
@@ -229,6 +238,9 @@ public class CombatTests
 
         Assert.NotEqual(ActorState.Executing, world.Player.State);
         Assert.True(target.IsAlive);
+        // The reservation is released: the target is back on the floor, executable again.
+        Assert.Equal(ActorState.KnockedDown, target.State);
+        Assert.Null(target.Executioner);
     }
 
     [Fact]

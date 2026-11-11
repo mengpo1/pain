@@ -4,9 +4,9 @@
   "faction": "player",
   "health": 100,
   "radius": 10,
-  "speed": 190,
-  "acceleration": 3400,
-  "friction": 3000,
+  "speed": 215,
+  "acceleration": 9000,
+  "friction": 9000,
   "hitStunDuration": 0,
   "sprites": {
     "body": "actor.player",

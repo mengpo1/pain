@@ -21,6 +21,7 @@
     "muzzleDistance": 20,
     "holdOffset": [12, 3],
     "whenEmpty": "drop",
+    "execution": { "mode": "shot", "strikes": 2, "windUp": 0.2, "strikeInterval": 0.2, "recovery": 0.25 },
     "sounds": { "attack": "sound.flare", "empty": "sound.empty", "pickup": "sound.pickup" }
   },
   {
@@ -40,6 +41,7 @@
     "noiseRadius": 900,
     "muzzleDistance": 24,
     "holdOffset": [13, 3],
+    "execution": { "mode": "shot", "strikes": 2, "windUp": 0.2, "strikeInterval": 0.2, "recovery": 0.25 },
     "sounds": { "attack": "sound.revolver", "empty": "sound.empty", "pickup": "sound.pickup" }
   }
 ]

@@ -31,7 +31,8 @@ internal sealed class DoorSystem
         {
             float speed = MathF.Abs(door.AngularVelocity);
             if (_world.Rules.DoorsKnockDown && speed >= Geo.DegToRad(door.Definition.KnockdownSpeedDegrees)
-                && actor.CanAct && !actor.Definition.KnockdownImmune)
+                && actor.CanAct && !actor.Definition.KnockdownImmune
+                && _world.Combat.CanDamage(door.LastPusher, actor, DamageKind.Door))
             {
                 Vector2 direction = Geo.Perpendicular(door.Direction) * side;
                 _world.Combat.ApplyHit(actor, new Hit(0f, "door", true, door.Definition.KnockdownDuration,

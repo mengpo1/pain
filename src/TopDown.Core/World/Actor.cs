@@ -6,12 +6,21 @@ namespace TopDown.Core.World;
 
 public enum ActorState
 {
+    /// <summary>Free to move and fight.</summary>
     Active,
+    /// <summary>Swinging a melee weapon; can still move.</summary>
     Attacking,
+    /// <summary>Dazed on its feet: cannot act for a moment.</summary>
     Stunned,
+    /// <summary>On the floor, alive, will get up after a delay.</summary>
     KnockedDown,
+    /// <summary>Getting back up; still vulnerable.</summary>
     GettingUp,
+    /// <summary>Finishing off a target.</summary>
     Executing,
+    /// <summary>Pinned by an executioner: reserved, cannot get up.</summary>
+    BeingExecuted,
+    /// <summary>Final: never acts or gets up again.</summary>
     Dead,
 }
 
@@ -77,9 +86,29 @@ public sealed class Actor
     /// <summary>World time of the last attack (for animations).</summary>
     public float LastAttackTime { get; internal set; } = float.NegativeInfinity;
 
+    /// <summary>Time spent in the current state (animations).</summary>
+    public float StateElapsed { get; private set; }
+
+    /// <summary>Number of melee attacks started (alternates the swing side).</summary>
+    public int AttackCount { get; private set; }
+
+    // --- Execution, executioner side ---
     public Actor? ExecutionTarget { get; private set; }
+    public WeaponDefinition? ExecutionWeapon { get; private set; }
     public float ExecutionElapsed { get; private set; }
-    public float ExecutionDuration { get; private set; }
+    public int ExecutionStrikesDone { get; internal set; }
+    internal float NextStrikeAt { get; set; }
+    internal float LastStrikeAt { get; set; }
+    /// <summary>The player pressed attack during the execution: deliver the next blow.</summary>
+    internal bool StrikeRequested { get; set; }
+    /// <summary>Final blow delivered; waiting for the recovery to end.</summary>
+    public bool ExecutionFinished { get; private set; }
+    private float _recoveryLeft;
+
+    // --- Execution, victim side ---
+    /// <summary>Who is executing this character (the reservation), if anyone.</summary>
+    public Actor? Executioner { get; private set; }
+    private float _downTimeBeforeExecution;
 
     public EnemyBrain? Brain { get; internal set; }
 
@@ -87,7 +116,8 @@ public sealed class Actor
     public float DistanceWalked { get; internal set; }
 
     public bool IsAlive => State != ActorState.Dead;
-    public bool IsDown => State is ActorState.KnockedDown or ActorState.GettingUp;
+    /// <summary>On the floor (alive): knocked down, getting up or being executed.</summary>
+    public bool IsDown => State is ActorState.KnockedDown or ActorState.GettingUp or ActorState.BeingExecuted;
     public bool CanAct => State is ActorState.Active or ActorState.Attacking;
     public bool CanMove => CanAct;
 
@@ -96,10 +126,11 @@ public sealed class Actor
     internal bool BeginMeleeAttack(WeaponDefinition weapon, float time)
     {
         if (State != ActorState.Active) return false;
-        State = ActorState.Attacking;
+        SetState(ActorState.Attacking);
         CurrentAttack = weapon;
         AttackElapsed = 0f;
         AttackResolved = false;
+        AttackCount++;
         StateTimer = MathF.Max(weapon.AttackDuration, weapon.HitDelay);
         LastAttackTime = time;
         return true;
@@ -108,67 +139,120 @@ public sealed class Actor
     internal void KnockDown(float duration)
     {
         if (!IsAlive) return;
+        if (State == ActorState.BeingExecuted)
+        {
+            // Already pinned: the executioner decides when it ends.
+            _downTimeBeforeExecution = MathF.Max(_downTimeBeforeExecution, duration);
+            return;
+        }
+
         CancelActions();
-        State = ActorState.KnockedDown;
+        SetState(ActorState.KnockedDown);
         StateTimer = duration;
     }
 
     internal void Stun(float duration)
     {
-        if (!CanAct || duration <= 0f) return;
+        if (duration <= 0f) return;
+        if (State == ActorState.Stunned)
+        {
+            StateTimer = MathF.Max(StateTimer, duration);
+            return;
+        }
+
+        if (!CanAct && State != ActorState.Executing) return;
         CancelActions();
-        State = ActorState.Stunned;
+        SetState(ActorState.Stunned);
         StateTimer = duration;
     }
 
     internal void Kill()
     {
         CancelActions();
-        State = ActorState.Dead;
+        Executioner = null;
+        SetState(ActorState.Dead);
         StateTimer = 0f;
         Health = MathF.Min(Health, 0f);
         MoveIntent = Vector2.Zero;
     }
 
-    /// <summary>Keeps a knocked-down actor on the floor for at least <paramref name="duration"/>.</summary>
-    internal void Pin(float duration)
-    {
-        if (State == ActorState.KnockedDown) StateTimer = MathF.Max(StateTimer, duration);
-    }
-
     /// <summary>True when a new action can start (also during the recovery of a finished swing).</summary>
     internal bool IsFreeToAct => State == ActorState.Active || (State == ActorState.Attacking && AttackResolved);
 
-    internal bool BeginExecution(Actor target, float duration)
+    /// <summary>
+    /// Starts finishing off <paramref name="target"/>. The target becomes <see cref="ActorState.BeingExecuted"/>,
+    /// which reserves it: nobody else can execute it until this execution ends.
+    /// </summary>
+    internal bool BeginExecution(Actor target, WeaponDefinition weapon, float windUp)
     {
-        if (!IsFreeToAct || target.State != ActorState.KnockedDown) return false;
+        if (!IsFreeToAct || target == this || !target.BecomeExecuted(this)) return false;
         CurrentAttack = null;
-        State = ActorState.Executing;
+        AttackResolved = true;
+        SetState(ActorState.Executing);
         ExecutionTarget = target;
+        ExecutionWeapon = weapon;
         ExecutionElapsed = 0f;
-        ExecutionDuration = duration;
+        ExecutionStrikesDone = 0;
+        NextStrikeAt = windUp;
+        LastStrikeAt = 0f;
+        StrikeRequested = false;
+        ExecutionFinished = false;
         MoveIntent = Vector2.Zero;
-        target.Pin(duration + 0.3f);
         return true;
     }
 
+    /// <summary>The final blow landed: stay committed for a short recovery, then act again.</summary>
+    internal void FinishExecution(float recovery)
+    {
+        if (State != ActorState.Executing) return;
+        ExecutionFinished = true;
+        ExecutionTarget = null;
+        _recoveryLeft = recovery;
+        if (recovery <= 0f) EndExecution();
+    }
+
+    /// <summary>Ends (or cancels) the execution and frees the target if it is still pinned.</summary>
     internal void EndExecution()
     {
         if (State != ActorState.Executing) return;
-        ExecutionTarget = null;
-        State = ActorState.Active;
+        ReleaseTarget();
+        ExecutionWeapon = null;
+        ExecutionFinished = false;
+        SetState(ActorState.Active);
     }
 
-    internal void Revive(float health)
+    private bool BecomeExecuted(Actor executioner)
     {
-        Health = health;
-        State = ActorState.Active;
+        if (!IsAlive || Executioner is not null) return false;
+        if (State is not (ActorState.KnockedDown or ActorState.GettingUp or ActorState.Stunned)) return false;
+        // A getting-up or dazed target ends on the floor for a while if the execution is interrupted.
+        _downTimeBeforeExecution = State == ActorState.KnockedDown ? StateTimer : 0f;
+        Executioner = executioner;
+        CancelActions();
+        SetState(ActorState.BeingExecuted);
+        return true;
+    }
+
+    /// <summary>Execution interrupted: back on the floor (never straight back up).</summary>
+    private void ReleaseFromExecution()
+    {
+        if (State != ActorState.BeingExecuted) return;
+        Executioner = null;
+        SetState(ActorState.KnockedDown);
+        StateTimer = MathF.Max(_downTimeBeforeExecution, MinimumDownTimeAfterRelease);
+    }
+
+    private void ReleaseTarget()
+    {
+        if (ExecutionTarget is { } target && target.Executioner == this) target.ReleaseFromExecution();
+        ExecutionTarget = null;
     }
 
     /// <summary>Advances timers and timed states.</summary>
     internal void TickState(float dt)
     {
         AttackCooldown = MathF.Max(0f, AttackCooldown - dt);
+        StateElapsed += dt;
         switch (State)
         {
             case ActorState.Attacking:
@@ -177,36 +261,52 @@ public sealed class Actor
                 if (StateTimer <= 0f && AttackResolved)
                 {
                     CurrentAttack = null;
-                    State = ActorState.Active;
+                    SetState(ActorState.Active);
                 }
                 break;
             case ActorState.Stunned:
                 StateTimer -= dt;
-                if (StateTimer <= 0f) State = ActorState.Active;
+                if (StateTimer <= 0f) SetState(ActorState.Active);
                 break;
             case ActorState.KnockedDown:
                 StateTimer -= dt;
                 if (StateTimer <= 0f)
                 {
-                    State = ActorState.GettingUp;
+                    SetState(ActorState.GettingUp);
                     StateTimer = Definition.GetUpDuration;
                 }
                 break;
             case ActorState.GettingUp:
                 StateTimer -= dt;
-                if (StateTimer <= 0f) State = ActorState.Active;
+                if (StateTimer <= 0f) SetState(ActorState.Active);
                 break;
             case ActorState.Executing:
                 ExecutionElapsed += dt;
+                if (ExecutionFinished)
+                {
+                    _recoveryLeft -= dt;
+                    if (_recoveryLeft <= 0f) EndExecution();
+                }
                 break;
         }
+    }
+
+    /// <summary>Shortest time on the floor after an interrupted execution.</summary>
+    private const float MinimumDownTimeAfterRelease = 0.6f;
+
+    private void SetState(ActorState state)
+    {
+        State = state;
+        StateElapsed = 0f;
     }
 
     private void CancelActions()
     {
         CurrentAttack = null;
         AttackResolved = true;
-        ExecutionTarget = null;
+        ReleaseTarget();
+        ExecutionWeapon = null;
+        ExecutionFinished = false;
         MoveIntent = Vector2.Zero;
     }
 }

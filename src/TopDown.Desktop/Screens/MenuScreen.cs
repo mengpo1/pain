@@ -97,6 +97,10 @@ public sealed class MenuScreen : Screen
             items.Add(new MenuItem(() => $"{index + 1}. {T.Get(campaign[index].NameKey)}", () => StartLevel(campaign, index)));
         }
 
+        IReadOnlyList<LevelDefinition> extra = Session.Content.PlayableExtraLevels;
+        foreach (LevelDefinition level in extra)
+            items.Add(new MenuItem(() => $"* {T.Get(level.NameKey)}", () => StartLevel([level], 0)));
+
         foreach (string invalid in Session.Content.InvalidLevels)
             items.Add(new MenuItem(() => T.Format("menu.invalidLevel", ("level", invalid)), Enabled: false));
         items.Add(Back());

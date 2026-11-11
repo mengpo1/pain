@@ -28,11 +28,42 @@ public sealed class GameSettings
     public string DefaultLanguage { get; set; } = "en";
     public string FallbackLanguage { get; set; } = "en";
     public List<string> Campaign { get; set; } = new();
+    /// <summary>Extra levels listed after the campaign (test scenes, challenges).</summary>
+    public List<string> ExtraLevels { get; set; } = new();
     public string Theme { get; set; } = "default";
     public string? MenuMusic { get; set; }
     public GameRules Rules { get; set; } = new();
     public CameraSettings Camera { get; set; } = new();
     public GameSounds Sounds { get; set; } = new();
+    public FeelSettings Feel { get; set; } = new();
+}
+
+/// <summary>
+/// Game feel (presentation only, never gameplay rules): micro-freezes, camera shake and flashes on
+/// impacts. All durations in seconds; shake from 0 (none) to 1 (strong).
+/// </summary>
+public sealed class FeelSettings
+{
+    /// <summary>A melee hit that does not floor the target.</summary>
+    public ImpactFeel Hit { get; set; } = new() { Hitstop = 0.02f, Shake = 0.06f };
+    public ImpactFeel Knockdown { get; set; } = new() { Hitstop = 0.045f, Shake = 0.16f };
+    public ImpactFeel Kill { get; set; } = new() { Hitstop = 0.06f, Shake = 0.22f };
+    public ImpactFeel ExecutionStrike { get; set; } = new() { Hitstop = 0.035f, Shake = 0.14f };
+    public ImpactFeel ExecutionFinish { get; set; } = new() { Hitstop = 0.08f, Shake = 0.32f };
+    /// <summary>The player is hit, knocked down or killed.</summary>
+    public ImpactFeel PlayerHurt { get; set; } = new() { Hitstop = 0.06f, Shake = 0.45f };
+    /// <summary>Longest total freeze, however many impacts happen at once.</summary>
+    public float MaxHitstop { get; set; } = 0.1f;
+    /// <summary>White flash on a character that is hit.</summary>
+    public float HitFlash { get; set; } = 0.08f;
+    /// <summary>Time for a character to visibly hit the floor.</summary>
+    public float FallDuration { get; set; } = 0.09f;
+}
+
+public sealed class ImpactFeel
+{
+    public float Hitstop { get; set; }
+    public float Shake { get; set; }
 }
 
 /// <summary>Sounds of generic events (not tied to a weapon or a character).</summary>

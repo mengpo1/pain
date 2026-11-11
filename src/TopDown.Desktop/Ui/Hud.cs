@@ -118,8 +118,18 @@ public sealed class Hud
     private void DrawPrompt(SpriteBatch batch, GameWorld world, Rectangle screen)
     {
         Actor player = world.Player;
-        if (!player.CanAct || world.Outcome != WorldOutcome.Playing) return;
+        if (world.Outcome != WorldOutcome.Playing) return;
 
+        // During an execution that needs blows: show how many are left.
+        if (player.State == ActorState.Executing && !player.ExecutionFinished && player.ExecutionWeapon is { Execution.StrikeOnInput: true } executionWeapon)
+        {
+            int left = Math.Max(1, executionWeapon.Execution.Strikes) - player.ExecutionStrikesDone;
+            string strike = $"[{KeyLabel(GameAction.Attack)}] {T.Format("prompt.strike", ("count", left))}";
+            _ui.Text(batch, strike, new Vector2(screen.Width * 0.5f, screen.Height - 70f * _ui.Scale), 22f, C.Accent, Align.Center);
+            return;
+        }
+
+        if (!player.CanAct) return;
         string? prompt = null;
         if (world.Rules.Execution.Enabled && world.Combat.FindExecutionTarget(player) is not null)
             prompt = $"[{KeyLabel(GameAction.Interact)}] {T.Get("prompt.execute")}";

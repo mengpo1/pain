@@ -28,10 +28,22 @@ Le joueur et les ennemis sont la même classe `Actor` : seule la source des déc
 
 ### États d'un personnage
 
-`Active` → `Attacking` (mêlée en cours, déplacement possible) → `Active` ;
-`Stunned` (brève hésitation) ; `KnockedDown` → `GettingUp` → `Active` ; `Executing` (achève une cible
-au sol, interrompu en bougeant) ; `Dead` (définitif). Les changements passent par des méthodes de
-`Actor` qui empêchent les combinaisons impossibles.
+`Active` → `Attacking` (mêlée en cours, déplacement possible) → `Active` ; `Stunned` (étourdi debout,
+brièvement) ; `KnockedDown` → `GettingUp` → `Active` ; `Executing` (achève une cible) ;
+`BeingExecuted` (cible clouée au sol : c'est la **réservation**, personne d'autre ne peut l'achever et
+elle ne se relève pas) ; `Dead` (définitif). Les changements passent par des méthodes de `Actor` qui
+empêchent les combinaisons impossibles : un achèvement interrompu (exécuteur touché, renversé ou tué)
+remet la cible au sol et libère la réservation.
+
+### Combat et achèvement
+
+Une seule règle de ciblage (`CombatSystem.CanDamage`) pour toutes les attaques : un ennemi peut
+toujours être blessé, un allié seulement si `rules.friendlyFire` l'autorise pour ce type d'attaque
+(mêlée, projectile, arme lancée, explosion, porte). L'achèvement est la même séquence pour tous :
+cible éligible (au sol, en train de se relever, ou étourdie si les règles le permettent), proche, sans
+obstacle, choisie de façon déterministe (la plus proche, pénalité si elle n'est pas devant) ; puis
+coups successifs décrits par l'arme (`execution`), le dernier tue. L'IA utilise exactement ces
+fonctions pour achever le joueur ; quand un allié achève déjà la cible, elle attend à proximité.
 
 ### Collisions
 

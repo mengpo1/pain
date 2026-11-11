@@ -34,6 +34,12 @@ public sealed class EnemyBrain
     private const float ReappearDelay = 0.3f;
     /// <summary>A gunman whose shot is blocked this long moves to get a clear line of fire.</summary>
     private const float BlockedShotPatience = 0.6f;
+    /// <summary>Distance kept from a target an ally is executing.</summary>
+    private const float WaitingDistance = 52f;
+    /// <summary>Beyond this, a gunman shoots a downed target instead of walking to it.</summary>
+    private const float ShootRatherThanExecuteDistance = 90f;
+    private const float SpreadMargin = 14f;
+    private const float SpreadStrength = 1.4f;
 
     private readonly Actor _self;
     private readonly GameWorld _world;
@@ -137,7 +143,8 @@ public sealed class EnemyBrain
         if (!_self.CanAct)
         {
             _self.MoveIntent = Vector2.Zero;
-            _wasIncapacitated = true;
+            // Executing is an action of its own, not an incapacity.
+            if (_self.State != ActorState.Executing) _wasIncapacitated = true;
             return;
         }
 
@@ -327,6 +334,8 @@ public sealed class EnemyBrain
         float targetAngle = Geo.ToAngle(toTarget);
         WeaponDefinition weapon = _world.Combat.CurrentWeapon(_self);
 
+        if (Target.IsDown && UpdateDownedTarget(dt, weapon, distance, targetAngle)) return;
+
         if (weapon.IsFirearm && _self.Weapon is { } gun)
         {
             if (gun.IsEmpty)
@@ -354,10 +363,75 @@ public sealed class EnemyBrain
         float reach = weapon.Range + Target.Radius;
         if (distance > reach * 0.8f) MoveTo(Target.Position, _self.Definition.RunSpeed, dt, faceMovement: false);
         else Stop();
+        SpreadFromAllies();
 
         TurnTowards(targetAngle, dt, 1f);
         bool facing = MathF.Abs(Geo.AngleDifference(_self.Facing, targetAngle)) < MeleeFacingTolerance;
         if (_reactionTimer <= _ai.ReactionTime * 0.5f && facing && distance <= reach) _world.Combat.TryAttack(_self);
+    }
+
+    /// <summary>
+    /// The target lies on the floor. If an ally is already finishing it, stay close and wait;
+    /// otherwise finish it off when in reach (same execution system as the player). Gunmen far
+    /// away keep shooting when bullets can hit people on the floor. Returns false to fall back to
+    /// the normal attack logic (executions disabled).
+    /// </summary>
+    private bool UpdateDownedTarget(float dt, WeaponDefinition weapon, float distance, float targetAngle)
+    {
+        Actor target = Target!;
+        if (target.State == ActorState.BeingExecuted)
+        {
+            if (distance > WaitingDistance) MoveTo(target.Position, _self.Definition.RunSpeed, dt, faceMovement: false);
+            else Stop();
+            SpreadFromAllies();
+            TurnTowards(targetAngle, dt, 1f);
+            return true;
+        }
+
+        if (!_world.Rules.Execution.Enabled || !_world.Rules.Execution.EnemiesCanExecute) return false;
+        TurnTowards(targetAngle, dt, 1f);
+        if (_world.Combat.TryExecute(_self)) return true;
+
+        bool canShoot = weapon.IsFirearm && _self.Weapon is { IsEmpty: false } && _world.Rules.Combat.BulletsHitDowned;
+        if (canShoot && distance > ShootRatherThanExecuteDistance) return false;
+
+        MoveTo(target.Position, _self.Definition.RunSpeed, dt, faceMovement: false);
+        SpreadFromAllies();
+        return true;
+    }
+
+    /// <summary>
+    /// Simple local avoidance: allies too close push each other aside, and an ally standing between
+    /// this enemy and its target is walked around (sideways), so attackers surround instead of queueing.
+    /// </summary>
+    private void SpreadFromAllies()
+    {
+        Vector2 push = Vector2.Zero;
+        Vector2 toTarget = Target is null ? Vector2.Zero : Geo.NormalizeOrZero(Target.Position - _self.Position);
+        foreach (Actor ally in _world.Actors)
+        {
+            if (ally == _self || !ally.IsAlive || ally.IsDown || ally.Faction != _self.Faction) continue;
+            Vector2 away = _self.Position - ally.Position;
+            float distance = away.Length();
+            float range = _self.Radius + ally.Radius + SpreadMargin;
+            if (distance >= range) continue;
+            // Perfectly stacked: pick a side from the ids so both do not choose the same one.
+            Vector2 direction = distance > Geo.Epsilon ? away / distance : Geo.FromAngle(_self.Id * 2.4f);
+            float weight = 1f - distance / range;
+            push += direction * weight;
+
+            // The ally is in the way to the target: step around it, on the side it is not on.
+            if (toTarget != Vector2.Zero && Vector2.Dot(-direction, toTarget) > 0.5f)
+            {
+                float cross = Geo.Cross(toTarget, -direction);
+                float side = MathF.Abs(cross) > 0.05f ? -MathF.Sign(cross) : (_self.Id % 2 == 0 ? 1f : -1f);
+                push += Geo.Perpendicular(toTarget) * side * (0.6f + weight);
+            }
+        }
+
+        if (push == Vector2.Zero) return;
+        if (_self.MoveIntent == Vector2.Zero) _self.MoveSpeed = _self.Definition.Speed;
+        _self.MoveIntent = Geo.ClampLength(_self.MoveIntent + push * SpreadStrength, 1f);
     }
 
     private void AttackWithAimError(float targetAngle)
@@ -378,7 +452,8 @@ public sealed class EnemyBrain
         for (int i = 0; i < 8; i++)
         {
             bool blocked = _world.Physics.Raycast(from, target.Position, Blocking.Projectiles, out RayHit hit,
-                actor => actor != _self && actor != target && actor.IsAlive && !_self.IsHostileTo(actor));
+                actor => actor != _self && actor != target && actor.IsAlive && !_self.IsHostileTo(actor)
+                    && (_world.Rules.Combat.BulletsHitDowned || !actor.IsDown) && _world.Rules.FriendlyFire.Projectiles);
             if (!blocked) return true;
             if (hit.Kind == HitKind.Tile && _world.Map.Get(hit.TileX, hit.TileY).Destructible)
             {

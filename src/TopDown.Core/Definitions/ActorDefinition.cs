@@ -43,6 +43,9 @@ public sealed class ActorDefinition
     public string? NaturalWeaponId { get; set; }
 
     public bool KnockdownImmune { get; set; }
+
+    /// <summary>A knockdown-immune character hit by a knockdown attack staggers this long instead.</summary>
+    public float KnockdownResistStun { get; set; } = 0.3f;
     public float HitStunDuration { get; set; } = 0.15f;
     public float GetUpDuration { get; set; } = 0.4f;
 

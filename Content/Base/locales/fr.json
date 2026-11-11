@@ -57,7 +57,11 @@
   },
   "prompt": {
     "execute": "Achever",
-    "pickup": "Ramasser : {weapon}"
+    "pickup": "Ramasser : {weapon}",
+    "strike": {
+      "one": "Frapper (dernier coup)",
+      "other": "Frapper ({count} coups)"
+    }
   },
   "stats": {
     "kills": {
@@ -85,6 +89,10 @@
     "warehouse": {
       "name": "L'entrepôt",
       "intro": "Les coups de feu attirent tout le quartier."
+    },
+    "arena": {
+      "name": "Salle d'essai",
+      "intro": "En bas : un ennemi seul. À droite : deux ennemis. Espace pour achever, R pour tout remettre à zéro."
     },
     "offices": {
       "name": "Bureaux",

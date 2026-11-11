@@ -16,7 +16,7 @@
     "muzzleDistance": 20,
     "holdOffset": [12, 3],
     "whenEmpty": "click",
-    "executionDuration": 0.35,
+    "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
     "sounds": { "attack": "sound.pistol", "empty": "sound.empty", "pickup": "sound.pickup" }
   },
   {
@@ -37,7 +37,7 @@
     "noiseRadius": 750,
     "muzzleDistance": 20,
     "holdOffset": [12, 3],
-    "executionDuration": 0.35,
+    "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
     "sounds": { "attack": "sound.revolver", "empty": "sound.empty", "pickup": "sound.pickup" }
   },
   {
@@ -58,7 +58,7 @@
     "noiseRadius": 850,
     "muzzleDistance": 22,
     "holdOffset": [12, 3],
-    "executionDuration": 0.35,
+    "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
     "sounds": { "attack": "sound.shotgun", "empty": "sound.empty", "pickup": "sound.pickup" }
   },
   {
@@ -78,7 +78,7 @@
     "noiseRadius": 650,
     "muzzleDistance": 20,
     "holdOffset": [12, 3],
-    "executionDuration": 0.35,
+    "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
     "sounds": { "attack": "sound.smg", "empty": "sound.empty", "pickup": "sound.pickup" }
   },
   {
@@ -98,7 +98,7 @@
     "noiseRadius": 800,
     "muzzleDistance": 24,
     "holdOffset": [13, 3],
-    "executionDuration": 0.35,
+    "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
     "sounds": { "attack": "sound.rifle", "empty": "sound.empty", "pickup": "sound.pickup" }
   }
 ]

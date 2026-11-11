@@ -14,7 +14,18 @@ public readonly record struct Hit(
     float Knockback,
     Actor? Source,
     HitMethod Method,
-    WeaponDefinition? Weapon = null);
+    WeaponDefinition? Weapon = null,
+    float StunDuration = 0f);
+
+/// <summary>Kinds of attack, for friendly-fire rules.</summary>
+public enum DamageKind
+{
+    Melee,
+    Projectile,
+    Thrown,
+    Explosion,
+    Door,
+}
 
 /// <summary>
 /// Attacks, bullets, thrown weapons, pickups and executions. The same rules apply to the
@@ -113,7 +124,7 @@ public sealed class CombatSystem
             {
                 case HitKind.Actor:
                     ApplyHit(hit.Actor!, new Hit(weapon.Damage, weapon.DamageType, weapon.Knockdown, weapon.KnockdownDuration,
-                        direction, weapon.Knockback, owner, HitMethod.Firearm, weapon));
+                        direction, weapon.Knockback, owner, HitMethod.Firearm, weapon, weapon.StunDuration));
                     return hit.Point;
                 case HitKind.Tile when _world.Map.Get(hit.TileX, hit.TileY).Destructible:
                     BreakTile(hit.TileX, hit.TileY);
@@ -129,7 +140,30 @@ public sealed class CombatSystem
     }
 
     private bool CanBulletHit(Actor? owner, Actor target) =>
-        target != owner && target.IsAlive && (Rules.FriendlyFire || owner is null || owner.IsHostileTo(target));
+        target != owner && target.IsAlive
+        && (Rules.Combat.BulletsHitDowned || !target.IsDown)
+        && CanDamage(owner, target, DamageKind.Projectile);
+
+    /// <summary>
+    /// Single targeting rule for every attack: enemies can always be hurt, allies only when the
+    /// friendly-fire flag of that kind of attack is on. Allies still collide physically.
+    /// </summary>
+    public bool CanDamage(Actor? source, Actor target, DamageKind kind)
+    {
+        if (source is null) return true;
+        if (source == target) return false;
+        if (source.IsHostileTo(target)) return true;
+        FriendlyFireRules friendlyFire = Rules.FriendlyFire;
+        return kind switch
+        {
+            DamageKind.Melee => friendlyFire.Melee,
+            DamageKind.Projectile => friendlyFire.Projectiles,
+            DamageKind.Thrown => friendlyFire.Thrown,
+            DamageKind.Explosion => friendlyFire.Explosions,
+            DamageKind.Door => friendlyFire.Doors,
+            _ => false,
+        };
+    }
 
     private static SurfaceKind ToSurface(HitKind kind) => kind switch
     {
@@ -194,7 +228,7 @@ public sealed class CombatSystem
         foreach (Actor target in _world.Actors)
         {
             if (target == attacker || !target.IsAlive) continue;
-            if (!Rules.FriendlyFire && !attacker.IsHostileTo(target)) continue;
+            if (!CanDamage(attacker, target, DamageKind.Melee)) continue;
             Vector2 toTarget = target.Position - attacker.Position;
             float distance = toTarget.Length();
             if (distance > weapon.Range + target.Radius) continue;
@@ -213,7 +247,7 @@ public sealed class CombatSystem
             Actor target = targets[i].Target;
             Vector2 direction = Geo.NormalizeOrZero(target.Position - attacker.Position);
             ApplyHit(target, new Hit(weapon.Damage, weapon.DamageType, weapon.Knockdown, weapon.KnockdownDuration,
-                direction, weapon.Knockback, attacker, HitMethod.Melee, weapon));
+                direction, weapon.Knockback, attacker, HitMethod.Melee, weapon, weapon.StunDuration));
         }
 
         if (count == 0) BreakTileInFront(attacker, weapon.Range);
@@ -254,7 +288,7 @@ public sealed class CombatSystem
         if (target.IsPlayer) multiplier *= _world.Modifier.DamageTaken;
         float damage = hit.Damage * multiplier;
 
-        _world.AddEvent(new ActorHit(target, hit.Direction, hit.Method, hit.DamageType, damage, hit.Weapon));
+        _world.AddEvent(new ActorHit(target, hit.Source, hit.Direction, hit.Method, hit.DamageType, damage, hit.Weapon));
 
         if (damage > 0f) target.Health -= damage;
         if (target.Health <= 0f)
@@ -266,20 +300,28 @@ public sealed class CombatSystem
         // Only survivors react (a silent kill alerts nobody).
         if (hit.Source is not null && target.Brain is not null) target.Brain.OnAttacked(hit.Source);
 
-        if (hit.Knockdown && !target.Definition.KnockdownImmune)
+        bool immune = target.Definition.KnockdownImmune;
+        // A dazed character goes down from any further hit (configurable).
+        bool knockdown = hit.Knockdown || (target.State == ActorState.Stunned && Rules.Combat.HitOnStunnedKnocksDown);
+        if (knockdown && !immune && target.State != ActorState.BeingExecuted)
         {
-            target.KnockDown(hit.KnockdownDuration);
+            target.KnockDown(MathF.Max(hit.KnockdownDuration, MinimumKnockdown));
             FallInDirection(target, hit.Direction);
             target.Velocity += hit.Direction * hit.Knockback;
             if (Rules.DropWeaponOnKnockdown) DropWeapon(target, hit.Direction * 60f);
-            _world.AddEvent(new ActorKnockedDown(target, hit.Method));
+            _world.AddEvent(new ActorKnockedDown(target, hit.Source, hit.Method));
+            return;
         }
-        else if (damage > 0f)
-        {
-            target.Stun(target.Definition.HitStunDuration);
-            target.Velocity += hit.Direction * hit.Knockback * 0.5f;
-        }
+
+        // Brief reaction for everything that does not floor the target: a shove and a stagger.
+        float stun = MathF.Max(hit.StunDuration, damage > 0f ? target.Definition.HitStunDuration : 0f);
+        if (hit.Knockdown && immune) stun = MathF.Max(stun, target.Definition.KnockdownResistStun);
+        if (stun > 0f) target.Stun(stun);
+        if (target.CanAct || target.State == ActorState.Stunned) target.Velocity += hit.Direction * hit.Knockback * 0.5f;
     }
+
+    /// <summary>Shortest knock-down caused by hitting a dazed character.</summary>
+    private const float MinimumKnockdown = 1.2f;
 
     private void Kill(Actor victim, in Hit hit)
     {
@@ -453,7 +495,7 @@ public sealed class CombatSystem
         foreach (Actor actor in _world.Actors)
         {
             if (actor == weapon.Thrower || !actor.IsAlive || actor.IsDown) continue;
-            if (!Rules.FriendlyFire && weapon.Thrower is not null && !weapon.Thrower.IsHostileTo(actor)) continue;
+            if (!CanDamage(weapon.Thrower, actor, DamageKind.Thrown)) continue;
             if (Geo.SegmentCircle(weapon.Position, delta, actor.Position, actor.Radius + WorldWeapon.CollisionRadius, out float t)
                 && t < bestFraction)
             {
@@ -465,19 +507,11 @@ public sealed class CombatSystem
         return best;
     }
 
-    /// <summary>Starts an execution on a nearby knocked-down enemy, or uses a nearby interactable.</summary>
+    /// <summary>Starts an execution on a nearby vulnerable enemy, or uses a nearby interactable.</summary>
     public bool TryInteract(Actor actor)
     {
         if (!actor.IsFreeToAct) return false;
-        if (Rules.Execution.Enabled && FindExecutionTarget(actor) is { } victim)
-        {
-            float speed = actor.IsPlayer ? MathF.Max(0.05f, _world.Modifier.ExecutionSpeed) : 1f;
-            float duration = CurrentWeapon(actor).ExecutionDuration * Rules.Execution.DurationMultiplier / speed;
-            if (!actor.BeginExecution(victim, duration)) return false;
-            actor.Facing = Geo.ToAngle(victim.Position - actor.Position);
-            _world.AddEvent(new ExecutionStarted(actor, victim));
-            return true;
-        }
+        if (TryExecute(actor)) return true;
 
         if (actor.IsPlayer && FindInteractable(actor) is { } interactable)
         {
@@ -488,24 +522,73 @@ public sealed class CombatSystem
         return false;
     }
 
+    /// <summary>
+    /// Engages the best execution target (same rules for the player and the AI). The target is
+    /// reserved until the execution ends or is interrupted.
+    /// </summary>
+    public bool TryExecute(Actor actor)
+    {
+        if (!Rules.Execution.Enabled || !actor.IsFreeToAct) return false;
+        if (!actor.IsPlayer && !Rules.Execution.EnemiesCanExecute) return false;
+        if (FindExecutionTarget(actor) is not { } victim) return false;
+
+        WeaponDefinition weapon = CurrentWeapon(actor);
+        if (!actor.BeginExecution(victim, weapon, weapon.Execution.WindUp * ExecutionTimeScale(actor))) return false;
+        actor.Facing = Geo.ToAngle(victim.Position - actor.Position);
+        actor.Velocity = Vector2.Zero;
+        _world.AddEvent(new ExecutionStarted(actor, victim));
+        return true;
+    }
+
+    /// <summary>
+    /// Vulnerable hostile characters in reach and in clear view: on the floor, getting up, or dazed
+    /// when the rules allow it. Not reserved by another executioner, not immune. The choice is
+    /// deterministic: nearest gap, with a penalty for targets the actor is not facing.
+    /// </summary>
     public Actor? FindExecutionTarget(Actor actor)
     {
         Actor? best = null;
-        float bestGap = Rules.Execution.Range;
+        float bestScore = float.MaxValue;
         foreach (Actor other in _world.Actors)
         {
-            if (other.State != ActorState.KnockedDown || !actor.IsHostileTo(other)) continue;
-            if (other.Definition.DamageMultipliers.GetValueOrDefault("execution", 1f) <= 0f) continue;
-            float gap = Vector2.Distance(other.Position, actor.Position) - other.Radius - actor.Radius;
-            if (gap <= bestGap && _world.Physics.HasLineOfSight(actor.Position, other.Position, Blocking.Movement))
+            if (!IsExecutable(other) || !actor.IsHostileTo(other)) continue;
+            Vector2 toOther = other.Position - actor.Position;
+            float gap = toOther.Length() - other.Radius - actor.Radius;
+            if (gap > Rules.Execution.Range) continue;
+            if (!_world.Physics.HasLineOfSight(actor.Position, other.Position, Blocking.Movement)) continue;
+
+            float angle = MathF.Abs(Geo.AngleDifference(actor.Facing, Geo.ToAngle(toOther)));
+            float score = gap + angle * FacingPenaltyPerRadian;
+            if (score < bestScore || (score == bestScore && best is not null && other.Id < best.Id))
             {
                 best = other;
-                bestGap = gap;
+                bestScore = score;
             }
         }
 
         return best;
     }
+
+    private bool IsExecutable(Actor target)
+    {
+        if (target.Executioner is not null || !target.IsAlive) return false;
+        if (target.Definition.DamageMultipliers.GetValueOrDefault("execution", 1f) <= 0f) return false;
+        return target.State is ActorState.KnockedDown or ActorState.GettingUp
+            || (target.State == ActorState.Stunned && Rules.Execution.AllowOnStunned);
+    }
+
+    /// <summary>Scales execution timings: global multiplier, and the player's modifier.</summary>
+    private float ExecutionTimeScale(Actor actor)
+    {
+        float speed = actor.IsPlayer ? MathF.Max(0.05f, _world.Modifier.ExecutionSpeed) : 1f;
+        return Rules.Execution.DurationMultiplier / speed;
+    }
+
+    /// <summary>How much a target behind the executioner counts against it (units per radian).</summary>
+    private const float FacingPenaltyPerRadian = 10f;
+
+    /// <summary>Speed at which the executioner closes in on its victim (units/s).</summary>
+    private const float MountSpeed = 260f;
 
     public Interactable? FindInteractable(Actor actor)
     {
@@ -518,30 +601,82 @@ public sealed class CombatSystem
         return null;
     }
 
-    internal void UpdateExecutions()
+    /// <summary>
+    /// Runs executions: close in, face the victim, deliver blows (on input for the player when the
+    /// weapon asks for it, automatically otherwise), kill on the last blow, short recovery.
+    /// </summary>
+    internal void UpdateExecutions(float dt)
     {
         foreach (Actor actor in _world.Actors)
         {
-            if (actor.State != ActorState.Executing) continue;
+            if (actor.State != ActorState.Executing || actor.ExecutionFinished) continue;
             Actor? victim = actor.ExecutionTarget;
-            if (victim is null || victim.State != ActorState.KnockedDown)
+            WeaponDefinition? weapon = actor.ExecutionWeapon;
+            if (victim is null || weapon is null || victim.State != ActorState.BeingExecuted || victim.Executioner != actor)
             {
                 actor.EndExecution();
                 continue;
             }
 
+            CloseIn(actor, victim, dt);
             Vector2 toVictim = victim.Position - actor.Position;
-            actor.Facing = Geo.ToAngle(toVictim);
-            if (actor.ExecutionElapsed < actor.ExecutionDuration) continue;
+            if (toVictim.LengthSquared() > Geo.Epsilon) actor.Facing = Geo.ToAngle(toVictim);
 
-            if (actor.Weapon is { Definition.IsFirearm: true } gun && gun.TryConsumeAmmo())
-            {
-                _world.AddEvent(new ShotFired(actor, gun.Definition, victim.Position, actor.Facing));
-                _world.EmitNoise(actor.Position, gun.Definition.NoiseRadius, actor);
-            }
+            ExecutionDefinition execution = weapon.Execution;
+            float scale = ExecutionTimeScale(actor);
+            if (actor.ExecutionElapsed < actor.NextStrikeAt) continue;
 
-            actor.EndExecution();
-            ApplyHit(victim, new Hit(1_000_000f, "execution", false, 0f, Geo.NormalizeOrZero(toVictim), 20f, actor, HitMethod.Execution, CurrentWeapon(actor)));
+            bool manual = actor.IsPlayer && execution.StrikeOnInput;
+            bool idleTooLong = actor.ExecutionElapsed >= MathF.Max(actor.NextStrikeAt, actor.LastStrikeAt + execution.AutoStrikeDelay * scale);
+            if (manual && !actor.StrikeRequested && !idleTooLong) continue;
+
+            Strike(actor, victim, weapon, Geo.NormalizeOrZero(toVictim), scale);
         }
+    }
+
+    private void Strike(Actor actor, Actor victim, WeaponDefinition weapon, Vector2 direction, float scale)
+    {
+        ExecutionDefinition execution = weapon.Execution;
+        actor.StrikeRequested = false;
+        actor.ExecutionStrikesDone++;
+        actor.LastStrikeAt = actor.ExecutionElapsed;
+        actor.NextStrikeAt = actor.ExecutionElapsed + execution.StrikeInterval * scale;
+        actor.LastAttackTime = _world.Time;
+        bool final = actor.ExecutionStrikesDone >= Math.Max(1, execution.Strikes);
+
+        bool shot = execution.Mode == ExecutionMode.Shot && actor.Weapon is { Definition.IsFirearm: true } gun
+            && gun.Definition == weapon && (gun.TryConsumeAmmo() || (!actor.IsPlayer && Rules.EnemiesHaveInfiniteAmmo));
+        if (shot)
+        {
+            final = true;
+            _world.AddEvent(new ShotFired(actor, weapon, victim.Position, actor.Facing));
+            _world.EmitNoise(actor.Position, weapon.NoiseRadius, actor);
+        }
+        else
+        {
+            _world.EmitNoise(actor.Position, execution.NoiseRadius, actor);
+        }
+
+        _world.AddEvent(new ExecutionStrike(actor, victim, weapon, actor.ExecutionStrikesDone, final, shot));
+        if (!final)
+        {
+            victim.Velocity += direction * 30f;
+            return;
+        }
+
+        actor.FinishExecution(execution.Recovery * scale);
+        ApplyHit(victim, new Hit(1_000_000f, "execution", false, 0f, direction, 40f, actor, HitMethod.Execution, weapon));
+    }
+
+    /// <summary>The executioner moves onto its victim (stopped by walls like any movement).</summary>
+    private void CloseIn(Actor actor, Actor victim, float dt)
+    {
+        Vector2 toVictim = victim.Position - actor.Position;
+        float distance = toVictim.Length();
+        float wanted = victim.Radius * 0.6f;
+        if (distance <= wanted + 0.5f) return;
+        float step = MathF.Min(distance - wanted, MountSpeed * dt);
+        actor.Position += toVictim / distance * step;
+        actor.Velocity = _world.Physics.ResolveStatic(actor, Vector2.Zero);
     }
 }

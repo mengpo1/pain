@@ -57,7 +57,11 @@
   },
   "prompt": {
     "execute": "Finish off",
-    "pickup": "Pick up: {weapon}"
+    "pickup": "Pick up: {weapon}",
+    "strike": {
+      "one": "Strike (final blow)",
+      "other": "Strike ({count} blows)"
+    }
   },
   "stats": {
     "kills": {
@@ -85,6 +89,10 @@
     "warehouse": {
       "name": "The warehouse",
       "intro": "Gunshots wake up the whole block."
+    },
+    "arena": {
+      "name": "Test room",
+      "intro": "Below: a lone enemy. Right: two enemies. Space to finish off, R to reset everything."
     },
     "offices": {
       "name": "Offices",

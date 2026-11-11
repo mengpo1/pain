@@ -18,6 +18,12 @@ internal sealed class Autopilot
     {
         Actor player = world.Player;
         if (!player.IsAlive) return;
+        if (player.State == ActorState.Executing)
+        {
+            // Deliver the blows of the execution.
+            commands.AttackPressed = true;
+            return;
+        }
 
         if (world.Combat.FindExecutionTarget(player) is not null)
         {

@@ -1,6 +1,7 @@
 [
   {
-    // Bare hands: knocks down without killing; finish the target on the floor.
+    // Bare hands: quick, dry punches that floor without killing. On the floor: Space, then
+    // one attack press per blow (the third kills).
     "id": "unarmed",
     "nameKey": "weapon.unarmed.name",
     "kind": "melee",
@@ -8,15 +9,15 @@
     "canDrop": false,
     "damage": 0,
     "damageType": "unarmed",
-    "range": 16,
-    "arcDegrees": 90,
-    "attackDuration": 0.2,
-    "hitDelay": 0.06,
-    "fireRate": 3.2,
+    "range": 17,
+    "arcDegrees": 100,
+    "attackDuration": 0.15,
+    "hitDelay": 0.04,
+    "fireRate": 4.5,
     "knockdown": true,
-    "knockdownDuration": 2.6,
-    "knockback": 160,
-    "executionDuration": 1.1,
+    "knockdownDuration": 2.2,
+    "knockback": 260,
+    "execution": { "strikes": 3, "windUp": 0.08, "strikeInterval": 0.12, "strikeOnInput": true, "autoStrikeDelay": 0.6, "recovery": 0.1 },
     "sounds": { "attack": "sound.swing", "hit": "sound.punch" }
   },
   {
@@ -32,6 +33,7 @@
     "hitDelay": 0.22,
     "fireRate": 1.3,
     "knockback": 260,
+    "execution": { "strikes": 1, "windUp": 0.25, "recovery": 0.2 },
     "sounds": { "attack": "sound.swing", "hit": "sound.hit_blunt" }
   },
   {
@@ -47,6 +49,7 @@
     "hitDelay": 0.1,
     "fireRate": 1.8,
     "knockback": 120,
+    "execution": { "strikes": 2, "windUp": 0.1, "strikeInterval": 0.18, "recovery": 0.15 },
     "sounds": { "attack": "sound.dog_bark", "hit": "sound.hit_sharp" }
   },
   {
@@ -63,6 +66,7 @@
     "hitDelay": 0.28,
     "fireRate": 1.2,
     "knockback": 300,
+    "execution": { "strikes": 1, "windUp": 0.3, "recovery": 0.25 },
     "sounds": { "attack": "sound.swing", "hit": "sound.hit_sharp" }
   }
 ]

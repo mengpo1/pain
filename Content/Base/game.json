@@ -4,10 +4,13 @@
   "defaultLanguage": "fr",
   "fallbackLanguage": "en",
   "campaign": ["first_night", "warehouse", "offices"],
+  // Listed in the level menu after the campaign.
+  "extraLevels": ["arena"],
   "theme": "neon",
   "menuMusic": "music.action",
   "rules": {
-    "friendlyFire": true,
+    // Damage between allies, per kind of attack (allies always collide physically).
+    "friendlyFire": { "melee": false, "projectiles": true, "thrown": false, "explosions": true, "doors": true },
     "unarmedWeaponId": "unarmed",
     "pickupRadius": 24,
     "pickupWhileArmed": "swap",
@@ -16,7 +19,16 @@
     "doorsKnockDown": true,
     "enemiesHaveInfiniteAmmo": true,
     "thrownHarmSpeed": 260,
-    "execution": { "enabled": true, "range": 20, "durationMultiplier": 1, "cancelByMoving": true },
+    // Space finishes off a target on the floor (or getting up). Same rules for enemies.
+    "execution": {
+      "enabled": true,
+      "range": 24,
+      "durationMultiplier": 1,
+      "cancelByMoving": false,
+      "allowOnStunned": false,
+      "enemiesCanExecute": true
+    },
+    "combat": { "inputBuffer": 0.15, "bulletsHitDowned": true, "hitOnStunnedKnocksDown": true },
     "score": {
       "enabled": true,
       "comboWindow": 3,
@@ -26,7 +38,7 @@
   "camera": {
     "viewHeight": 400,
     "zoom": 1,
-    "followSharpness": 10,
+    "followSharpness": 16,
     "lookAhead": 0.22,
     "lookAheadMax": 90,
     "farLook": 0.6,
@@ -44,5 +56,17 @@
     "footstep": "sound.footstep",
     "objectiveComplete": "sound.ui_select",
     "levelComplete": "sound.complete"
+  },
+  // Game feel (presentation only). hitstop = micro-freeze in seconds, shake from 0 to 1.
+  "feel": {
+    "hit": { "hitstop": 0.02, "shake": 0.06 },
+    "knockdown": { "hitstop": 0.045, "shake": 0.16 },
+    "kill": { "hitstop": 0.06, "shake": 0.22 },
+    "executionStrike": { "hitstop": 0.035, "shake": 0.14 },
+    "executionFinish": { "hitstop": 0.08, "shake": 0.32 },
+    "playerHurt": { "hitstop": 0.06, "shake": 0.45 },
+    "maxHitstop": 0.1,
+    "hitFlash": 0.08,
+    "fallDuration": 0.09
   }
 }

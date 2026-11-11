@@ -35,6 +35,9 @@ public sealed class PlayScreen : Screen
     private readonly Dictionary<Actor, bool> _visibility = new();
     private readonly List<WorldLight> _lights = new();
     private readonly Func<Actor, bool> _isVisible;
+    private readonly Func<Actor, float> _flashAmount;
+    private readonly Dictionary<Actor, float> _flashUntil = new();
+    private float _hitstop;
 
     private GameWorld _world = null!;
     private PlayerCommands _pending;
@@ -55,11 +58,12 @@ public sealed class PlayScreen : Screen
         _levelIndex = levelIndex;
         _modifier = modifier;
         ThemeDefinition theme = Session.Content.Theme;
-        _renderer = new WorldRenderer(Session.Assets, theme);
+        _renderer = new WorldRenderer(Session.Assets, theme, Session.Content.Game.Feel);
         _post = new PostProcessor(host.GraphicsDevice, Session.Assets, theme.Post);
         _hud = new Hud(Session.Ui, host.Input.Bindings);
         _autopilot = autopilot ? new Autopilot() : null;
         _isVisible = IsVisible;
+        _flashAmount = FlashAmount;
         Restart();
     }
 
@@ -79,6 +83,8 @@ public sealed class PlayScreen : Screen
         _effects.Clear();
         _hud.Clear();
         _visibility.Clear();
+        _flashUntil.Clear();
+        _hitstop = 0f;
         _accumulator = 0f;
         _outcomeTime = 0f;
         _paused = false;
@@ -124,8 +130,11 @@ public sealed class PlayScreen : Screen
 
         GatherCommands();
         float frame = MathF.Min(dt, MaxFrameTime);
-        _accumulator += frame;
-        while (_accumulator >= Step)
+        // Hitstop: the simulation freezes for a few milliseconds on strong impacts. Inputs keep
+        // accumulating meanwhile, so nothing pressed during the freeze is lost.
+        if (_hitstop > 0f) _hitstop -= frame;
+        else _accumulator += frame;
+        while (_accumulator >= Step && _hitstop <= 0f)
         {
             _world.Step(Step, _pending);
             _pending.AttackPressed = _pending.PickupOrThrowPressed = _pending.InteractPressed = false;
@@ -237,18 +246,30 @@ public sealed class PlayScreen : Screen
                 break;
             case ActorHit hit:
                 Audio.Play(hit.Weapon?.Sounds.Hit, hit.Target.Position);
+                Flash(hit.Target);
                 if (hit.Damage > 0f)
                     _effects.BloodSpray(WorldRenderer.ToXna(hit.Target.Position), WorldRenderer.ToXna(hit.Direction), 10, Blood(hit.Target));
+                if (hit.Method == HitMethod.Melee || hit.Method == HitMethod.Thrown) Impact(Feel.Hit, hit.Source, hit.Target);
+                break;
+            case ActorKnockedDown down:
+                _effects.Smoke(WorldRenderer.ToXna(down.Target.Position), colors.Fx * 0.25f, 2);
+                Impact(Feel.Knockdown, down.Source, down.Target);
                 break;
             case ActorKilled killed:
                 Audio.Play(killed.Victim.Definition.Sounds.Death, killed.Victim.Position);
                 _effects.BloodSpray(WorldRenderer.ToXna(killed.Victim.Position), WorldRenderer.ToXna(killed.Direction), 18, Blood(killed.Victim));
                 _effects.BloodPool(WorldRenderer.ToXna(killed.Victim.Position + killed.Direction * 8f), Blood(killed.Victim), killed.Victim.Radius / 11f);
-                if (killed.Killer is { IsPlayer: true }) _camera.Shake(0.25f);
+                if (killed.Method != HitMethod.Execution) Impact(Feel.Kill, killed.Killer, killed.Victim);
                 if (killed.Victim == _lockTarget) _lockTarget = null;
                 break;
+            case ExecutionStrike strike:
+                if (!strike.Shot) Audio.Play(strike.Weapon.Sounds.Hit ?? Sounds.Impact, strike.Victim.Position);
+                Flash(strike.Victim);
+                _effects.BloodSpray(WorldRenderer.ToXna(strike.Victim.Position), WorldRenderer.ToXna(FromTo(strike.Executioner, strike.Victim)),
+                    strike.Final ? 16 : 6, Blood(strike.Victim));
+                Impact(strike.Final ? Feel.ExecutionFinish : Feel.ExecutionStrike, strike.Executioner, strike.Victim);
+                break;
             case PlayerDied:
-                _camera.Shake(0.6f);
                 _hud.Clear();
                 break;
             case WeaponPickedUp pickedUp:
@@ -301,6 +322,29 @@ public sealed class PlayScreen : Screen
         }
     }
 
+    private FeelSettings Feel => Session.Content.Game.Feel;
+
+    /// <summary>Hitstop and camera shake, only for impacts the player takes part in.</summary>
+    private void Impact(ImpactFeel feel, Actor? source, Actor target)
+    {
+        bool playerHurt = target.IsPlayer;
+        if (!playerHurt && source is not { IsPlayer: true }) return;
+        ImpactFeel applied = playerHurt ? Feel.PlayerHurt : feel;
+        _hitstop = MathF.Min(Feel.MaxHitstop, MathF.Max(_hitstop, applied.Hitstop));
+        _camera.Shake(applied.Shake);
+    }
+
+    private void Flash(Actor actor) => _flashUntil[actor] = _time + Feel.HitFlash;
+
+    private float FlashAmount(Actor actor) =>
+        Feel.HitFlash > 0f && _flashUntil.TryGetValue(actor, out float until) ? Math.Clamp((until - _time) / Feel.HitFlash, 0f, 1f) : 0f;
+
+    private static NVector2 FromTo(Actor from, Actor to)
+    {
+        NVector2 delta = to.Position - from.Position;
+        return delta.LengthSquared() > 0.0001f ? NVector2.Normalize(delta) : NVector2.UnitX;
+    }
+
     private Color Blood(Actor actor) =>
         ColorParser.Parse(actor.Definition.Sprites.BloodTint, Color.White).MultiplyBy(_renderer.Colors.Blood);
 
@@ -346,7 +390,7 @@ public sealed class PlayScreen : Screen
         float alpha = _paused ? 1f : _accumulator / Step;
         UpdateVisibility();
         _post.BeginScene(_renderer.Colors.Background);
-        _renderer.Draw(batch, _world, _camera, _effects, alpha, _time, _isVisible);
+        _renderer.Draw(batch, _world, _camera, _effects, alpha, _time, _isVisible, _flashAmount);
         _post.EndScene(batch, _camera, CollectLights(), _paused ? 0f : dt);
 
         Host.Debug.DrawWorld(batch, Session.Assets.Pixel, _world, _camera, _aimWorld);

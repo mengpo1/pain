@@ -62,6 +62,9 @@ public sealed class WeaponDefinition
     public bool Knockdown { get; set; }
     public float KnockdownDuration { get; set; } = 2.5f;
 
+    /// <summary>Leaves a standing target dazed for this long (0 = no stun).</summary>
+    public float StunDuration { get; set; }
+
     /// <summary>Speed (units/s) given to the target when hit.</summary>
     public float Knockback { get; set; } = 140f;
 
@@ -90,14 +93,52 @@ public sealed class WeaponDefinition
 
     public EmptyBehavior WhenEmpty { get; set; } = EmptyBehavior.Click;
 
-    /// <summary>Time needed to finish off a knocked-down enemy with this weapon.</summary>
-    public float ExecutionDuration { get; set; } = 0.8f;
+    /// <summary>How this weapon finishes off a target on the floor.</summary>
+    public ExecutionDefinition Execution { get; set; } = new();
 
     public ThrowDefinition Throw { get; set; } = new();
     public WeaponSounds Sounds { get; set; } = new();
 
     public bool IsFirearm => Kind == WeaponKind.Firearm;
     public float Cooldown => FireRate > 0f ? 1f / FireRate : 0.5f;
+}
+
+public enum ExecutionMode
+{
+    /// <summary>Blows (fists, blades, clubs… or a gun used as a club).</summary>
+    Strike,
+    /// <summary>Point-blank shot; falls back to strikes when the gun is empty.</summary>
+    Shot,
+}
+
+/// <summary>
+/// Generic finishing move, tuned per weapon: one heavy blow, several quick ones, or a shot.
+/// The same sequence serves the player and the enemies.
+/// </summary>
+public sealed class ExecutionDefinition
+{
+    public ExecutionMode Mode { get; set; } = ExecutionMode.Strike;
+
+    /// <summary>Blows needed; the last one kills.</summary>
+    public int Strikes { get; set; } = 1;
+
+    /// <summary>Delay between engaging and the first blow.</summary>
+    public float WindUp { get; set; } = 0.12f;
+
+    /// <summary>Shortest time between two blows.</summary>
+    public float StrikeInterval { get; set; } = 0.16f;
+
+    /// <summary>For the player: each blow needs an attack press (fists in the reference game).</summary>
+    public bool StrikeOnInput { get; set; }
+
+    /// <summary>Without input, a blow happens anyway after this delay, so an execution never stalls.</summary>
+    public float AutoStrikeDelay { get; set; } = 0.45f;
+
+    /// <summary>Time after the final blow before the executioner can act again.</summary>
+    public float Recovery { get; set; } = 0.12f;
+
+    /// <summary>Noise of each blow (shots use the weapon's noise).</summary>
+    public float NoiseRadius { get; set; }
 }
 
 public sealed class ThrowDefinition

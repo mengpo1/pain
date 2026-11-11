@@ -31,10 +31,10 @@ public sealed class GameWorld
     private readonly Dictionary<string, RectF> _zones = new();
     private readonly List<GameEvent> _events = new();
     private readonly List<Noise> _noises = new();
-    /// <summary>How long an early attack click is remembered (seconds).</summary>
-    private const float AttackBufferTime = 0.15f;
     private bool[] _propBlocked = [];
     private float _attackBuffer;
+    private float _pickupBuffer;
+    private float _interactBuffer;
     private int _nextActorId = 1;
 
     internal GameWorld(LevelDefinition level, DefinitionSet definitions, TileMap map, ModifierDefinition modifier, int seed)
@@ -109,7 +109,7 @@ public sealed class GameWorld
         foreach (Actor actor in _actors) actor.Brain?.Update(dt);
 
         Combat.UpdateMeleeAttacks();
-        Combat.UpdateExecutions();
+        Combat.UpdateExecutions(dt);
 
         foreach (Actor actor in _actors) Physics.MoveActor(actor, dt);
         Physics.SeparateActors();
@@ -136,7 +136,11 @@ public sealed class GameWorld
     private void ApplyPlayerCommands(in PlayerCommands commands, float dt)
     {
         Actor player = Player;
-        _attackBuffer = MathF.Max(0f, _attackBuffer - dt);
+        // Presses slightly too early (end of a swing, target not yet down) are kept briefly.
+        float buffer = Rules.Combat.InputBuffer;
+        _attackBuffer = commands.AttackPressed ? buffer : MathF.Max(0f, _attackBuffer - dt);
+        _pickupBuffer = commands.PickupOrThrowPressed ? buffer : MathF.Max(0f, _pickupBuffer - dt);
+        _interactBuffer = commands.InteractPressed ? buffer : MathF.Max(0f, _interactBuffer - dt);
         if (!player.IsAlive || Outcome != WorldOutcome.Playing)
         {
             player.MoveIntent = Vector2.Zero;
@@ -146,8 +150,15 @@ public sealed class GameWorld
         Vector2 move = Geo.ClampLength(commands.Move, 1f);
         if (player.State == ActorState.Executing)
         {
-            if (Rules.Execution.CancelByMoving && move != Vector2.Zero) player.EndExecution();
-            else return;
+            // During an execution the attack button delivers the blows.
+            if (_attackBuffer > 0f && !player.ExecutionFinished)
+            {
+                player.StrikeRequested = true;
+                _attackBuffer = 0f;
+            }
+
+            if (!(Rules.Execution.CancelByMoving && move != Vector2.Zero && !player.ExecutionFinished)) return;
+            player.EndExecution();
         }
 
         player.MoveIntent = move;
@@ -156,13 +167,20 @@ public sealed class GameWorld
         Vector2 aim = commands.AimTarget - player.Position;
         if (player.CanAct && aim.LengthSquared() > 1f) player.Facing = Geo.ToAngle(aim);
 
+        if (_interactBuffer > 0f && Combat.TryInteract(player))
+        {
+            _interactBuffer = 0f;
+            _attackBuffer = 0f;
+            return;
+        }
+
         bool automatic = Combat.CurrentWeapon(player).Automatic;
-        // A click slightly too early (end of the previous swing) is kept briefly instead of being lost.
-        if (commands.AttackPressed) _attackBuffer = AttackBufferTime;
-        bool wantsAttack = _attackBuffer > 0f || (commands.AttackHeld && automatic);
-        if (wantsAttack && Combat.TryAttack(player)) _attackBuffer = 0f;
-        if (commands.PickupOrThrowPressed) Combat.PickupOrThrow(player);
-        if (commands.InteractPressed) Combat.TryInteract(player);
+        if ((_attackBuffer > 0f || (commands.AttackHeld && automatic)) && Combat.TryAttack(player)) _attackBuffer = 0f;
+        if (_pickupBuffer > 0f && player.IsFreeToAct)
+        {
+            Combat.PickupOrThrow(player);
+            _pickupBuffer = 0f;
+        }
     }
 
     public Actor? FindActor(string levelId) => _actors.FirstOrDefault(a => a.LevelId == levelId);
