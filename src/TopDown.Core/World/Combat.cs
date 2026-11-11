@@ -291,6 +291,11 @@ public sealed class CombatSystem
         float damage = hit.Damage * multiplier;
 
         _world.AddEvent(new ActorHit(target, hit.Source, hit.Direction, hit.Method, hit.DamageType, damage, hit.Weapon));
+        if (damage > 0f)
+        {
+            target.LastHurtTime = _world.Time;
+            target.LastDamageType = hit.DamageType;
+        }
 
         if (damage > 0f) target.Health -= damage;
         if (target.Health <= 0f)

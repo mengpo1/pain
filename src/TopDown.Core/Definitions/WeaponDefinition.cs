@@ -110,6 +110,21 @@ public sealed class WeaponDefinition
     /// <summary>Weapon sprite position relative to the owner: X forward, Y to the right.</summary>
     public Vector2 HoldOffset { get; set; } = new(10f, 5f);
 
+    /// <summary>
+    /// How the weapon is held, for the body animations ("unarmed", "club", "blade", "pistol",
+    /// "long"…): a character's animation set uses keys such as "attack.club" or "fire.long".
+    /// Null: "unarmed" for natural weapons, "pistol" for guns, "club" for other melee weapons.
+    /// </summary>
+    public string? Pose { get; set; }
+
+    /// <summary>Image of the weapon in a character's hands (seen from above); null uses <see cref="SpriteId"/>.</summary>
+    public string? HeldSprite { get; set; }
+
+    /// <summary>Where the hand holds the held image, in pixels from the image centre.</summary>
+    public Vector2 Grip { get; set; }
+
+    public string PoseName => Pose ?? (!CanDrop ? "unarmed" : IsFirearm ? "pistol" : "club");
+
     public EmptyBehavior WhenEmpty { get; set; } = EmptyBehavior.Click;
 
     /// <summary>How this weapon finishes off a target on the floor.</summary>

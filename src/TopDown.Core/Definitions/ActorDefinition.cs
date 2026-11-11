@@ -137,6 +137,19 @@ public sealed class ActorSprites
 
     /// <summary>Thermal signature (brightness at rest and when active). Null: always fully visible.</summary>
     public HeatDefinition? Heat { get; set; }
+
+    /// <summary>
+    /// Animation set: pose key → animation (or sprite) id, for instance "idle.club", "attack.unarmed",
+    /// "fire.long", "hurt", "knockdown", "getup", "death.shot", "walk", "leap.crouch", "awaken".
+    /// Missing keys fall back to simpler ones, then to <see cref="Body"/> (see ActorPose).
+    /// </summary>
+    public Dictionary<string, string> Animations { get; set; } = new();
+
+    /// <summary>
+    /// Prefix of a whole animation set: key "attack.club" also looks for the animation
+    /// "{AnimationSet}.attack.club". Entries of <see cref="Animations"/> take precedence.
+    /// </summary>
+    public string? AnimationSet { get; set; }
 }
 
 /// <summary>A piece of a body that can be torn off ("head", "leg").</summary>
@@ -197,6 +210,9 @@ public sealed class AiDefinition
 
     /// <summary>Behaviour "ambush": wakes up when the target comes this close in clear view (units).</summary>
     public float WakeRadius { get; set; } = 110f;
+
+    /// <summary>Behaviour "ambush": time spent rising after waking up, before the hunt (seconds).</summary>
+    public float WakeTime { get; set; }
 
     /// <summary>Leap attack (see <see cref="LeapDefinition"/>). Null: no leaping.</summary>
     public LeapDefinition? Leap { get; set; }

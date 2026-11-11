@@ -23,6 +23,44 @@ public sealed class Camera2D
         * Matrix.CreateScale(Zoom, Zoom, 1f)
         * Matrix.CreateTranslation(new Vector3(ViewportSize * 0.5f, 0f));
 
+    /// <summary>Screen pixels per world unit in pixel-art mode (0: the world is drawn at screen resolution).</summary>
+    public int PixelScale { get; private set; }
+
+    /// <summary>Size of the image the world is drawn into (the screen, or the small pixel-art image with a margin).</summary>
+    public Point SceneSize => PixelScale == 0
+        ? new Point((int)ViewportSize.X, (int)ViewportSize.Y)
+        : new Point((int)MathF.Ceiling(ViewportSize.X / PixelScale) + 2, (int)MathF.Ceiling(ViewportSize.Y / PixelScale) + 2);
+
+    /// <summary>Where the camera centre falls, snapped to whole world units in pixel-art mode.</summary>
+    private Vector2 Snapped
+    {
+        get
+        {
+            Vector2 center = Position + ShakeOffset;
+            return PixelScale == 0 ? center : new Vector2(MathF.Floor(center.X), MathF.Floor(center.Y));
+        }
+    }
+
+    /// <summary>World to scene image: the screen transform, or one unit per pixel around the snapped centre.</summary>
+    public Matrix SceneTransform => PixelScale == 0
+        ? Transform
+        : Matrix.CreateTranslation(new Vector3(-Snapped, 0f)) * Matrix.CreateTranslation(SceneSize.X / 2, SceneSize.Y / 2, 0f);
+
+    /// <summary>
+    /// Where the scene image goes on screen: enlarged by the pixel scale and shifted by what the snapping
+    /// left out, so the view still scrolls smoothly while every pixel stays whole.
+    /// </summary>
+    public Rectangle SceneDestination
+    {
+        get
+        {
+            if (PixelScale == 0) return new Rectangle(0, 0, (int)ViewportSize.X, (int)ViewportSize.Y);
+            Vector2 fraction = Position + ShakeOffset - Snapped;
+            Vector2 topLeft = ViewportSize * 0.5f - (fraction + new Vector2(SceneSize.X / 2, SceneSize.Y / 2)) * PixelScale;
+            return new Rectangle((int)MathF.Round(topLeft.X), (int)MathF.Round(topLeft.Y), SceneSize.X * PixelScale, SceneSize.Y * PixelScale);
+        }
+    }
+
     /// <summary>World rectangle currently on screen (with a small margin).</summary>
     public Rectangle VisibleWorld
     {
@@ -34,10 +72,12 @@ public sealed class Camera2D
         }
     }
 
-    public void SetViewport(int width, int height, CameraSettings settings, float userZoom)
+    public void SetViewport(int width, int height, CameraSettings settings, float userZoom, bool pixelArt = false)
     {
         ViewportSize = new Vector2(width, height);
         Zoom = height / MathF.Max(1f, settings.ViewHeight) * settings.Zoom * userZoom;
+        PixelScale = pixelArt ? Math.Max(1, (int)MathF.Round(Zoom)) : 0;
+        if (pixelArt) Zoom = PixelScale;
     }
 
     public void SnapTo(Vector2 position)

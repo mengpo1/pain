@@ -183,6 +183,13 @@ public sealed class PostEffects
     public float HeatGlow { get; set; }
     /// <summary>A faint band rolling down the image, like an old video feed.</summary>
     public float RollingBar { get; set; }
+
+    /// <summary>
+    /// Pixel art: the world is drawn at one texture pixel per world unit into a small image, then
+    /// enlarged by a whole factor without smoothing (crisp, even pixels, rotated sprites stay pixelated).
+    /// The view height is rounded to that factor.
+    /// </summary>
+    public bool PixelArt { get; set; }
 }
 
 public sealed class AnimationDefinition
@@ -194,11 +201,55 @@ public sealed class AnimationDefinition
     /// <summary>Frame indices (left to right, top to bottom). Empty = every frame of the sheet.</summary>
     public List<int> Frames { get; set; } = new();
     public float FrameDuration { get; set; } = 0.1f;
+    /// <summary>Duration of each frame (seconds), when they differ; empty = <see cref="FrameDuration"/> for all.</summary>
+    public List<float> Durations { get; set; } = new();
+    /// <summary>Repeats; otherwise holds its last frame (falls, deaths, attacks).</summary>
     public bool Loop { get; set; } = true;
     /// <summary>Rotation origin in pixels; null = frame centre.</summary>
     public Vector2? Origin { get; set; }
     /// <summary>Frame index → event name (footstep sounds…). Purely cosmetic.</summary>
     public Dictionary<string, string> Events { get; set; } = new();
+
+    /// <summary>
+    /// Named points per frame, in pixels from the frame centre with the character facing right:
+    /// <c>"weapon": [[x, y, angleDegrees, over], …]</c> places the held weapon (its grip) and says
+    /// whether it is drawn over the body (1) or under it (0). One entry per frame.
+    /// </summary>
+    public Dictionary<string, List<float[]>> Attach { get; set; } = new();
+
+    /// <summary>Total length of one pass (seconds).</summary>
+    public float Length(int frameCount) =>
+        Durations.Count > 0 ? Durations.Sum() : FrameDuration * Math.Max(1, frameCount);
+
+    /// <summary>Start time of the first frame carrying <paramref name="eventName"/>, if any.</summary>
+    public float? EventTime(string eventName, int frameCount)
+    {
+        float t = 0f;
+        for (int i = 0; i < Math.Max(1, frameCount); i++)
+        {
+            if (Events.TryGetValue(i.ToString(System.Globalization.CultureInfo.InvariantCulture), out string? name) && name == eventName) return t;
+            t += i < Durations.Count ? Durations[i] : FrameDuration;
+        }
+
+        return null;
+    }
+
+    /// <summary>Position in the frame list at <paramref name="time"/> (looping or holding the last frame).</summary>
+    public int FrameAt(float time, int frameCount)
+    {
+        if (frameCount <= 1) return 0;
+        float length = Length(frameCount);
+        if (length <= 0f) return 0;
+        float t = Loop ? ((time % length) + length) % length : Math.Clamp(time, 0f, length);
+        if (Durations.Count == 0) return Math.Min(frameCount - 1, (int)(t / MathF.Max(0.0001f, FrameDuration)));
+        for (int i = 0; i < frameCount; i++)
+        {
+            t -= i < Durations.Count ? Durations[i] : FrameDuration;
+            if (t < 0f) return i;
+        }
+
+        return frameCount - 1;
+    }
 }
 
 /// <summary>A selectable set of mods (an "experience" built on the same engine).</summary>

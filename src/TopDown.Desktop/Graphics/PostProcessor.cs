@@ -32,6 +32,8 @@ public sealed class PostProcessor : IDisposable
     private readonly Random _random = new(13);
     private RenderTarget2D? _scene;
     private RenderTarget2D? _lights;
+    private Rectangle _sceneDestination;
+    private int _sceneScale = 1;
     private float _time;
     private float _glitchTimer;
     private float _flicker;
@@ -47,12 +49,15 @@ public sealed class PostProcessor : IDisposable
 
     public PostEffects Settings => _settings;
 
-    /// <summary>Starts drawing the world into an off-screen target.</summary>
-    public void BeginScene(Color clear)
+    /// <summary>Starts drawing the world into an off-screen target (small in pixel-art mode).</summary>
+    public void BeginScene(Color clear, Camera2D camera)
     {
         int width = Math.Max(1, _device.PresentationParameters.BackBufferWidth);
         int height = Math.Max(1, _device.PresentationParameters.BackBufferHeight);
-        Ensure(ref _scene, width, height);
+        Point scene = camera.SceneSize;
+        _sceneDestination = camera.SceneDestination;
+        _sceneScale = Math.Max(1, camera.PixelScale);
+        Ensure(ref _scene, Math.Max(1, scene.X), Math.Max(1, scene.Y));
         Ensure(ref _lights, width, height);
         _device.SetRenderTarget(_scene);
         _device.Clear(clear);
@@ -69,7 +74,7 @@ public sealed class PostProcessor : IDisposable
         Rectangle screen = _device.Viewport.Bounds;
 
         batch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp);
-        batch.Draw(_scene!, screen, Color.White);
+        batch.Draw(_scene!, _sceneDestination, Color.White);
         batch.End();
 
         batch.Begin(SpriteSortMode.Deferred, Multiply, SamplerState.LinearClamp);
@@ -143,7 +148,9 @@ public sealed class PostProcessor : IDisposable
                 int height = _random.Next(2, 14);
                 int y = _random.Next(screen.Height - height);
                 int shift = _random.Next(-24, 25);
-                batch.Draw(_scene, new Rectangle(shift, y, screen.Width, height), new Rectangle(0, y, screen.Width, height), Color.White);
+                var source = new Rectangle((0 - _sceneDestination.X) / _sceneScale, (y - _sceneDestination.Y) / _sceneScale,
+                    screen.Width / _sceneScale, Math.Max(1, height / _sceneScale));
+                batch.Draw(_scene, new Rectangle(shift, y, screen.Width, height), source, Color.White);
                 batch.Draw(_assets.Noise, new Rectangle(0, y, screen.Width, height), new Rectangle(_random.Next(200), _random.Next(200), screen.Width / 3, height), Color.White * 0.15f);
             }
         }

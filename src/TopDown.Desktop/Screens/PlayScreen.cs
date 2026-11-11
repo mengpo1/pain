@@ -448,14 +448,14 @@ public sealed class PlayScreen : Screen
     private void UpdateViewport()
     {
         Rectangle bounds = Host.GraphicsDevice.Viewport.Bounds;
-        _camera.SetViewport(bounds.Width, bounds.Height, Session.Content.Game.Camera, Host.Settings.Zoom);
+        _camera.SetViewport(bounds.Width, bounds.Height, Session.Content.Game.Camera, Host.Settings.Zoom, _post.Settings.PixelArt);
     }
 
     public override void Draw(SpriteBatch batch, float dt)
     {
         float alpha = _paused ? 1f : _accumulator / Step;
         UpdateVisibility();
-        _post.BeginScene(_renderer.Colors.Background);
+        _post.BeginScene(_renderer.Colors.Background, _camera);
         _renderer.Draw(batch, _world, _camera, _effects, _gore, alpha, _time, _isVisible, _flashAmount);
         _post.EndScene(batch, _camera, CollectLights(), _paused ? 0f : dt);
 

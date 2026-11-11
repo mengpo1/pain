@@ -32,6 +32,14 @@ public sealed class Pack(string root)
         Written.Add(relativePath);
     }
 
+    /// <summary>Writes a file next to the asset folder (the pack's root), such as a generated asset manifest.</summary>
+    public void PackFile(string name, string content)
+    {
+        string path = Path.Combine(Path.GetDirectoryName(Root)!, name);
+        File.WriteAllBytes(path, System.Text.Encoding.UTF8.GetBytes(content.ReplaceLineEndings("\n")));
+        Written.Add("../" + name);
+    }
+
     void Write(string relativePath, byte[] bytes)
     {
         var path = Path.Combine(Root, relativePath);

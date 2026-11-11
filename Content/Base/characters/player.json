@@ -10,7 +10,8 @@
   "hitStunDuration": 0,
   "sprites": {
     "body": "actor.player",
-    "legs": "actor.legs",
+    "animationSet": "actor.player",
+    "legs": "actor.player.legs",
     "down": "actor.player.down",
     "dead": "actor.player.dead",
     "mount": "actor.player.mount",

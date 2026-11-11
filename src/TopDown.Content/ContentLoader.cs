@@ -160,9 +160,20 @@ public static class ContentLoader
         }
     }
 
+    /// <summary>
+    /// The pack's asset manifest, <c>assets.json</c>, then any <c>assets.*.json</c> beside it in name order
+    /// (generated sprite sheets, for instance); later entries replace earlier ones with the same id.
+    /// </summary>
     private static void LoadAssets(ContentPack pack, AssetCatalog catalog, DiagnosticList diagnostics)
     {
-        string file = Path.Combine(pack.RootDirectory, "assets.json");
+        LoadAssetFile(pack, Path.Combine(pack.RootDirectory, "assets.json"), catalog, diagnostics);
+        if (!Directory.Exists(pack.RootDirectory)) return;
+        foreach (string extra in Directory.GetFiles(pack.RootDirectory, "assets.*.json").Order(StringComparer.Ordinal))
+            LoadAssetFile(pack, extra, catalog, diagnostics);
+    }
+
+    private static void LoadAssetFile(ContentPack pack, string file, AssetCatalog catalog, DiagnosticList diagnostics)
+    {
         if (ReadJson(file, diagnostics, optional: true) is not JsonObject root) return;
         foreach ((string section, JsonNode? node) in root)
         {

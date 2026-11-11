@@ -16,12 +16,14 @@ internal static class ContentValidator
         AssetCatalog assets = content.Assets;
 
         ValidateGame(content, d);
+        ValidateAnimations(content.Assets, d);
 
         foreach (WeaponDefinition weapon in defs.Weapons.Values)
         {
             string source = $"weapon:{weapon.Id}";
             // Natural weapons (fists, claws) are never seen on their own.
             if (weapon.CanDrop || !string.IsNullOrEmpty(weapon.SpriteId)) Sprite(assets, d, source, weapon.SpriteId);
+            if (!string.IsNullOrEmpty(weapon.HeldSprite)) Sprite(assets, d, source, weapon.HeldSprite);
             if (weapon.IsFirearm)
             {
                 if (weapon.MagazineSize <= 0) d.Error(source, "A firearm needs 'magazineSize' > 0.");
@@ -63,6 +65,10 @@ internal static class ContentValidator
             foreach (string? sprite in new[] { actor.Sprites.Legs, actor.Sprites.Down, actor.Sprites.Dead, actor.Sprites.Mount, actor.Sprites.Kick, actor.Sprites.Torso })
                 if (sprite is not null) Sprite(assets, d, source, sprite);
             foreach (BodyPart part in actor.Sprites.Parts) Sprite(assets, d, source, part.Sprite);
+            foreach ((string key, string sprite) in actor.Sprites.Animations)
+                if (!assets.HasSprite(sprite)) d.Warning(source, $"Animation '{key}' uses unknown sprite '{sprite}'.");
+            if (actor.Sprites.AnimationSet is { Length: > 0 } set && !assets.Animations.Keys.Any(id => id.StartsWith(set + ".", StringComparison.Ordinal)))
+                d.Warning(source, $"Animation set '{set}' has no animation (ids starting with '{set}.').");
             if (actor.Sprites.Parts.Count > 0 && actor.Sprites.Torso is null)
                 d.Warning(source, "'sprites.parts' needs 'sprites.torso' (the body without its parts).");
             Sound(assets, d, source, actor.Sounds.Death, actor.Sounds.Hurt, actor.Sounds.Alert, actor.Sounds.Idle, actor.Sounds.Leap);
@@ -313,6 +319,27 @@ internal static class ContentValidator
     private static void Reference<T>(IReadOnlyDictionary<string, T> table, DiagnosticList d, string source, string kind, string? id)
     {
         if (id is not null && !table.ContainsKey(id)) d.Error(source, $"Unknown {kind} '{id}'.");
+    }
+
+    /// <summary>Frames, durations and attach points of every animation must line up.</summary>
+    private static void ValidateAnimations(AssetCatalog assets, DiagnosticList d)
+    {
+        foreach ((string id, AnimationDefinition animation) in assets.Animations)
+        {
+            string source = $"animation:{id}";
+            if (!assets.Textures.ContainsKey(animation.Texture)) d.Error(source, $"Unknown texture '{animation.Texture}'.");
+            if (animation.FrameWidth <= 0 || animation.FrameHeight <= 0) d.Error(source, "'frameWidth' and 'frameHeight' must be > 0.");
+            int frames = animation.Frames.Count;
+            if (animation.Durations.Count > 0 && frames > 0 && animation.Durations.Count != frames)
+                d.Error(source, $"'durations' has {animation.Durations.Count} values for {frames} frames.");
+            if (animation.Durations.Any(t => t <= 0f)) d.Error(source, "Every duration must be > 0.");
+            foreach ((string name, List<float[]> points) in animation.Attach)
+            {
+                if (frames > 0 && points.Count != frames)
+                    d.Error(source, $"Attach point '{name}' has {points.Count} entries for {frames} frames.");
+                if (points.Any(p => p.Length < 3)) d.Error(source, $"Attach point '{name}': each entry is [x, y, angle] or [x, y, angle, over].");
+            }
+        }
     }
 
     private static void Sprite(AssetCatalog assets, DiagnosticList d, string source, string id)

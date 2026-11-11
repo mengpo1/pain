@@ -266,8 +266,8 @@ public sealed class MenuScreen : Screen
     {
         Rectangle screen = Host.GraphicsDevice.Viewport.Bounds;
         UiContext ui = Session.Ui;
-        _camera.SetViewport(screen.Width, screen.Height, Session.Content.Game.Camera, 1f);
-        _post.BeginScene(ui.Colors.Background);
+        _camera.SetViewport(screen.Width, screen.Height, Session.Content.Game.Camera, 1f, _post.Settings.PixelArt);
+        _post.BeginScene(ui.Colors.Background, _camera);
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp);
         DrawBackdrop(batch, screen);
         batch.End();

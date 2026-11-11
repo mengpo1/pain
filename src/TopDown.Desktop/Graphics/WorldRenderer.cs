@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TopDown.Content;
 using TopDown.Core.Ai;
+using TopDown.Core.Presentation;
 using TopDown.Core.Definitions;
 using TopDown.Core.Geometry;
 using TopDown.Core.World;
@@ -16,7 +17,7 @@ namespace TopDown.Desktop.Graphics;
 public sealed class WorldRenderer
 {
     /// <summary>World units walked per second of leg animation time.</summary>
-    private const float LegDistancePerSecond = 48f;
+    private const float LegDistancePerSecond = ActorPose.WalkUnitsPerSecond;
     private readonly AssetCache _assets;
     private readonly ThemeColors _colors;
     private readonly ShadowStyle _shadow;
@@ -45,7 +46,7 @@ public sealed class WorldRenderer
     {
         Rectangle view = camera.VisibleWorld;
         UpdateHeat(world, time);
-        batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, RasterizerState.CullNone, null, camera.Transform);
+        batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, RasterizerState.CullNone, null, camera.SceneTransform);
 
         DrawTiles(batch, world, view, TileLayer.Floor, Vector2.Zero, null);
         DrawDecor(batch, world, DecorLayer.Floor);
@@ -69,7 +70,7 @@ public sealed class WorldRenderer
 
         foreach (Actor actor in world.Actors)
         {
-            if ((!actor.IsAlive || actor.IsDown) && isVisible(actor)) DrawFallen(batch, actor, alpha, gore);
+            if ((!actor.IsAlive || actor.IsDown) && isVisible(actor)) DrawFallen(batch, world, actor, alpha, gore);
         }
 
         foreach (WorldWeapon weapon in world.Weapons)
@@ -93,7 +94,7 @@ public sealed class WorldRenderer
         DrawDecor(batch, world, DecorLayer.Top);
         batch.End();
 
-        batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, RasterizerState.CullNone, null, camera.Transform);
+        batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, RasterizerState.CullNone, null, camera.SceneTransform);
         effects.DrawAdditive(batch, _assets);
         DrawHeatGlow(batch, world, alpha, isVisible);
         DrawHitFlashes(batch, world, gore, alpha, isVisible, flash);
@@ -170,7 +171,7 @@ public sealed class WorldRenderer
             if (amount <= 0f || !isVisible(actor)) continue;
             Vector2 position = ToXna(NVector2.Lerp(actor.PreviousPosition, actor.Position, alpha));
             bool fallen = !actor.IsAlive || actor.IsDown;
-            SpriteFrame frame = fallen ? FallenFrame(actor, gore) : _assets.Sprite(actor.Definition.Sprites.Body);
+            SpriteFrame frame = fallen ? FallenFrame(world, actor, gore) : StandingFrame(world, actor);
             batch.Draw(frame.Texture, position, frame.Source, Color.White * amount, actor.Facing, frame.Origin, fallen ? FallScale(actor) : 1f, SpriteEffects.None, 0f);
         }
     }
@@ -298,12 +299,13 @@ public sealed class WorldRenderer
         batch.Draw(frame.Texture, position, frame.Source, tint, weapon.Rotation, frame.Origin, 1f, SpriteEffects.None, 0f);
     }
 
-    private void DrawFallen(SpriteBatch batch, Actor actor, float alpha, GoreLayer gore)
+    private void DrawFallen(SpriteBatch batch, GameWorld world, Actor actor, float alpha, GoreLayer gore)
     {
         Vector2 position = ToXna(NVector2.Lerp(actor.PreviousPosition, actor.Position, alpha));
+        bool animated = AnimationFor(actor, ActorPose.Of(actor, world).Keys) is not null;
         float wobble = actor.State switch
         {
-            ActorState.GettingUp => MathF.Sin(actor.StateTimer * 30f) * 0.1f,
+            ActorState.GettingUp when !animated => MathF.Sin(actor.StateTimer * 30f) * 0.1f,
             ActorState.BeingExecuted => MathF.Sin(actor.StateElapsed * 45f) * 0.04f,
             _ => 0f,
         };
@@ -320,15 +322,16 @@ public sealed class WorldRenderer
         }
 
         float rotation = actor.Facing + wobble;
-        float scale = FallScale(actor);
+        // An animated fall shows the impact itself; otherwise the body is slammed down for a few frames.
+        float scale = animated ? 1f : FallScale(actor);
         ActorSprites sprites = actor.Definition.Sprites;
         BodyDamage? damage = gore.Damage(actor);
         bool inPieces = sprites.Torso is not null && sprites.Parts.Count > 0 && (damage?.Torn.Count > 0 || pulled >= 0);
         if (actor.State == ActorState.Wounded) rotation += MathF.Sin(actor.DistanceWalked * 0.35f) * 0.06f;
         if (!inPieces)
         {
-            SpriteFrame frame = FallenFrame(actor, gore);
-            batch.Draw(frame.Texture, position, frame.Source, _colors.Actor, rotation, frame.Origin, scale, SpriteEffects.None, 0f);
+            SpriteFrame frame = FallenFrame(world, actor, gore);
+            batch.Draw(frame.Texture, position, frame.Source, ActorTint(actor), rotation, frame.Origin, scale, SpriteEffects.None, 0f);
         }
         else
         {
@@ -387,12 +390,64 @@ public sealed class WorldRenderer
     private Color Blood(Actor actor) => ColorParser.Parse(actor.Definition.Sprites.BloodTint, Color.White).MultiplyBy(_colors.Blood);
 
     /// <summary>On the floor: face down and crawling if wounded, otherwise lying on its back.</summary>
-    private SpriteFrame FallenFrame(Actor actor, GoreLayer gore)
+    private SpriteFrame FallenFrame(GameWorld world, Actor actor, GoreLayer gore)
     {
         bool faceDown = actor.IsWounded || gore.Damage(actor)?.FaceDown == true;
         if (faceDown && actor.Definition.Sprites.Crawl is { } crawl)
             return _assets.Sprite(crawl, actor.DistanceWalked / CrawlDistancePerSecond);
-        return _assets.Sprite(FallenSprite(actor));
+        Pose pose = ActorPose.Of(actor, world);
+        return AnimationFor(actor, pose.Keys) is { } animation ? _assets.Sprite(animation, AnimationTime(animation, pose)) : _assets.Sprite(FallenSprite(actor));
+    }
+
+    /// <summary>The body frame of a standing character (animated set, or its single sprite).</summary>
+    private SpriteFrame StandingFrame(GameWorld world, Actor actor)
+    {
+        Pose pose = ActorPose.Of(actor, world);
+        return AnimationFor(actor, pose.Keys) is { } animation ? _assets.Sprite(animation, AnimationTime(animation, pose)) : _assets.Sprite(actor.Definition.Sprites.Body);
+    }
+
+    /// <summary>Time to read an animation at: impact-relative poses line up with the frame marked "impact".</summary>
+    private float AnimationTime(string animation, Pose pose) =>
+        pose.FromImpact ? MathF.Max(0f, _assets.EventTime(animation, "impact") + pose.Time) : pose.Time;
+
+    /// <summary>First pose key the character's animation set defines, resolved to its sprite id.</summary>
+    private string? AnimationFor(Actor actor, IReadOnlyList<string> keys)
+    {
+        ActorSprites sprites = actor.Definition.Sprites;
+        Dictionary<string, string> set = sprites.Animations;
+        string? prefix = sprites.AnimationSet;
+        if (set.Count == 0 && prefix is null) return null;
+        foreach (string key in keys)
+        {
+            if (set.TryGetValue(key, out string? id) && _assets.HasSprite(id)) return id;
+            if (prefix is not null && _assets.HasAnimation($"{prefix}.{key}")) return $"{prefix}.{key}";
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Draws an animated body frame and the weapon in its hand, placed by the frame's "weapon" attach
+    /// point (position, angle, over or under the body) and the weapon's grip.
+    /// </summary>
+    private void DrawAnimatedBody(SpriteBatch batch, Actor actor, string animation, float animationTime, Vector2 position, float facing,
+        float scale, Color? flatColor, float time)
+    {
+        WeaponDefinition? held = actor.Weapon?.Definition;
+        bool hasHold = _assets.TryAttach(animation, animationTime, "weapon", out Vector2 grip, out float angle, out bool over);
+        void Weapon()
+        {
+            if (held is null) return;
+            SpriteFrame frame = _assets.Sprite(held.HeldSprite ?? held.SpriteId);
+            Vector2 at = hasHold ? grip : new Vector2(held.HoldOffset.X, held.HoldOffset.Y);
+            float rotation = facing + (hasHold ? Geo.DegToRad(angle) : 0f);
+            var origin = frame.Origin + new Vector2(held.Grip.X, held.Grip.Y);
+            batch.Draw(frame.Texture, position + Rotate(at * scale, facing), frame.Source, flatColor ?? _colors.Weapon, rotation, origin, scale, SpriteEffects.None, 0f);
+        }
+
+        if (!over) Weapon();
+        SpriteFrame body = _assets.Sprite(animation, animationTime);
+        batch.Draw(body.Texture, position, body.Source, flatColor ?? ActorTint(actor), facing, body.Origin, scale, SpriteEffects.None, 0f);
+        if (over) Weapon();
     }
 
     /// <summary>World units crawled per second of crawl animation time.</summary>
@@ -473,6 +528,16 @@ public sealed class WorldRenderer
             return;
         }
 
+        Pose pose = ActorPose.Of(actor, world);
+        if (AnimationFor(actor, pose.Keys) is { } animation)
+        {
+            Vector2 at = position;
+            if (actor.State == ActorState.Stunned) at += new Vector2(MathF.Sin(time * 47f), MathF.Cos(time * 41f)) * 0.6f;
+            if (actor.LeapPhase == LeapPhase.Crouch) at += new Vector2(MathF.Sin(time * 70f), MathF.Cos(time * 61f)) * 0.8f;
+            DrawAnimatedBody(batch, actor, animation, AnimationTime(animation, pose), at, facing, 1f, flatColor, time);
+            return;
+        }
+
         float swing = 0f;
         float lunge = 0f;
         if (actor.CurrentAttack is { } attack && attack.AttackDuration > 0f)
@@ -515,6 +580,15 @@ public sealed class WorldRenderer
         Vector2 forward = new(MathF.Cos(facing), MathF.Sin(facing));
         Vector2 right = new(-forward.Y, forward.X);
         ExecutionLook look = LookOf(actor, time);
+        Pose pose = ActorPose.Of(actor, world);
+
+        // An execution drawn by the character's own animation (astride or standing) carries all the motion.
+        if (AnimationFor(actor, pose.Keys.Take(1).ToList()) is { } own)
+        {
+            DrawAnimatedBody(batch, actor, own, AnimationTime(own, pose), position, facing, 1f, flatColor, time);
+            return;
+        }
+
         float sinceAttack = world.Time - actor.LastAttackTime;
         float recoil = actor.Weapon is { Definition.IsFirearm: true } && sinceAttack < 0.08f ? -2.5f : 0f;
         Vector2 bodyPosition = position + forward * (look.Lean + recoil);
@@ -523,6 +597,13 @@ public sealed class WorldRenderer
         {
             SpriteFrame legFrame = _assets.Sprite(legs);
             batch.Draw(legFrame.Texture, position, legFrame.Source, _colors.Actor, facing, legFrame.Origin, 1f, SpriteEffects.None, 0f);
+        }
+
+        // Standing executions with an animated set but no execution of their own replay the weapon's blow.
+        if (!look.Astride && AnimationFor(actor, pose.Keys) is { } animation)
+        {
+            DrawAnimatedBody(batch, actor, animation, AnimationTime(animation, pose), position + forward * MathF.Max(0f, look.Lean * 0.4f), facing, 1f, flatColor, time);
+            return;
         }
 
         if (actor.Weapon?.Definition is { } held)

@@ -99,6 +99,13 @@ public sealed class Actor
     public float AttackElapsed { get; private set; }
     public bool AttackResolved { get; internal set; }
 
+    /// <summary>World time of the last hit that did damage, and its damage type (for animations).</summary>
+    public float LastHurtTime { get; internal set; } = float.NegativeInfinity;
+    public string? LastDamageType { get; internal set; }
+
+    /// <summary>Was already on the floor when it died (its death is not a fall).</summary>
+    public bool DiedOnTheFloor { get; private set; }
+
     /// <summary>World time of the last attack (for animations).</summary>
     public float LastAttackTime { get; internal set; } = float.NegativeInfinity;
 
@@ -277,6 +284,7 @@ public sealed class Actor
 
     internal void Kill()
     {
+        DiedOnTheFloor = IsDown;
         CancelActions();
         Executioner = null;
         SetState(ActorState.Dead);

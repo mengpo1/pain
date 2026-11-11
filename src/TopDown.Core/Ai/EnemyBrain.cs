@@ -18,6 +18,8 @@ public enum AiState
     Return,
     /// <summary>Lying in wait, blind and still, until the target comes close.</summary>
     Ambush,
+    /// <summary>Just woken from an ambush: rising, about to hunt.</summary>
+    Awakening,
 }
 
 /// <summary>
@@ -90,6 +92,9 @@ public sealed class EnemyBrain
     }
 
     public AiState State { get; private set; }
+
+    /// <summary>Time spent in the current state (animations).</summary>
+    public float StateTime => _stateTime;
     public Actor? Target { get; private set; }
     public bool CanSeeTarget { get; private set; }
     public Vector2 LastKnownTargetPosition { get; private set; }
@@ -120,6 +125,7 @@ public sealed class EnemyBrain
     internal void OnNoise(Vector2 position, Actor? source)
     {
         if (State == AiState.Dormant) return;
+        if (State == AiState.Awakening) return;
         if (State == AiState.Ambush)
         {
             // Only a noise made close by its prey gives away the ambush.
@@ -193,6 +199,20 @@ public sealed class EnemyBrain
             return;
         }
 
+        if (State == AiState.Awakening)
+        {
+            // Unfolding: turns towards its prey without moving, then hunts.
+            Stop();
+            if (Target is { } prey) TurnTowards(Geo.ToAngle(prey.Position - _self.Position), dt, 0.6f);
+            if (_stateTime >= _ai.WakeTime && Target is { } hunted)
+            {
+                BecomeAlerted(hunted, shareAlert: true);
+                TimeSinceTargetSeen = 0f;
+            }
+
+            return;
+        }
+
         Perceive(dt);
         switch (State)
         {
@@ -263,7 +283,14 @@ public sealed class EnemyBrain
         Target = prey;
         LastKnownTargetPosition = at;
         TimeSinceTargetSeen = 0f;
-        BecomeAlerted(prey, shareAlert: true);
+        if (_ai.WakeTime <= 0f)
+        {
+            BecomeAlerted(prey, shareAlert: true);
+            return;
+        }
+
+        Enter(AiState.Awakening);
+        _world.AddEvent(new EnemyAlerted(_self));
     }
 
     /// <summary>The player, if it came within the wake radius in clear view.</summary>

@@ -309,6 +309,18 @@ public sealed class Canvas
         });
     }
 
+    /// <summary>Pixel-art edges: pixels at least half covered become opaque, the others transparent.</summary>
+    public void Harden()
+    {
+        for (int i = 0; i < Width * Height; i++)
+        {
+            float a = _px[i * 4 + 3];
+            if (a < 0.5f) { _px[i * 4] = _px[i * 4 + 1] = _px[i * 4 + 2] = _px[i * 4 + 3] = 0f; continue; }
+            for (int ch = 0; ch < 3; ch++) _px[i * 4 + ch] /= a;
+            _px[i * 4 + 3] = 1f;
+        }
+    }
+
     /// <summary>Encodes the canvas as an 8-bit RGBA PNG.</summary>
     public byte[] ToPng()
     {

@@ -27,6 +27,7 @@
   },
   {
     "id": "brute_fists",
+    "pose": "heavy",
     "nameKey": "weapon.unarmed.name",
     "kind": "melee",
     "canDrop": false,

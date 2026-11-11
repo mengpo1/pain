@@ -115,6 +115,35 @@ public sealed class AssetCache : IDisposable
         return pixels;
     }
 
+    /// <summary>
+    /// A named attach point of an animation at <paramref name="time"/> (see <c>AnimationDefinition.Attach</c>):
+    /// position from the frame centre, angle in degrees, and whether it goes over the body.
+    /// </summary>
+    public bool TryAttach(string? id, float time, string name, out Vector2 position, out float angleDegrees, out bool over)
+    {
+        position = Vector2.Zero;
+        angleDegrees = 0f;
+        over = false;
+        if (id is null || !_catalog.Animations.TryGetValue(id, out AnimationDefinition? animation)) return false;
+        if (!animation.Attach.TryGetValue(name, out List<float[]>? points) || points.Count == 0) return false;
+        if (!_textures.TryGetValue(animation.Texture, out Texture2D? texture)) return false;
+        int frame = animation.FrameAt(time, FrameIndices(id, animation, texture).Count);
+        float[] point = points[Math.Min(frame, points.Count - 1)];
+        position = new Vector2(point[0], point[1]);
+        angleDegrees = point.Length > 2 ? point[2] : 0f;
+        over = point.Length > 3 && point[3] > 0.5f;
+        return true;
+    }
+
+    /// <summary>When the animation's frame marked with <paramref name="eventName"/> starts (0 if none).</summary>
+    public float EventTime(string id, string eventName)
+    {
+        if (!_catalog.Animations.TryGetValue(id, out AnimationDefinition? animation)) return 0f;
+        return animation.EventTime(eventName, FrameCount(id)) ?? 0f;
+    }
+
+    public bool HasAnimation(string id) => _catalog.Animations.ContainsKey(id);
+
     public bool HasSprite(string? id) => id is not null && (_textures.ContainsKey(id) || _catalog.Animations.ContainsKey(id));
 
     /// <summary>Number of frames in an animation (1 for a plain texture).</summary>
@@ -151,8 +180,7 @@ public sealed class AssetCache : IDisposable
         }
 
         List<int> frames = FrameIndices(id, animation, texture);
-        int step = animation.FrameDuration > 0f ? (int)MathF.Floor(time / animation.FrameDuration) : 0;
-        int index = animation.Loop ? ((step % frames.Count) + frames.Count) % frames.Count : Math.Clamp(step, 0, frames.Count - 1);
+        int index = animation.FrameAt(time, frames.Count);
         int columns = Math.Max(1, texture.Width / animation.FrameWidth);
         int frame = frames[index];
         var source = new Rectangle(frame % columns * animation.FrameWidth, frame / columns * animation.FrameHeight, animation.FrameWidth, animation.FrameHeight);
