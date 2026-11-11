@@ -1,9 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <!-- Pure game logic: no rendering, no file system, no MonoGame. -->
-  <PropertyGroup>
-    <RootNamespace>TopDown.Core</RootNamespace>
-  </PropertyGroup>
-  <ItemGroup>
-    <InternalsVisibleTo Include="TopDown.Tests" />
-  </ItemGroup>
-</Project>

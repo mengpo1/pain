@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- MonoGame front-end: window, rendering, audio, input. It shows the simulation of
+       Game.Core and turns clicks into commands; it never changes the game state itself. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Game.Desktop</RootNamespace>
+    <AssemblyName>OpenTactics</AssemblyName>
+    <RollForward>Major</RollForward>
+    <TieredPGO>true</TieredPGO>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.6.1" />
+    <!-- Runtime TrueType fonts (MonoGame needs its content pipeline otherwise): lets packs and
+         mods ship any .ttf and covers Unicode. -->
+    <PackageReference Include="FontStashSharp.MonoGame" Version="1.6.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Game.Core\Game.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Game packs and mods are plain files next to the executable: editable without recompiling. -->
+    <None Include="..\..\Content\**\*" LinkBase="Content" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\Mods\**\*" LinkBase="Mods" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

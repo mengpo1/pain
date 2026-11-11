@@ -1,7 +1,0 @@
-{
-  // Each profile is a set of mods loaded on top of the base pack: a different game on the same engine.
-  "profiles": [
-    { "id": "action", "nameKey": "profile.action", "mods": [] },
-    { "id": "noct", "nameKey": "profile.noct", "mods": ["noct_inspired"] }
-  ]
-}

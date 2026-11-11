@@ -1,7 +1,0 @@
-[
-  { "id": "swift", "nameKey": "modifier.swift.name", "descriptionKey": "modifier.swift.description", "moveSpeed": 1.25 },
-  { "id": "armored", "nameKey": "modifier.armored.name", "descriptionKey": "modifier.armored.description", "damageTaken": 0.5, "moveSpeed": 0.85 },
-  { "id": "shadow", "nameKey": "modifier.shadow.name", "descriptionKey": "modifier.shadow.description", "enemyVision": 0.6 },
-  { "id": "brawler", "nameKey": "modifier.brawler.name", "descriptionKey": "modifier.brawler.description", "allowFirearms": false, "executionSpeed": 2 },
-  { "id": "gunner", "nameKey": "modifier.gunner.name", "descriptionKey": "modifier.gunner.description", "startingWeaponId": "pistol", "spread": 0.5 }
-]

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Rules and simulation (tactical and, later, strategic), content loading and validation.
+       No MonoGame dependency: everything here runs and is tested without a window. -->
+  <PropertyGroup>
+    <RootNamespace>Game.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Game.Tests" />
+  </ItemGroup>
+</Project>

@@ -1,23 +1,20 @@
 // Placeholder art & sound generator.
 //   dotnet run --project tools/PlaceholderArt -- <repo root>
-// Writes Content/Base/assets and Mods/NoctInspired/assets. Output is deterministic: re-running
+// Writes Content/horizon/assets and Content/mistvale/assets. Output is deterministic: re-running
 // overwrites every file with identical bytes.
 using PlaceholderArt;
 
 string root = Path.GetFullPath(args.Length > 0 ? args[0] : Directory.GetCurrentDirectory());
 
-var basePack = new Pack(Path.Combine(root, "Content", "Base", "assets"));
-var noctPack = new Pack(Path.Combine(root, "Mods", "NoctInspired", "assets"));
+var horizon = new Pack(Path.Combine(root, "Content", "horizon", "assets"));
+var mistvale = new Pack(Path.Combine(root, "Content", "mistvale", "assets"));
 
-BaseArt.Generate(basePack);
-BaseSounds.Generate(basePack);
-basePack.Text("LICENSE.md", License.Text("Base"));
+HorizonArt.Generate(horizon);
+horizon.Text("LICENSE.md", License.Text("Horizon"));
+MistvaleArt.Generate(mistvale);
+mistvale.Text("LICENSE.md", License.Text("Mistvale"));
 
-NoctArt.Generate(noctPack);
-NoctSounds.Generate(noctPack);
-noctPack.Text("LICENSE.md", License.Text("NoctInspired mod"));
-
-foreach (var pack in new[] { basePack, noctPack })
+foreach (var pack in new[] { horizon, mistvale })
 {
     Console.WriteLine($"{pack.Root}  ({pack.Written.Count} files)");
     foreach (var line in pack.Written) Console.WriteLine($"  {line}");

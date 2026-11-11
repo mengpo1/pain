@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Generates the original placeholder art and sound for Content/Base and Mods/NoctInspired.
+  <!-- Generates the original placeholder art and sound of the game packs in Content/.
        Usage (from the repo root): dotnet run (project tools/PlaceholderArt), passing the repo root as argument.
        See Program.cs. -->
   <PropertyGroup>

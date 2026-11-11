@@ -1,9 +1,0 @@
-{
-  "id": "noct_inspired",
-  "name": "Dead Signal",
-  "version": "0.1.0",
-  "formatVersion": 1,
-  "description": "Original survival-horror conversion: thermal surveillance look, scarce ammo, creatures that hunt by sound.",
-  "author": "TopDown contributors",
-  "dependencies": ["base"]
-}
