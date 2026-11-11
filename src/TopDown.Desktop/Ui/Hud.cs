@@ -16,14 +16,18 @@ public sealed class Hud
 {
     private readonly UiContext _ui;
     private readonly InputBindings _bindings;
+    private readonly bool _survival;
     private readonly List<(string Text, float TimeLeft)> _messages = new();
+    private readonly Queue<(string Text, float Duration)> _transmissions = new();
+    private (string Text, float Duration, float Elapsed)? _transmission;
     private float _comboPulse;
     private int _lastCombo;
 
-    public Hud(UiContext ui, InputBindings bindings)
+    public Hud(UiContext ui, InputBindings bindings, bool survival = false)
     {
         _ui = ui;
         _bindings = bindings;
+        _survival = survival;
     }
 
     private Localizer T => _ui.Texts;
@@ -37,10 +41,47 @@ public sealed class Hud
         if (_messages.Count > 4) _messages.RemoveAt(0);
     }
 
-    public void Clear() => _messages.Clear();
+    public void Clear()
+    {
+        _messages.Clear();
+        _transmissions.Clear();
+        _transmission = null;
+    }
+
+    /// <summary>A message from the observer: typed out in the radio panel, one at a time.</summary>
+    public void ShowTransmission(string text, float duration)
+    {
+        if (_transmission is null) _transmission = (text, MathF.Max(1f, duration), 0f);
+        else _transmissions.Enqueue((text, MathF.Max(1f, duration)));
+        // A backlog would make messages arrive late: shorten the one on screen.
+        if (_transmissions.Count > 1 && _transmission is { } current)
+            _transmission = (current.Text, MathF.Min(current.Duration, current.Elapsed + 0.8f), current.Elapsed);
+    }
+
+    /// <summary>"+12 9 mm rounds", "+1 medkit", "Radio battery"…</summary>
+    public void ShowLoot(IReadOnlyList<LootEntry> loot)
+    {
+        foreach (LootEntry entry in loot)
+        {
+            if (entry.Ammo is { } type && entry.Amount > 0)
+                ShowMessage(T.Format("hud.loot.ammo", ("count", entry.Amount), ("ammo", AmmoName(type))), 2.5f);
+            if (entry.Medkits > 0) ShowMessage(T.Format("hud.loot.medkits", ("count", entry.Medkits)), 2.5f);
+            if (entry.Weapon is not null) ShowMessage(T.Get("hud.loot.weapon"), 2.5f);
+            if (entry.Item is { } item) ShowMessage(T.Format("hud.collected", ("item", entry.NameKey is { } key ? T.Get(key) : item)), 3f);
+        }
+    }
+
+    private string AmmoName(string type) => T.Has($"ammo.{type}") ? T.Get($"ammo.{type}") : type;
 
     public void Update(float dt, GameWorld world)
     {
+        if (_transmission is { } current)
+        {
+            float elapsed = current.Elapsed + dt;
+            _transmission = elapsed < current.Duration + TypingTime(current.Text) ? (current.Text, current.Duration, elapsed)
+                : _transmissions.TryDequeue(out var next) ? (next.Text, next.Duration, 0f) : null;
+        }
+
         for (int i = _messages.Count - 1; i >= 0; i--)
         {
             (string text, float left) = _messages[i];
@@ -68,8 +109,10 @@ public sealed class Hud
         }
 
         DrawWeapon(batch, world, screen, margin);
+        if (_survival) DrawVitals(batch, world, screen, margin);
         if (world.Score.Enabled) DrawScore(batch, world, screen, margin);
         DrawPrompt(batch, world, screen);
+        if (world.Outcome == WorldOutcome.Playing) DrawTransmission(batch, screen, time);
 
         float messageY = screen.Height * 0.2f;
         foreach ((string text, float left) in _messages)
@@ -88,7 +131,9 @@ public sealed class Hud
         {
             label = T.Get(weapon.Definition.NameKey);
             if (weapon.Definition.IsFirearm) label += $"  {weapon.Ammo}/{weapon.Definition.MagazineSize}";
-            if (weapon.IsEmpty) label += "  " + T.Get("hud.empty");
+            if (weapon.Definition.AmmoType is { } type) label += $"  +{world.Inventory.AmmoOf(type)}";
+            if (player.IsReloading) label += "  " + T.Get("hud.reloading");
+            else if (weapon.IsEmpty) label += "  " + T.Get("hud.empty");
         }
         else
         {
@@ -96,9 +141,65 @@ public sealed class Hud
         }
 
         float y = screen.Height - margin - 34f * _ui.Scale;
-        Color color = player.Weapon is { IsEmpty: true } ? C.Danger : C.Secondary;
+        Color color = player.Weapon is { IsEmpty: true } && !player.IsReloading ? C.Danger : C.Secondary;
         _ui.Text(batch, label, new Vector2(margin, y), 28f, color);
     }
+
+    /// <summary>Health and stamina bars, medkits and mission items, above the weapon.</summary>
+    private void DrawVitals(SpriteBatch batch, GameWorld world, Rectangle screen, float margin)
+    {
+        Actor player = world.Player;
+        Texture2D pixel = _ui.Assets.Pixel;
+        float scale = _ui.Scale;
+        float width = 190f * scale;
+        float y = screen.Height - margin - 58f * scale;
+
+        float health = Math.Clamp(player.Health / MathF.Max(1f, player.Definition.Health), 0f, 1f);
+        bool low = health < 0.35f;
+        Primitives.FillRect(batch, pixel, new Vector2(margin, y), new Vector2(width, 9f * scale), C.Shadow * 0.7f);
+        Primitives.FillRect(batch, pixel, new Vector2(margin, y), new Vector2(width * health, 9f * scale), low ? C.Danger : C.Text);
+        _ui.Text(batch, T.Format("hud.medkits", ("count", world.Inventory.Medkits)), new Vector2(margin + width + 12f * scale, y - 7f * scale), 18f, C.Secondary);
+
+        if (player.Definition.Stamina is { } stamina && player.Stamina < stamina.Max)
+        {
+            float fraction = Math.Clamp(player.Stamina / stamina.Max, 0f, 1f);
+            Color color = player.Exhausted ? C.Danger * 0.7f : C.Secondary * 0.8f;
+            Primitives.FillRect(batch, pixel, new Vector2(margin, y + 12f * scale), new Vector2(width * fraction, 3f * scale), color);
+        }
+
+        float itemY = y - 30f * scale;
+        foreach ((string id, string? nameKey) in world.Inventory.Items)
+        {
+            string name = nameKey is not null ? T.Get(nameKey) : id;
+            Primitives.Rect(batch, pixel, new Vector2(margin, itemY + 5f * scale), new Vector2(10f, 10f) * scale, C.Accent, 2f);
+            _ui.Text(batch, name, new Vector2(margin + 18f * scale, itemY), 18f, C.Accent);
+            itemY -= 24f * scale;
+        }
+    }
+
+    /// <summary>The observer's message, typed out letter by letter under a blinking radio label.</summary>
+    private void DrawTransmission(SpriteBatch batch, Rectangle screen, float time)
+    {
+        if (_transmission is not { } current) return;
+        float scale = _ui.Scale;
+        float total = current.Duration + TypingTime(current.Text);
+        float fade = Math.Clamp(MathF.Min(current.Elapsed * 6f, (total - current.Elapsed) * 3f), 0f, 1f);
+        int letters = Math.Min(current.Text.Length, (int)(current.Elapsed * LettersPerSecond));
+        string shown = current.Text[..letters];
+
+        float width = MathF.Min(screen.Width * 0.62f, 760f * scale);
+        var origin = new Vector2((screen.Width - width) * 0.5f, screen.Height * 0.12f);
+        Primitives.FillRect(batch, _ui.Assets.Pixel, origin, new Vector2(width, 66f * scale), C.Panel * fade);
+        Primitives.Rect(batch, _ui.Assets.Pixel, origin, new Vector2(width, 66f * scale), C.Secondary * (0.6f * fade), 1f);
+        bool blink = (int)(time * 3f) % 2 == 0;
+        string header = (blink ? "((o)) " : "( o ) ") + T.Get("hud.transmission");
+        _ui.Text(batch, header, origin + new Vector2(12f, 6f) * scale, 16f, C.Secondary * fade, shadow: 0f);
+        _ui.Text(batch, shown, origin + new Vector2(12f, 28f) * scale, 22f, C.Text * fade, shadow: 0f);
+    }
+
+    private const float LettersPerSecond = 60f;
+
+    private static float TypingTime(string text) => text.Length / LettersPerSecond;
 
     private void DrawScore(SpriteBatch batch, GameWorld world, Rectangle screen, float margin)
     {
@@ -123,7 +224,7 @@ public sealed class Hud
         // During an execution that needs blows: show how many are left.
         if (player.State == ActorState.Executing && !player.ExecutionFinished && player.ExecutionWeapon is { Execution.StrikeOnInput: true } executionWeapon)
         {
-            int left = Math.Max(1, executionWeapon.Execution.Strikes) - player.ExecutionStrikesDone;
+            int left = Math.Max(1, player.ExecutionStrikesNeeded) - player.ExecutionStrikesDone;
             string strike = $"[{KeyLabel(GameAction.Attack)}] {T.Format("prompt.strike", ("count", left))}";
             _ui.Text(batch, strike, new Vector2(screen.Width * 0.5f, screen.Height - 70f * _ui.Scale), 22f, C.Accent, Align.Center);
             return;
@@ -137,6 +238,8 @@ public sealed class Hud
             prompt = $"[{KeyLabel(GameAction.Interact)}] {T.Get(interactable.Definition.PromptKey)}";
         else if (world.Combat.FindPickup(player) is { } weapon)
             prompt = $"[{KeyLabel(GameAction.PickupThrow)}] {T.Format("prompt.pickup", ("weapon", T.Get(weapon.Weapon.Definition.NameKey)))}";
+        else if (_survival && world.Inventory.Medkits > 0 && player.Health < player.Definition.Health * 0.5f)
+            prompt = $"[{KeyLabel(GameAction.Heal)}] {T.Get("prompt.heal")}";
 
         if (prompt is not null)
             _ui.Text(batch, prompt, new Vector2(screen.Width * 0.5f, screen.Height - 70f * _ui.Scale), 20f, C.Text, Align.Center);

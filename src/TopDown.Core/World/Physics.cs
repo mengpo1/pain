@@ -189,7 +189,10 @@ public sealed class Physics
                         _world.DoorLogic.OnContact(door, actor, velocity);
                         velocity += actor.Velocity - before;
                         actor.Position += push;
+                        float into = -Vector2.Dot(velocity, Geo.NormalizeOrZero(push));
                         velocity = RemoveInward(velocity, push);
+                        // A door wide open against the push: walk round its free end instead of sticking to it.
+                        if (into > 0f && !door.Locked && door.CannotYieldTo(actor.Position)) velocity += door.Direction * into;
                         pushed = true;
                     }
                 }

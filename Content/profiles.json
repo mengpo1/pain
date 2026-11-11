@@ -1,7 +1,9 @@
 {
   // Each profile is a set of mods loaded on top of the base pack: a different game on the same engine.
+  // Chosen in the main menu ("Game") or with --profile.
   "profiles": [
     { "id": "action", "nameKey": "profile.action", "mods": [] },
-    { "id": "noct", "nameKey": "profile.noct", "mods": ["noct_inspired"] }
+    { "id": "noct", "nameKey": "profile.noct", "mods": ["noct_prototype"] },
+    { "id": "signal", "nameKey": "profile.signal", "mods": ["noct_inspired"] }
   ]
 }

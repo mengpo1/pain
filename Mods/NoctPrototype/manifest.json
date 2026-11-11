@@ -1,0 +1,9 @@
+{
+  "id": "noct_prototype",
+  "name": "Noct — The Last Signal (prototype)",
+  "version": "0.1.0",
+  "formatVersion": 1,
+  "description": "Top-down survival horror seen through a thermal surveillance camera: three creatures, one facility, one mission. Original content.",
+  "author": "TopDown contributors",
+  "dependencies": ["base"]
+}

@@ -95,9 +95,25 @@ public sealed class PostProcessor : IDisposable
             batch.Draw(_assets.Pixel, screen, Color.Black * (_flicker * _settings.Flicker * 0.35f));
         }
 
+        if (_settings.RollingBar > 0f) DrawRollingBar(batch, screen);
         if (_settings.Vignette > 0f) batch.Draw(_assets.Vignette, screen, Color.Black * _settings.Vignette);
         batch.End();
     }
+
+    /// <summary>A faint, slightly noisy band slowly rolling down the image (old video feed).</summary>
+    private void DrawRollingBar(SpriteBatch batch, Rectangle screen)
+    {
+        int height = Math.Max(4, screen.Height / 9);
+        float cycle = (_time * RollingBarSpeed) % 1.3f;
+        int y = (int)((cycle - 0.15f) * screen.Height);
+        var band = new Rectangle(0, y, screen.Width, height);
+        batch.Draw(_assets.Pixel, band, Color.White * (0.035f * _settings.RollingBar));
+        batch.Draw(_assets.Noise, band, new Rectangle(_random.Next(200), _random.Next(200), screen.Width / 2, height / 2), Color.White * (0.06f * _settings.RollingBar));
+        batch.Draw(_assets.Pixel, new Rectangle(0, y + height, screen.Width, 2), Color.Black * (0.25f * _settings.RollingBar));
+    }
+
+    /// <summary>Screens per second.</summary>
+    private const float RollingBarSpeed = 0.09f;
 
     private void RenderLightMap(SpriteBatch batch, Camera2D camera, IEnumerable<WorldLight> lights)
     {

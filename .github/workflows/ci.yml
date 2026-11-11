@@ -38,8 +38,10 @@ jobs:
             xvfb-run -a -s "-screen 0 1280x720x24" dotnet $game --level $level --autopilot --mute --frames 300 --size 1280x720 --screenshot $level.png
           done
           for level in outpost tunnels; do
-            xvfb-run -a -s "-screen 0 1280x720x24" dotnet $game --profile noct --level $level --autopilot --mute --frames 300 --size 1280x720 --screenshot $level.png
+            xvfb-run -a -s "-screen 0 1280x720x24" dotnet $game --profile signal --level $level --autopilot --mute --frames 300 --size 1280x720 --screenshot $level.png
           done
+          # The Noct prototype: the autopilot plays the whole mission (about 25 s), the last frame is the result.
+          xvfb-run -a -s "-screen 0 1280x720x24" dotnet $game --profile noct --level installation --autopilot --mute --frames 4200 --size 1280x720 --screenshot installation.png
       - uses: actions/upload-artifact@v4
         with:
           name: screenshots-linux
@@ -57,6 +59,7 @@ jobs:
           dotnet-version: '10.0.x'
       - run: dotnet build src/TopDown.Desktop -c Release
       - run: dotnet src/TopDown.Desktop/bin/Release/net10.0/TopDown.dll --level first_night --autopilot --mute --frames 300 --size 1280x720 --screenshot first_night.png
+      - run: dotnet src/TopDown.Desktop/bin/Release/net10.0/TopDown.dll --profile noct --level installation --autopilot --mute --frames 600 --size 1280x720 --screenshot installation.png
       - uses: actions/upload-artifact@v4
         if: always()
         with:

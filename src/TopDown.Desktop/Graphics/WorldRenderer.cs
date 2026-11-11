@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TopDown.Content;
+using TopDown.Core.Ai;
 using TopDown.Core.Definitions;
 using TopDown.Core.Geometry;
 using TopDown.Core.World;
@@ -22,9 +23,15 @@ public sealed class WorldRenderer
     private readonly Color _shadowColor;
     private readonly float _fallDuration;
 
+    private readonly float _heatGlow;
+    private readonly Dictionary<Actor, float> _heat = new();
+    private GameWorld? _heatWorld;
+    private float _lastTime;
+
     public WorldRenderer(AssetCache assets, ThemeDefinition theme, FeelSettings feel)
     {
         _assets = assets;
+        _heatGlow = theme.Post.HeatGlow;
         _fallDuration = feel.FallDuration;
         _colors = new ThemeColors(theme);
         _shadow = theme.Shadow;
@@ -37,6 +44,7 @@ public sealed class WorldRenderer
         Func<Actor, bool> isVisible, Func<Actor, float> flash)
     {
         Rectangle view = camera.VisibleWorld;
+        UpdateHeat(world, time);
         batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, RasterizerState.CullNone, null, camera.Transform);
 
         DrawTiles(batch, world, view, TileLayer.Floor, Vector2.Zero, null);
@@ -87,8 +95,70 @@ public sealed class WorldRenderer
 
         batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, RasterizerState.CullNone, null, camera.Transform);
         effects.DrawAdditive(batch, _assets);
+        DrawHeatGlow(batch, world, alpha, isVisible);
         DrawHitFlashes(batch, world, gore, alpha, isVisible, flash);
         batch.End();
+    }
+
+    /// <summary>
+    /// Thermal signature of each character, eased over time: full for most, low for a creature lying
+    /// in wait (with a slow breathing pulse an attentive player can spot), full again once it moves.
+    /// </summary>
+    private void UpdateHeat(GameWorld world, float time)
+    {
+        float dt = Math.Clamp(time - _lastTime, 0f, 0.1f);
+        _lastTime = time;
+        if (!ReferenceEquals(world, _heatWorld))
+        {
+            _heat.Clear();
+            _heatWorld = world;
+        }
+
+        foreach (Actor actor in world.Actors)
+        {
+            float target = TargetHeat(actor, time);
+            float current = _heat.TryGetValue(actor, out float value) ? value : target;
+            _heat[actor] = current + (target - current) * (1f - MathF.Exp(-HeatEasing * dt));
+        }
+    }
+
+    private static float TargetHeat(Actor actor, float time)
+    {
+        if (actor.Definition.Sprites.Heat is not { } heat) return 1f;
+        if (!actor.IsAlive) return heat.Rest;
+        bool resting = actor.Brain is { State: AiState.Ambush or AiState.Dormant or AiState.Idle } && actor.Velocity.LengthSquared() < 400f;
+        if (!resting || actor.State == ActorState.Leaping) return heat.Active;
+        float breath = 0.5f + 0.5f * MathF.Sin(time * 2.2f + actor.Id * 1.7f);
+        return Math.Clamp(heat.Rest + heat.Pulse * breath, 0f, 1f);
+    }
+
+    private const float HeatEasing = 3.5f;
+
+    private float HeatOf(Actor actor) => _heat.TryGetValue(actor, out float heat) ? heat : 1f;
+
+    /// <summary>Actor colour dimmed by its heat: a cold body fades into the dark floor.</summary>
+    private Color ActorTint(Actor actor)
+    {
+        float heat = HeatOf(actor);
+        if (heat >= 0.999f) return _colors.Actor;
+        Color c = _colors.Actor;
+        return new Color((int)(c.R * heat), (int)(c.G * heat), (int)(c.B * heat), c.A) * (0.4f + 0.6f * heat);
+    }
+
+    /// <summary>Soft halo around warm bodies (thermal camera bloom), from the theme's "heatGlow".</summary>
+    private void DrawHeatGlow(SpriteBatch batch, GameWorld world, float alpha, Func<Actor, bool> isVisible)
+    {
+        if (_heatGlow <= 0f) return;
+        Texture2D circle = _assets.SoftCircle;
+        var origin = new Vector2(circle.Width, circle.Height) * 0.5f;
+        foreach (Actor actor in world.Actors)
+        {
+            if (!actor.IsAlive || !isVisible(actor)) continue;
+            float heat = HeatOf(actor);
+            Vector2 position = ToXna(NVector2.Lerp(actor.PreviousPosition, actor.Position, alpha));
+            float scale = actor.Radius * 3.4f * 2f / circle.Width;
+            batch.Draw(circle, position, null, Color.White * (_heatGlow * heat * heat * 0.35f), 0f, origin, scale, SpriteEffects.None, 0f);
+        }
     }
 
     /// <summary>Characters just hit flash white for a few frames (additive pass).</summary>
@@ -183,8 +253,10 @@ public sealed class WorldRenderer
 
         foreach (Interactable interactable in world.Interactables)
         {
-            SpriteFrame frame = _assets.Sprite(interactable.Definition.Sprite);
-            Color color = interactable.Available ? _colors.Decor : _colors.Decor * 0.5f;
+            // Once used: its "used" look (an open, empty locker), or the same sprite dimmed.
+            bool showUsed = !interactable.Available && interactable.Definition.UsedSprite is not null;
+            SpriteFrame frame = _assets.Sprite(showUsed ? interactable.Definition.UsedSprite : interactable.Definition.Sprite);
+            Color color = interactable.Available || showUsed ? _colors.Decor : _colors.Decor * 0.5f;
             batch.Draw(frame.Texture, ToXna(interactable.Position), frame.Source, color, 0f, frame.Origin, 1f, SpriteEffects.None, 0f);
         }
     }
@@ -346,11 +418,47 @@ public sealed class WorldRenderer
         {
             SpriteFrame legFrame = _assets.Sprite(legs, LegAnimationTime(actor));
             float legAngle = MathF.Atan2(actor.Velocity.Y, actor.Velocity.X);
-            batch.Draw(legFrame.Texture, position, legFrame.Source, _colors.Actor, legAngle, legFrame.Origin, 1f, SpriteEffects.None, 0f);
+            batch.Draw(legFrame.Texture, position, legFrame.Source, ActorTint(actor), legAngle, legFrame.Origin, 1f, SpriteEffects.None, 0f);
         }
 
+        if (actor.State == ActorState.Leaping) DrawLeapWarning(batch, actor, position, time);
         DrawActorBody(batch, world, actor, alpha, time, Vector2.Zero, null);
     }
+
+    /// <summary>
+    /// The crouch before a leap is announced: a line grows towards the target, the creature flickers.
+    /// In the air, two fading after-images trail behind it.
+    /// </summary>
+    private void DrawLeapWarning(SpriteBatch batch, Actor actor, Vector2 position, float time)
+    {
+        if (actor.Definition.Ai.Leap is not { } leap) return;
+        Vector2 forward = new(MathF.Cos(actor.Facing), MathF.Sin(actor.Facing));
+        if (actor.LeapPhase == LeapPhase.Crouch)
+        {
+            float progress = Math.Clamp(actor.LeapPhaseElapsed / MathF.Max(0.01f, leap.WindUp), 0f, 1f);
+            float flicker = 0.55f + 0.45f * MathF.Sin(time * 40f);
+            Primitives.Line(batch, _assets.Pixel, position + forward * actor.Radius, position + forward * (actor.Radius + leap.Distance * progress),
+                _colors.Fx * (0.15f + 0.35f * progress * flicker), 2f);
+        }
+        else if (actor.LeapPhase == LeapPhase.Airborne)
+        {
+            SpriteFrame body = _assets.Sprite(actor.Definition.Sprites.Body, time);
+            for (int i = 1; i <= 2; i++)
+            {
+                Vector2 ghost = position - forward * (10f * i);
+                batch.Draw(body.Texture, ghost, body.Source, ActorTint(actor) * (0.3f / i), actor.Facing, body.Origin, LeapScale(actor), SpriteEffects.None, 0f);
+            }
+        }
+    }
+
+    /// <summary>Smaller while crouching, bigger in the air (closer to the camera), a bit squashed on landing.</summary>
+    private static float LeapScale(Actor actor) => actor.LeapPhase switch
+    {
+        LeapPhase.Crouch => 0.84f,
+        LeapPhase.Airborne => 1.2f,
+        LeapPhase.Landing => 0.94f,
+        _ => 1f,
+    };
 
     /// <summary>Held weapon then body. Also used for the drop shadow (with a flat colour).</summary>
     private void DrawActorBody(SpriteBatch batch, GameWorld world, Actor actor, float alpha, float time, Vector2 offset, Color? flatColor)
@@ -394,7 +502,8 @@ public sealed class WorldRenderer
 
         SpriteFrame body = _assets.Sprite(actor.Definition.Sprites.Body, time);
         float stunWobble = actor.State == ActorState.Stunned ? MathF.Sin(time * 40f) * 0.15f : 0f;
-        batch.Draw(body.Texture, bodyPosition, body.Source, flatColor ?? _colors.Actor, facing + stunWobble, body.Origin, 1f, SpriteEffects.None, 0f);
+        if (actor.LeapPhase == LeapPhase.Crouch) bodyPosition += new Vector2(MathF.Sin(time * 70f), MathF.Cos(time * 61f)) * 0.8f;
+        batch.Draw(body.Texture, bodyPosition, body.Source, flatColor ?? ActorTint(actor), facing + stunWobble, body.Origin, LeapScale(actor), SpriteEffects.None, 0f);
     }
 
     /// <summary>
@@ -428,7 +537,7 @@ public sealed class WorldRenderer
         }
 
         SpriteFrame body = _assets.Sprite(look.Sprite, time);
-        batch.Draw(body.Texture, bodyPosition, body.Source, flatColor ?? _colors.Actor, facing, body.Origin, look.Scale, SpriteEffects.None, 0f);
+        batch.Draw(body.Texture, bodyPosition, body.Source, flatColor ?? ActorTint(actor), facing, body.Origin, look.Scale, SpriteEffects.None, 0f);
     }
 
     /// <summary>Sprite and offsets of an executioner's body, from the timing of its blows.</summary>

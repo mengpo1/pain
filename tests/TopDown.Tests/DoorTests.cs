@@ -39,6 +39,21 @@ public class DoorTests
     }
 
     [Fact]
+    public void A_door_wide_open_against_the_way_is_walked_round_instead_of_blocking()
+    {
+        // Door swung flat into the east room, along the top of row 2; the player stands under it
+        // and walks north, so pushing would open it further than it goes.
+        GameWorld world = World(Level(Map, new Vector2(5.6f, 2)));
+        Door door = Assert.Single(world.Doors);
+        door.Angle = -MathF.PI / 2f;
+        door.PreviousAngle = door.Angle;
+
+        Run(world, 1.5f, new PlayerCommands { Move = -Vector2.UnitY, AimTarget = TileCenter(6, 1) });
+
+        Assert.True(world.Player.Position.Y < 2 * Tile - world.Player.Radius, $"y = {world.Player.Position.Y}");
+    }
+
+    [Fact]
     public void A_closed_door_blocks_vision_and_bullets()
     {
         GameWorld world = World(new LevelDefinitionBuilder(Map, new Vector2(2, 2), playerWeapon: "pistol").With(Enemy("dummy", 8, 2)).Build());

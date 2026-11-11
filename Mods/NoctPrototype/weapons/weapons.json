@@ -1,0 +1,52 @@
+[
+  // The survivor's guns use spare ammunition (R to reload). Only the values given here change.
+  { "id": "pistol", "magazineSize": 8, "ammoType": "9mm", "reloadTime": 1.1, "woundChance": 0 },
+  { "id": "shotgun", "magazineSize": 4, "ammoType": "shells", "reloadTime": 1.7, "woundChance": 0 },
+
+  // Natural weapons of the creatures: they hurt without knocking down, the survivor can take a few.
+  {
+    "id": "scavenger_bite",
+    "nameKey": "weapon.bite.name",
+    "kind": "melee",
+    "canDrop": false,
+    "damage": 30,
+    "damageType": "sharp",
+    "range": 18,
+    "arcDegrees": 100,
+    "attackDuration": 0.45,
+    "hitDelay": 0.22,
+    "fireRate": 1.4,
+    "knockback": 170,
+    "sounds": { "attack": "sound.scavenger_growl", "hit": "sound.hit_sharp" }
+  },
+  {
+    "id": "leaper_claws",
+    "nameKey": "weapon.claws.name",
+    "kind": "melee",
+    "canDrop": false,
+    "damage": 40,
+    "damageType": "sharp",
+    "range": 16,
+    "arcDegrees": 110,
+    "attackDuration": 0.3,
+    "hitDelay": 0.12,
+    "fireRate": 1.6,
+    "knockback": 280,
+    "sounds": { "attack": "sound.swing", "hit": "sound.hit_sharp" }
+  },
+  {
+    "id": "watcher_claws",
+    "nameKey": "weapon.claws.name",
+    "kind": "melee",
+    "canDrop": false,
+    "damage": 45,
+    "damageType": "sharp",
+    "range": 28,
+    "arcDegrees": 150,
+    "attackDuration": 0.5,
+    "hitDelay": 0.28,
+    "fireRate": 1.1,
+    "knockback": 300,
+    "sounds": { "attack": "sound.swing", "hit": "sound.hit_sharp" }
+  }
+]

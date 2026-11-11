@@ -71,6 +71,11 @@ thermique, HUD de surveillance, nouvelles tuiles, armes (`flare_gun`, `hunting_r
 (`husk`, `stalker`), variantes d'ennemis existants (`guard`), deux niveaux, textes fr/en, musique et
 ambiance, score désactivé.
 
+`Mods/NoctPrototype` (« Le dernier signal ») va plus loin, toujours sans code propre au pack : survival
+horror complet avec ses propres images thermiques, trois créatures (`scavenger`, `leaper` avec `ai.leap`,
+`watcher` avec `ai.behavior: "ambush"`), armes à munitions de réserve, conteneurs à fouiller, transmissions
+de l'observateur et une mission décrite dans les données du niveau. Il ne dépend que du pack de base.
+
 ## Limites
 
 Pas de scripts ni de DLL dans les mods : un comportement réellement nouveau (par exemple un ennemi qui

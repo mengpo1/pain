@@ -1,0 +1,12 @@
+{
+  // The survivor: walks carefully, runs while stamina lasts (and makes noise doing so).
+  // As responsive as the action game (same acceleration), but not killed in one hit.
+  "id": "player",
+  "health": 100,
+  "speed": 165,
+  "runSpeed": 250,
+  "acceleration": 9000,
+  "friction": 9000,
+  "stamina": { "max": 100, "runDrain": 30, "regen": 24, "regenDelay": 0.6, "recoverThreshold": 30, "runNoise": 260 },
+  "sounds": { "death": "sound.static" }
+}

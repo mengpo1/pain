@@ -119,7 +119,7 @@ internal static class ContentValidator
         Sound(content.Assets, d, "game.json", game.MenuMusic);
         GameSounds s = game.Sounds;
         Sound(content.Assets, d, "game.json", s.UiMove, s.UiSelect, s.Pickup, s.Throw, s.Bounce, s.Impact, s.Footstep,
-            s.ObjectiveComplete, s.LevelComplete, s.Crush, s.Tear);
+            s.ObjectiveComplete, s.LevelComplete, s.Crush, s.Tear, s.Transmission, s.Reload, s.Heal);
     }
 
     private static void ValidateLevel(ContentDatabase content, LevelDefinition level, DiagnosticList d)

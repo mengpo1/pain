@@ -1,0 +1,37 @@
+{
+  "game.over": "SIGNAL PERDU",
+  "game.levelComplete": "EXTRACTION RÉUSSIE",
+  "game.restartHint": "{key} pour relancer la mission",
+  "actor": {
+    "scavenger": { "name": "Charognard" },
+    "leaper": { "name": "Bondisseur" },
+    "watcher": { "name": "Veilleur" }
+  },
+  "ammo": { "9mm": "balles de 9 mm", "shells": "cartouches" },
+  "noctproto": {
+    "title": "LE DERNIER SIGNAL",
+    "camLabel": "CAM-03 // {level}",
+    "level": { "installation": { "name": "Installation K-12" } },
+    "objective": {
+      "reachFacility": "Atteignez l'installation",
+      "findRadioRoom": "Explorez le bâtiment : trouvez la salle radio",
+      "takeBattery": "Récupérez la batterie radio",
+      "extraction": "EXTRACTION : rejoignez le point désigné"
+    },
+    "item": {
+      "battery": "Batterie radio",
+      "ammo9": "Boîte de munitions",
+      "medkit": "Trousse de soins"
+    },
+    "tx": {
+      "signal": "TRANSMISSION — Signal détecté. Source estimée à 120 mètres.",
+      "mission": "OBJECTIF — Rejoignez l'installation au nord et récupérez une batterie radio.",
+      "unknown": "ANALYSE — Signature thermique non identifiée. Elle se déplace.",
+      "inside": "OBSERVATEUR — Vous y êtes. La salle radio est au nord du couloir.",
+      "faint": "ANALYSE — Signal faible dans la salle radio. Immobile. Approchez lentement.",
+      "battery": "TRANSMISSION — Batterie récupérée. Liaison possible.",
+      "extraction": "EXTRACTION — Retournez au point désigné, au sud-ouest.",
+      "fast": "ANALYSE — Signature rapide en approche. Ne restez pas dans son axe."
+    }
+  }
+}

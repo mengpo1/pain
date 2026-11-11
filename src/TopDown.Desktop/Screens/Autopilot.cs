@@ -58,6 +58,12 @@ internal sealed class Autopilot
                 commands.AttackHeld = true;
             }
         }
+        else if (ObjectiveTarget(world) is { } container)
+        {
+            // Search the container holding what the mission needs (or use the object to activate).
+            goal = container.Position;
+            if (world.Combat.FindInteractable(player) == container) commands.InteractPressed = true;
+        }
         else if (world.Objectives.Current is { Zone: { } zone } && world.Zones.TryGetValue(zone, out var rect))
         {
             goal = rect.Center;
@@ -68,6 +74,7 @@ internal sealed class Autopilot
             return;
         }
 
+        if (player.Weapon is { IsEmpty: true }) commands.ReloadPressed = true;
         if (time > _repathTime || _path.Count == 0)
         {
             world.Pathfinder.FindPath(player.Position, goal, _path);
@@ -80,5 +87,17 @@ internal sealed class Autopilot
         NVector2 direction = target - player.Position;
         commands.Move = direction.LengthSquared() > 4f ? NVector2.Normalize(direction) : NVector2.Zero;
         if (enemy is null) commands.AimTarget = player.Position + commands.Move * 50f;
+    }
+
+    /// <summary>The interactable the current objective is about: to activate, or holding the item to collect.</summary>
+    private static Interactable? ObjectiveTarget(GameWorld world)
+    {
+        if (world.Objectives.Current is not { Target: { } target } objective) return null;
+        return objective.Type switch
+        {
+            ObjectiveType.Activate => world.Interactables.FirstOrDefault(i => i.Available && i.Definition.Id == target),
+            ObjectiveType.Collect => world.Interactables.FirstOrDefault(i => i.Available && i.Definition.Loot.Any(l => l.Item == target)),
+            _ => null,
+        };
     }
 }

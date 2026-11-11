@@ -8,7 +8,7 @@ namespace PlaceholderArt;
 /// </summary>
 public static class NoctArt
 {
-    static Rgba G(float v, float a = 1f) => Rgba.Grey(v, a);
+    internal static Rgba G(float v, float a = 1f) => Rgba.Grey(v, a);
 
     static readonly HumanLook Player = new()
     {
@@ -76,7 +76,7 @@ public static class NoctArt
     // ------------------------------------------------------------------ thermal post-processing
 
     /// <summary>Additive per-pixel sensor noise on the visible pixels.</summary>
-    static void Grain(Canvas c, int seed, float amount) =>
+    internal static void Grain(Canvas c, int seed, float amount) =>
         c.Map((x, y, p) =>
         {
             if (p.A <= 0f) return p;
@@ -85,7 +85,7 @@ public static class NoctArt
         });
 
     /// <summary>Warm body: softened edges, a white heat halo and grain.</summary>
-    static Canvas Warm(Canvas c, int seed, float halo = 0.5f)
+    internal static Canvas Warm(Canvas c, int seed, float halo = 0.5f)
     {
         c.Blur(0.4f);
         c.Glow(Rgba.White, 2f, halo);
@@ -94,7 +94,7 @@ public static class NoctArt
     }
 
     /// <summary>Cold object: luminance remapped into [lo, hi], light rim, grain.</summary>
-    static Canvas Cold(Canvas src, float lo, float hi, Rgba edge, float edgeStrength, int seed)
+    internal static Canvas Cold(Canvas src, float lo, float hi, Rgba edge, float edgeStrength, int seed)
     {
         var c = src.Clone();
         c.Map((_, _, p) => G(lo + (hi - lo) * p.Luma, p.A));
@@ -107,7 +107,7 @@ public static class NoctArt
     /// Re-grades a base tile into thermal greys: luminance is centred on <paramref name="target"/> with its
     /// contrast scaled, then softened (wrapping, so it stays seamless) and grained.
     /// </summary>
-    static Canvas ThermalTile(Canvas tile, float target, float contrast, int seed)
+    internal static Canvas ThermalTile(Canvas tile, float target, float contrast, int seed)
     {
         float sum = 0f, weight = 0f;
         for (int y = 0; y < tile.Height; y++)
@@ -125,7 +125,7 @@ public static class NoctArt
     }
 
     /// <summary>Residual body heat on the floor: light grey, fading out towards the edges.</summary>
-    static void HeatPool(Canvas c, float cx, float cy, float r, int seed)
+    internal static void HeatPool(Canvas c, float cx, float cy, float r, int seed)
     {
         var rng = new Random(seed);
         var layer = new Canvas(c.Width, c.Height);

@@ -11,7 +11,7 @@
   "menu": {
     "play": "Jouer",
     "modifier": "Modificateur",
-    "profile": "Profil",
+    "profile": "Jeu",
     "language": "Langue",
     "settings": "Paramètres",
     "mods": "Mods",
@@ -53,10 +53,20 @@
     "empty": "VIDE",
     "outOfAmmo": "Plus de munitions : lancez l'arme !",
     "collected": "Récupéré : {item}",
-    "rec": "REC"
+    "rec": "REC",
+    "reloading": "RECHARGEMENT",
+    "transmission": "TRANSMISSION",
+    "medkits": { "one": "{count} soin", "other": "{count} soins" },
+    "loot": {
+      "ammo": "+{count} {ammo}",
+      "medkits": { "one": "+{count} trousse de soins", "other": "+{count} trousses de soins" },
+      "weapon": "Une arme est tombée au sol"
+    }
   },
   "prompt": {
     "execute": "Achever",
+    "search": "Fouiller",
+    "heal": "Se soigner",
     "pickup": "Ramasser : {weapon}",
     "strike": {
       "one": "Frapper (dernier coup)",
@@ -135,8 +145,9 @@
     "gunner": { "name": "Tireur", "description": "Commence avec un pistolet, tir plus précis." }
   },
   "profile": {
-    "action": "Action (contenu de base)",
-    "noct": "Horreur (mod inspiré de Noct)"
+    "action": "Néon brutal (prototype d'action)",
+    "noct": "Le dernier signal (prototype horreur Noct)",
+    "signal": "Signal mort (ancienne démo de mod)"
   },
   "input": {
     "Space": "Espace",

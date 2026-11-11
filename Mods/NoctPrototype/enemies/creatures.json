@@ -1,0 +1,98 @@
+[
+  {
+    // Charognard: the basic creature. Easy alone (two pistol shots), dangerous in a pack: it calls
+    // the others. Can be shoved back, stunned, knocked down with a club and finished off.
+    "id": "scavenger",
+    "nameKey": "actor.scavenger.name",
+    "faction": "creature",
+    "anatomy": "creature",
+    "health": 150,
+    "radius": 11,
+    "speed": 70,
+    "runSpeed": 205,
+    "acceleration": 2600,
+    "friction": 2600,
+    "naturalWeaponId": "scavenger_bite",
+    "hitStunDuration": 0.3,
+    "getUpDuration": 0.6,
+    "sprites": { "body": "actor.scavenger", "down": "actor.scavenger.dead", "dead": "actor.scavenger.dead", "bloodTint": "#c8c8c8",
+                 "heat": { "rest": 0.8, "active": 1 } },
+    "sounds": { "death": "sound.creature_screech", "alert": "sound.scavenger_growl", "hurt": "sound.scavenger_growl" },
+    "ai": {
+      "behavior": "wander",
+      "visionRange": 300,
+      "visionAngleDegrees": 140,
+      "closeDetectionRadius": 70,
+      "hearingMultiplier": 1.4,
+      "reactionTime": 0.35,
+      "turnSpeedDegrees": 420,
+      "loseTargetTime": 4,
+      "searchDuration": 6,
+      "wanderRadiusTiles": 4,
+      "alertAlliesRadius": 260
+    }
+  },
+  {
+    // Bondisseur: fast and frail. From mid range it crouches (screech, flicker, a line towards
+    // you), then leaps in a straight line: step aside right after the launch.
+    "id": "leaper",
+    "nameKey": "actor.leaper.name",
+    "faction": "creature",
+    "anatomy": "creature",
+    "health": 90,
+    "radius": 10,
+    "speed": 95,
+    "runSpeed": 235,
+    "acceleration": 3200,
+    "friction": 3200,
+    "naturalWeaponId": "leaper_claws",
+    "hitStunDuration": 0.25,
+    "sprites": { "body": "actor.leaper", "down": "actor.leaper.dead", "dead": "actor.leaper.dead", "bloodTint": "#c8c8c8",
+                 "heat": { "rest": 0.85, "active": 1 } },
+    "sounds": { "death": "sound.creature_screech", "alert": "sound.leaper_screech", "leap": "sound.leaper_screech" },
+    "ai": {
+      "behavior": "guard",
+      "visionRange": 380,
+      "visionAngleDegrees": 160,
+      "closeDetectionRadius": 80,
+      "hearingMultiplier": 1.2,
+      "reactionTime": 0.3,
+      "turnSpeedDegrees": 540,
+      "loseTargetTime": 5,
+      "searchDuration": 6,
+      "leap": { "minRange": 55, "range": 190, "windUp": 0.5, "speed": 600, "distance": 230, "recovery": 0.8, "cooldown": 1.6 }
+    }
+  },
+  {
+    // Veilleur: lies in wait, still and cold (barely brighter than the floor), breathing slowly.
+    // It wakes up when you come close in clear view, or make noise right next to it.
+    "id": "watcher",
+    "nameKey": "actor.watcher.name",
+    "faction": "creature",
+    "anatomy": "creature",
+    "health": 220,
+    "radius": 13,
+    "speed": 60,
+    "runSpeed": 215,
+    "acceleration": 2400,
+    "friction": 2400,
+    "naturalWeaponId": "watcher_claws",
+    "knockdownImmune": true,
+    "hitStunDuration": 0.2,
+    "damageMultipliers": { "unarmed": 0, "execution": 0 },
+    "sprites": { "body": "actor.watcher", "dead": "actor.watcher.dead", "bloodTint": "#a0a0a0",
+                 "heat": { "rest": 0.2, "active": 1, "pulse": 0.14 } },
+    "sounds": { "death": "sound.creature_growl", "alert": "sound.creature_screech", "idle": "sound.watcher_breath" },
+    "ai": {
+      "behavior": "ambush",
+      "wakeRadius": 110,
+      "visionRange": 320,
+      "visionAngleDegrees": 220,
+      "closeDetectionRadius": 90,
+      "reactionTime": 0.2,
+      "turnSpeedDegrees": 360,
+      "loseTargetTime": 6,
+      "searchDuration": 8
+    }
+  }
+]

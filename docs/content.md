@@ -80,6 +80,7 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 | `dismember` | un coup mortel peut trancher des morceaux du corps : `chance`, `parts` (sortes : `head`, `arm`, `leg`), `count` (morceaux au plus), `maxDistance` (0 = toute distance ; le fusil à pompe seulement de près) |
 | `noiseRadius` | rayon dans lequel les ennemis entendent (0 = silencieux) |
 | `magazineSize`, `pellets`, `spreadDegrees` | munitions, plombs par tir, dispersion |
+| `ammoType`, `reloadTime` | munitions de réserve (`"9mm"`, `"shells"`…) : l'arme se recharge depuis l'inventaire du joueur (R, ou en tirant sur un chargeur vide). Sans `ammoType`, une arme vide ne fait que cliquer ou être lancée |
 | `projectileSpeed` | vitesse des balles ; `0` = tir instantané |
 | `muzzleDistance`, `holdOffset` | position du canon et de l'arme dans les mains (avant, droite) |
 | `whenEmpty` | `click`, `throw` (lancée automatiquement) ou `drop` |
@@ -162,6 +163,19 @@ Toutes les poses à cheval regardent vers la tête : les épaules du bourreau so
   `"execution": 0` empêche d'achever.
 - `anatomy` (`human` par défaut, `quadruped` pour le chien) : une arme peut achever chaque anatomie
   différemment (`execution.against`).
+- `stamina` (absent = pas de course) : `{ "max": 100, "runDrain": 30, "regen": 24, "regenDelay": 0.6,
+  "recoverThreshold": 30, "runNoise": 260 }`. En courant (Maj), le joueur va à `runSpeed`, dépense son
+  endurance et fait du bruit ; épuisé, il marche jusqu'à en avoir récupéré `recoverThreshold`.
+- `sprites.heat` (caméra thermique) : `{ "rest": 0.2, "active": 1, "pulse": 0.14 }` = luminosité au repos
+  (embuscade, sommeil, garde immobile), en mouvement, et respiration lente au repos.
+- `sounds.idle` : joué de temps en temps au repos quand le joueur est proche (un indice) ; `sounds.leap` :
+  au moment où une créature se ramasse pour bondir.
+- `ai.behavior: "ambush"` : immobile et aveugle, se réveille quand le joueur entre à vue dans
+  `ai.wakeRadius` (ou fait du bruit tout près), puis chasse comme les autres.
+- `ai.leap` : `{ "minRange": 55, "range": 190, "windUp": 0.5, "speed": 600, "distance": 230,
+  "recovery": 0.8, "cooldown": 1.6 }`. Entre `minRange` et `range`, chemin dégagé : la créature se ramasse
+  (`windUp`, annoncé à l'écran et au son), puis bondit en ligne droite vers l'endroit où était sa cible ;
+  un mur l'arrête ; un seul coup au contact (son arme naturelle, factions respectées), puis `recovery`.
 - `wound` (absent = jamais blessé) : un coup mortel d'une arme qui a un `woundChance` peut laisser le
   personnage **blessé** : à terre, face contre le sol, il lâche son arme et rampe en s'éloignant du
   joueur (`crawlSpeed`), en laissant une traînée de sang et en gémissant (`sounds.hurt`). Il ne se
@@ -285,4 +299,11 @@ quand un morceau est arraché.
 ```
 
 Couleurs `#rrggbb` ou `#rrggbbaa`. `hudStyle` : `default` ou `surveillance`. `hideUnseenActors` cache les
-personnages hors du champ de vision du joueur. Le thème ne change jamais les règles.
+personnages hors du champ de vision du joueur. `heatGlow` (halo autour des corps chauds, selon leur
+`sprites.heat`) et `rollingBar` (bande qui défile, vieille vidéo) complètent l'effet caméra thermique
+(`Mods/NoctPrototype/themes/thermal_cam.json`). Le thème ne change jamais les règles.
+
+Dans `game.json`, `"restartWhileAlive": false` réserve la touche de relance à l'après-mort (et à la pause),
+pour qu'elle serve aussi à recharger ; `"hud": { "survival": true }` affiche vie, endurance, munitions de
+réserve, trousses et objets de mission ; `rules.medkitHeal` règle le soin d'une trousse ; `sounds`
+accepte `transmission`, `reload`, `heal`.

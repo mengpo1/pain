@@ -74,4 +74,16 @@ public sealed class Door
 
         if (!IsMoving) LastPusher = null;
     }
+
+    /// <summary>
+    /// Already open as far as it goes in the direction a character at <paramref name="position"/>
+    /// would push it: pushing harder will not move it.
+    /// </summary>
+    internal bool CannotYieldTo(Vector2 position)
+    {
+        if (Locked) return true;
+        float push = -SideOf(position);
+        float max = Geo.DegToRad(Definition.MaxAngleDegrees);
+        return MathF.Abs(Angle) >= max - 0.02f && MathF.Sign(Angle) == MathF.Sign(push);
+    }
 }

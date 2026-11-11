@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TopDown.Content;
+using TopDown.Core.Ai;
 using TopDown.Core.Definitions;
 using TopDown.Core.Geometry;
 using TopDown.Core.World;
@@ -61,7 +62,7 @@ public sealed class PlayScreen : Screen
         ThemeDefinition theme = Session.Content.Theme;
         _renderer = new WorldRenderer(Session.Assets, theme, Session.Content.Game.Feel);
         _post = new PostProcessor(host.GraphicsDevice, Session.Assets, theme.Post);
-        _hud = new Hud(Session.Ui, host.Input.Bindings);
+        _hud = new Hud(Session.Ui, host.Input.Bindings, Session.Content.Game.Hud.Survival);
         _autopilot = autopilot ? new Autopilot() : null;
         _isVisible = IsVisible;
         _flashAmount = FlashAmount;
@@ -83,6 +84,7 @@ public sealed class PlayScreen : Screen
         _world = GameWorld.Create(Level, Session.Content.Definitions, seed: _attempt * 7919, _modifier);
         _effects.Clear();
         _gore.Clear();
+        _nextIdleSound.Clear();
         _hud.Clear();
         _visibility.Clear();
         _flashUntil.Clear();
@@ -118,7 +120,9 @@ public sealed class PlayScreen : Screen
             return;
         }
 
-        if (Input.Pressed(GameAction.Restart))
+        // In a survival game the key also reloads: it only restarts after death (or from the pause menu).
+        bool canRestart = Session.Content.Game.RestartWhileAlive || !_world.Player.IsAlive || _world.Outcome != WorldOutcome.Playing;
+        if (canRestart && Input.Pressed(GameAction.Restart))
         {
             Restart();
             return;
@@ -140,6 +144,7 @@ public sealed class PlayScreen : Screen
         {
             _world.Step(Step, _pending);
             _pending.AttackPressed = _pending.PickupOrThrowPressed = _pending.InteractPressed = false;
+            _pending.ReloadPressed = _pending.HealPressed = false;
             HandleEvents();
             _accumulator -= Step;
         }
@@ -147,13 +152,15 @@ public sealed class PlayScreen : Screen
         if (_world.Outcome != WorldOutcome.Playing) _outcomeTime += frame;
         float alpha = _accumulator / Step;
         NVector2 playerPosition = NVector2.Lerp(_world.Player.PreviousPosition, _world.Player.Position, alpha);
-        _camera.Update(frame, WorldRenderer.ToXna(playerPosition), _aimWorld, Input.Held(GameAction.LookFar), Session.Content.Game.Camera, Host.Settings.ScreenShake);
+        bool lookFar = Input.Held(GameAction.LookFar) && !_world.Player.IsRunning;
+        _camera.Update(frame, WorldRenderer.ToXna(playerPosition), _aimWorld, lookFar, Session.Content.Game.Camera, Host.Settings.ScreenShake);
         Audio.ListenerPosition = _camera.Position;
         _effects.Update(frame);
         foreach (Actor actor in _world.Actors)
         {
             if (actor.State == ActorState.Wounded && _gore.Crawling(actor, _effects, Blood(actor), _time))
                 Audio.Play(actor.Definition.Sounds.Hurt, actor.Position, volume: 0.55f);
+            PlayIdleSound(actor);
         }
 
         _hud.Update(frame, _world);
@@ -175,6 +182,9 @@ public sealed class PlayScreen : Screen
         _pending.AttackPressed |= Input.Pressed(GameAction.Attack);
         _pending.PickupOrThrowPressed |= Input.Pressed(GameAction.PickupThrow);
         _pending.InteractPressed |= Input.Pressed(GameAction.Interact);
+        _pending.Run = Input.Held(GameAction.Run);
+        _pending.ReloadPressed |= Input.Pressed(GameAction.Reload);
+        _pending.HealPressed |= Input.Pressed(GameAction.Heal);
         _autopilot?.Drive(_world, ref _pending, _time);
         if (_autopilot is not null) _aimWorld = WorldRenderer.ToXna(_pending.AimTarget);
     }
@@ -265,6 +275,26 @@ public sealed class PlayScreen : Screen
                 Impact(Feel.Kill, wounded.Source, wounded.Target, wounded.Direction);
                 if (wounded.Target == _lockTarget) _lockTarget = null;
                 break;
+            case LootReceived loot:
+                Audio.Play(Sounds.Pickup, loot.Position);
+                _hud.ShowLoot(loot.Loot);
+                break;
+            case TransmissionRequested transmission:
+                Audio.Play(transmission.Sound ?? Sounds.Transmission, channel: AudioChannel.Interface);
+                _hud.ShowTransmission(T.Get(transmission.TextKey), transmission.Duration);
+                break;
+            case ReloadStarted reload:
+                Audio.Play(Sounds.Reload, reload.Actor.Position);
+                break;
+            case Healed healed:
+                Audio.Play(Sounds.Heal, healed.Actor.Position);
+                break;
+            case LeapStarted leap:
+                Audio.Play(leap.Actor.Definition.Sounds.Leap ?? leap.Actor.Definition.Sounds.Alert, leap.Actor.Position);
+                break;
+            case LeapLanded landed:
+                _effects.Smoke(WorldRenderer.ToXna(landed.Actor.Position), colors.Fx * 0.25f, 2);
+                break;
             case ActorKnockedDown down:
                 _effects.Smoke(WorldRenderer.ToXna(down.Target.Position), colors.Fx * 0.25f, 2);
                 Impact(Feel.Knockdown, down.Source, down.Target, down.Source is { } source ? FromTo(source, down.Target) : NVector2.Zero);
@@ -317,6 +347,8 @@ public sealed class PlayScreen : Screen
                 Audio.Play(alerted.Enemy.Definition.Sounds.Alert, alerted.Enemy.Position, volume: 0.6f);
                 break;
             case ItemCollected collected:
+                // Boxes of ammunition and medkits are announced by their loot.
+                if (collected.Item.Definition.Loot.Count > 0) break;
                 Audio.Play(Sounds.Pickup, collected.Item.Position);
                 _hud.ShowMessage(T.Format("hud.collected", ("item", T.Get(collected.Item.Definition.NameKey))), 2.5f);
                 break;
@@ -340,6 +372,22 @@ public sealed class PlayScreen : Screen
     }
 
     private FeelSettings Feel => Session.Content.Game.Feel;
+
+    /// <summary>
+    /// A creature lying in wait gives itself away now and then (breathing, clicking), only when the
+    /// player is close enough to hear it.
+    /// </summary>
+    private void PlayIdleSound(Actor actor)
+    {
+        if (actor.Definition.Sounds.Idle is not { } sound || actor.Brain is not { State: AiState.Ambush or AiState.Dormant or AiState.Idle }) return;
+        if (NVector2.Distance(actor.Position, _world.Player.Position) > IdleSoundDistance) return;
+        if (_nextIdleSound.TryGetValue(actor, out float next) && _time < next) return;
+        if (_nextIdleSound.ContainsKey(actor)) Audio.Play(sound, actor.Position, volume: 0.7f);
+        _nextIdleSound[actor] = _time + 2.8f + (actor.Id % 4) * 0.45f;
+    }
+
+    private readonly Dictionary<Actor, float> _nextIdleSound = new();
+    private const float IdleSoundDistance = 300f;
 
     /// <summary>Hitstop and camera shake, only for impacts the player takes part in.</summary>
     private void Impact(ImpactFeel feel, Actor? source, Actor target, NVector2 direction)

@@ -31,7 +31,8 @@ Le joueur et les ennemis sont la même classe `Actor` : seule la source des déc
 `Active` → `Attacking` (mêlée en cours, déplacement possible) → `Active` ; `Stunned` (étourdi debout,
 brièvement) ; `KnockedDown` → `GettingUp` → `Active` ; `Executing` (achève une cible) ;
 `BeingExecuted` (cible clouée au sol : c'est la **réservation**, personne d'autre ne peut l'achever et
-elle ne se relève pas) ; `Wounded` (blessé : rampe, ne se relève jamais, s'achève) ; `Dead` (définitif). Les changements passent par des méthodes de `Actor` qui
+elle ne se relève pas) ; `Wounded` (blessé : rampe, ne se relève jamais, s'achève) ; `Leaping` (bond :
+`Crouch` → `Airborne` → `Landing`) ; `Dead` (définitif). Les changements passent par des méthodes de `Actor` qui
 empêchent les combinaisons impossibles : un achèvement interrompu (exécuteur touché, renversé ou tué)
 remet la cible au sol et libère la réservation (un blessé se remet à ramper).
 
@@ -64,7 +65,8 @@ arrachés (le corps est alors dessiné pièce par pièce).
 ### IA
 
 Une seule machine à états (`EnemyBrain`) pour tous les ennemis : `Dormant`, `Idle` (surveillance),
-`Patrol`, `Wander`, `Suspicious`, `Investigate`, `Chase` (poursuite et attaque), `Search`, `Return`.
+`Patrol`, `Wander`, `Ambush` (embuscade), `Suspicious`, `Investigate`, `Chase` (poursuite et attaque, et
+bond si la définition en a un), `Search`, `Return`.
 Les définitions changent les paramètres (portée et angle de vision, ouïe, temps de réaction, vitesse,
 précision, alerte des alliés) et le comportement au repos. Les chemins (A* sur la grille, sans couper
 les coins) ne sont recalculés que si la cible a bougé ou si l'ennemi est bloqué.
@@ -74,6 +76,13 @@ les coins) ne sont recalculés que si la cible a bougé ou si l'ennemi est bloqu
 La simulation produit des `GameEvent` (tir, impact, mort, porte claquée, objectif atteint…). Le
 Desktop les lit après chaque pas pour jouer sons, particules et secousses, puis les efface. Pas de bus
 d'événements générique : une simple liste.
+
+### Survie
+
+`Inventory` (munitions de réserve par type, trousses, objets de mission) appartient au monde du joueur ;
+le butin des objets et conteneurs y arrive par `GiveLoot`. Rechargement, soin et course sont des règles
+du Core, activées seulement par les données (`ammoType`, `medkitHeal`, `stamina`) : sans elles, le jeu
+d'action se comporte exactement comme avant.
 
 ## Rendu
 

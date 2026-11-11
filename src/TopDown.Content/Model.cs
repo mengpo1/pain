@@ -36,6 +36,20 @@ public sealed class GameSettings
     public CameraSettings Camera { get; set; } = new();
     public GameSounds Sounds { get; set; } = new();
     public FeelSettings Feel { get; set; } = new();
+
+    /// <summary>
+    /// The restart key works at any time (action game). Off: only after death or from the pause
+    /// menu, so the same key can reload.
+    /// </summary>
+    public bool RestartWhileAlive { get; set; } = true;
+
+    public HudSettings Hud { get; set; } = new();
+}
+
+public sealed class HudSettings
+{
+    /// <summary>Shows health, stamina, spare ammunition, medkits and mission items.</summary>
+    public bool Survival { get; set; }
 }
 
 /// <summary>
@@ -84,6 +98,10 @@ public sealed class GameSounds
     public string? Crush { get; set; }
     /// <summary>A limb torn off.</summary>
     public string? Tear { get; set; }
+    /// <summary>A message from the observer arrives.</summary>
+    public string? Transmission { get; set; }
+    public string? Reload { get; set; }
+    public string? Heal { get; set; }
 }
 
 public sealed class CameraSettings
@@ -161,6 +179,10 @@ public sealed class PostEffects
     public string ColorMultiply { get; set; } = "#ffffff";
     /// <summary>Characters outside the player's line of sight are not drawn.</summary>
     public bool HideUnseenActors { get; set; }
+    /// <summary>Soft halo around warm bodies (thermal camera), scaled by each body's heat.</summary>
+    public float HeatGlow { get; set; }
+    /// <summary>A faint band rolling down the image, like an old video feed.</summary>
+    public float RollingBar { get; set; }
 }
 
 public sealed class AnimationDefinition

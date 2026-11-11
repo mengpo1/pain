@@ -1,0 +1,37 @@
+{
+  "game.over": "SIGNAL LOST",
+  "game.levelComplete": "EXTRACTION COMPLETE",
+  "game.restartHint": "{key} to restart the mission",
+  "actor": {
+    "scavenger": { "name": "Scavenger" },
+    "leaper": { "name": "Leaper" },
+    "watcher": { "name": "Watcher" }
+  },
+  "ammo": { "9mm": "9 mm rounds", "shells": "shells" },
+  "noctproto": {
+    "title": "THE LAST SIGNAL",
+    "camLabel": "CAM-03 // {level}",
+    "level": { "installation": { "name": "Facility K-12" } },
+    "objective": {
+      "reachFacility": "Reach the facility",
+      "findRadioRoom": "Search the building: find the radio room",
+      "takeBattery": "Take the radio battery",
+      "extraction": "EXTRACTION: reach the designated point"
+    },
+    "item": {
+      "battery": "Radio battery",
+      "ammo9": "Box of ammunition",
+      "medkit": "Medkit"
+    },
+    "tx": {
+      "signal": "TRANSMISSION — Signal detected. Source estimated 120 metres away.",
+      "mission": "OBJECTIVE — Reach the facility to the north and recover a radio battery.",
+      "unknown": "ANALYSIS — Unidentified heat signature. It is moving.",
+      "inside": "OBSERVER — You're in. The radio room is north of the corridor.",
+      "faint": "ANALYSIS — Faint signal in the radio room. Not moving. Approach slowly.",
+      "battery": "TRANSMISSION — Battery recovered. A link is possible.",
+      "extraction": "EXTRACTION — Go back to the designated point, south-west.",
+      "fast": "ANALYSIS — Fast signature closing in. Don't stay in its path."
+    }
+  }
+}

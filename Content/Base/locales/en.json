@@ -11,7 +11,7 @@
   "menu": {
     "play": "Play",
     "modifier": "Modifier",
-    "profile": "Profile",
+    "profile": "Game",
     "language": "Language",
     "settings": "Settings",
     "mods": "Mods",
@@ -53,10 +53,20 @@
     "empty": "EMPTY",
     "outOfAmmo": "Out of ammo: throw it!",
     "collected": "Picked up: {item}",
-    "rec": "REC"
+    "rec": "REC",
+    "reloading": "RELOADING",
+    "transmission": "TRANSMISSION",
+    "medkits": { "one": "{count} medkit", "other": "{count} medkits" },
+    "loot": {
+      "ammo": "+{count} {ammo}",
+      "medkits": { "one": "+{count} medkit", "other": "+{count} medkits" },
+      "weapon": "A weapon fell to the floor"
+    }
   },
   "prompt": {
     "execute": "Finish off",
+    "search": "Search",
+    "heal": "Heal",
     "pickup": "Pick up: {weapon}",
     "strike": {
       "one": "Strike (final blow)",
@@ -135,8 +145,9 @@
     "gunner": { "name": "Gunner", "description": "Starts with a pistol, more accurate shots." }
   },
   "profile": {
-    "action": "Action (base content)",
-    "noct": "Horror (Noct-inspired mod)"
+    "action": "Neon Brutal (action prototype)",
+    "noct": "The Last Signal (Noct horror prototype)",
+    "signal": "Dead Signal (older mod demo)"
   },
   "input": {
     "Space": "Space",

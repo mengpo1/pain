@@ -137,7 +137,7 @@ public sealed class Actor
     public float Stamina { get; internal set; }
     public bool IsRunning { get; internal set; }
     /// <summary>Ran out of stamina: cannot run again before recovering a bit.</summary>
-    internal bool Exhausted { get; set; }
+    public bool Exhausted { get; internal set; }
     internal float StaminaRestTimer { get; set; }
     internal float RunNoiseTimer { get; set; }
 

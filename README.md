@@ -4,16 +4,18 @@ Socle C# / MonoGame pour des jeux d'action 2D vus du dessus, rapides et létaux.
 les **règles** (déplacements, collisions, combat, IA, portes, objectifs) ; les **jeux** sont des données
 (JSON, images, sons) chargées au lancement.
 
-Deux expériences tournent déjà sur le même exécutable :
+Plusieurs jeux tournent sur le même exécutable ; on les choisit dans le menu principal (« Jeu ») ou
+avec `--profile` :
 
 | Profil | Contenu | Style |
 |---|---|---|
 | `action` | `Content/Base` | « Néon brutal » : action nerveuse, un coup = un mort (ou un blessé qui rampe, ou un corps démembré), score et combos |
-| `noct` | `Content/Base` + `Mods/NoctInspired` | « Signal mort » : horreur de surveillance thermique, obscurité, créatures qui chassent au bruit, sans score |
+| `noct` | `Content/Base` + `Mods/NoctPrototype` | « Le dernier signal » : survival horror vu par une caméra thermique de surveillance, trois créatures, une mission |
+| `signal` | `Content/Base` + `Mods/NoctInspired` | « Signal mort » : ancienne démo de mod (horreur thermique, deux niveaux) |
 
 | Action (`action`) | Horreur (`noct`) | Mode debug |
 |---|---|---|
-| ![Combat dans l'entrepôt](docs/images/action.jpg) | ![Avant-poste en vision thermique](docs/images/horror.jpg) | ![Hitboxes, collisions et IA](docs/images/debug.jpg) |
+| ![Combat dans l'entrepôt](docs/images/action.jpg) | ![Installation vue par la caméra thermique](docs/images/noct.jpg) | ![Hitboxes, collisions et IA](docs/images/debug.jpg) |
 
 Tout le contenu (graphismes, sons, niveaux, textes) est original. Les graphismes et sons de
 remplacement sont générés par `tools/PlaceholderArt` (CC0).
@@ -74,7 +76,10 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler.
 | Achever un ennemi à terre, qui se relève ou qui rampe blessé / interagir | Espace (aux poings, puis clic gauche pour chaque coup : à cheval, la tête cognée au sol, ou coups de pied ; un chien y laisse ses pattes ou sa tête) |
 | Verrouiller une cible | clic molette ou E |
 | Regarder plus loin | Maj |
-| Recommencer | R |
+| Courir (jeux avec endurance) | Maj (maintenu) |
+| Recharger (armes à munitions de réserve) | R (et automatiquement sur un chargeur vide) |
+| Se soigner (trousse) | H |
+| Recommencer | R (dans « Le dernier signal » : après la mort, ou depuis la pause, puisque R recharge) |
 | Pause | Échap ou P |
 | Plein écran | F11 |
 
@@ -82,6 +87,22 @@ Un repère discret entoure l'ennemi que vous pouvez achever. La **salle d'essai*
 campagne, ou `--level arena`) réunit un ennemi seul, un chien, deux ennemis ensemble, une batte, un
 tuyau et un pistolet pour tester les combats. Les réglages de rythme sont dans `Content/Base/game.json` (`rules`,
 `feel`), les armes et les personnages (voir [docs/content.md](docs/content.md)) ; `F9` les recharge.
+
+### Le dernier signal (prototype Noct)
+
+```bash
+dotnet run --project src/TopDown.Desktop -- --profile noct
+```
+
+Un survivant reçoit une transmission venant d'une installation abandonnée : traverser la cour,
+explorer le bâtiment, récupérer une batterie radio dans la salle radio, revenir au point d'extraction.
+L'observateur commente par radio. Trois créatures : le **Charognard** (chasse en meute), le
+**Bondisseur** (se ramasse, crie, puis bondit en ligne droite : écartez-vous juste après le saut) et le
+**Veilleur** (immobile et presque froid à l'image, il respire ; il se réveille si l'on s'approche).
+Munitions de réserve par calibre, rechargement, trousses de soins, course avec endurance (bruyante),
+casiers et caisses à fouiller. Tout est dans `Mods/NoctPrototype` (données, images, sons, textes) ; le
+jeu d'action n'est pas modifié. Pour revenir au jeu d'action : menu « Jeu », ou `--profile action`
+(le dernier jeu choisi est retenu au lancement suivant).
 
 Toutes les touches se changent dans `settings.json`, dans le dossier utilisateur dont le chemin
 exact est affiché en bas du menu Paramètres (par exemple `~/.config/TopDown` sous Linux,
@@ -123,18 +144,20 @@ docs/                 formats et guides
 ## État et limites
 
 - **Vérifié** :
-  - ici (Linux, Xvfb, OpenGL logiciel) : compilation sans avertissement, tests, menus, les cinq
-    niveaux en pilotage automatique, et une partie pilotée au clavier et à la souris (menu, ramassage,
-    attaque, pause, mode debug, recommencement) ;
+  - ici (Linux, Xvfb, OpenGL logiciel) : compilation sans avertissement, tests, menus, tous les
+    niveaux en pilotage automatique (la mission du « Dernier signal » jouée de bout en bout jusqu'à
+    l'extraction), et une partie pilotée au clavier et à la souris (menu, ramassage, attaque, pause,
+    mode debug, recommencement) ;
   - en intégration continue (`.github/workflows/ci.yml`) : compilation et tests sous **Linux, Windows et
-    macOS** ; le jeu réel sur les cinq niveaux sous Linux ; le jeu lancé et rendu sous **macOS** (Apple
-    Silicon) sur un niveau.
+    macOS** ; le jeu réel sur tous les niveaux sous Linux ; le jeu lancé et rendu sous **macOS** (Apple
+    Silicon) sur un niveau d'action et sur la mission Noct.
 - **Non vérifié** : une vraie session de jeu sur un Mac ou un PC Windows avec carte graphique, et le son
   et les musiques (pas de carte son dans l'environnement de développement : le jeu le détecte et
   continue sans audio ; les musiques sont contrôlées par mesures de volume, de spectre et de bouclage).
 - Post-traitement sans shaders compilés (le compilateur d'effets de MonoGame exige Wine hors Windows) :
   obscurité, lumières, grain, vignette, lignes de balayage et parasites sont faits par mélanges de
-  couleurs. Un vrai rendu thermique (conversion en niveaux de gris) passe par des sprites adaptés, comme
-  le fait le mod.
+  couleurs. Le rendu thermique repose sur des images en niveaux de gris (générées, remplaçables), un halo
+  de chaleur autour des corps, la luminosité propre à chaque créature et ces effets, tous réglables dans
+  le thème du pack.
 - Pas de manette, pas d'éditeur de niveaux, pas de scripts dans les mods (choix volontaires pour cette
   première version), les ennemis ne ramassent pas les armes.

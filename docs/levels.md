@@ -58,9 +58,24 @@ le bord entre deux tuiles). L'axe Y descend.
 - L'apparence (`sprite`) et la collision (`size`, `blocks*`) des `props` sont indépendantes. Le `decor`
   n'a jamais de collision.
 
+## Joueur, objets et conteneurs
+
+`player.inventory` : ce que le joueur porte au départ. Le **butin** (`loot`) est une liste d'entrées, une
+chose par entrée :
+
+```json
+{ "ammo": "9mm", "amount": 12 }   { "medkits": 1 }   { "weapon": "shotgun" }   { "item": "battery", "nameKey": "noctproto.item.battery" }
+```
+
+- `items` : ramassés en marchant dessus. Avec `loot` (boîte de munitions, trousse), ils le donnent ;
+  sans `loot`, l'objet lui-même est un **objet de mission** gardé dans l'inventaire.
+- `interactables` : utilisés avec Espace (`promptKey`, par exemple `prompt.search`). Leur `loot` est
+  donné **une seule fois** ; `usedSprite` montre le conteneur ouvert et vide. Une arme trouvée est posée
+  au sol à côté.
+
 ## Ennemis
 
-`behavior` remplace le comportement au repos de la définition (`guard`, `patrol`, `wander`, `dormant`).
+`behavior` remplace le comportement au repos de la définition (`guard`, `patrol`, `wander`, `dormant`, `ambush`).
 `patrol` liste les points de ronde. `weaponId: "none"` retire l'arme par défaut. `tag` regroupe des
 ennemis pour les déclencheurs.
 
@@ -72,17 +87,26 @@ Ils s'enchaînent dans l'ordre ; le niveau est gagné quand le dernier est rempl
 |---|---|---|
 | `eliminateAll` | `tag` (facultatif) | tous les ennemis (du tag) sont morts ; un ennemi à terre compte encore |
 | `reachZone` | `zone` | le joueur est dans la zone (elle est signalée à l'écran) |
-| `collect` | `target` (id d'item) | l'objet est ramassé (en marchant dessus) |
+| `collect` | `target` (id d'objet de mission) | le joueur l'a (ramassé au sol ou trouvé dans un conteneur) |
 | `survive` | `duration` | le joueur a survécu la durée indiquée |
 | `activate` | `target` (id d'interactable) | le joueur l'a utilisé (Espace) |
 
+Tout objectif accepte `requires` (id d'objet de mission) : une extraction (`reachZone`) qui ne compte que
+si le joueur porte ce qu'il est venu chercher.
+
 ## Déclencheurs
 
-`on` : `enterZone` (`subject` = zone), `objectiveCompleted` (`subject` = index de l'objectif, `"0"` pour
-le premier), `activated` (`subject` = id d'interactable). `once` (vrai par défaut).
+`on` : `start` (début du niveau), `enterZone` (`subject` = zone), `objectiveCompleted` (`subject` = index
+de l'objectif, `"0"` pour le premier), `activated` (`subject` = id d'interactable), `collected` (`subject` =
+id d'objet de mission). `once` (vrai par défaut).
 
 Actions : `activateTag` (réveille des ennemis `dormant`), `alertTag` (les lance sur le joueur),
-`message` (`textKey`, `duration`), `unlockDoor` (`door`), `playSound` (`sound`).
+`message` (`textKey`, `duration`), `transmission` (message de l'observateur dans le panneau radio, avec
+le son `transmission` du jeu ou `sound` ; les suivants attendent leur tour), `spawn` (`definition`,
+`position`, `facingDegrees`, `tag`, `alert` : un personnage apparaît, et chasse le joueur si `alert`),
+`unlockDoor` (`door`), `playSound` (`sound`).
+
+Exemple complet : la mission « Le dernier signal » (`Mods/NoctPrototype/levels/installation.json`).
 
 ## Validation
 
