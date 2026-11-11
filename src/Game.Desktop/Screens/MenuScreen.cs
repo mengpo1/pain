@@ -11,6 +11,7 @@ namespace Game.Desktop.Screens;
 public sealed class MenuScreen : Screen
 {
     private int _selected;
+    private string? _error;
 
     public MenuScreen(GameHost host) : base(host)
     {
@@ -78,6 +79,17 @@ public sealed class MenuScreen : Screen
 
         if (ui.Button(batch, new Rectangle(screen.Width - left - ui.S(160), bottom, ui.S(160), ui.S(40)), texts.Get("menu.quit")))
             Host.Exit();
+
+        if (File.Exists(BattleScreen.QuickSavePath(Host))
+            && ui.Button(batch, new Rectangle(left, top + Missions.Count * row + ui.S(20), width, row - ui.S(8)), texts.Get("menu.load"), size: 16f))
+        {
+            if (BattleScreen.Resume(Host, out string? error) is { } resumed) Host.SetScreen(resumed);
+            else _error = texts.Format("error.load_failed", ("message", error ?? ""));
+        }
+
+        if (_error is not null)
+            foreach ((string line, int i) in TextLayout.Wrap(ui, _error, 14f, screen.Width - left * 2).Select((l, i) => (l, i)))
+                ui.Text(batch, line, new Vector2(left, bottom - ui.S(70) + i * ui.S(20)), 14f, ui.Colors.Bad);
 
         int problems = Session.Content.Diagnostics.Errors.Count();
         if (problems > 0)

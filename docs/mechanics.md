@@ -159,7 +159,8 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 | Inventaire | 🟡 Déplacement d'objets entre mains, ceinture, sac et sol avec les coûts en UT des emplacements (`RuleInventory::getCost`) ; panneau en liste, pas encore la grille d'OXCE ; poids et encombrement non appliqués. |
 | Feu, fumée (création, propagation, dégâts) | ❌ Algorithmes relevés dans les sources (`prepareNewTurn`). |
 | Expérience et progression | ❌ |
-| Sauvegarde de bataille et de campagne | ❌ |
+| Sauvegarde de bataille | ✅ | JSON versionné (`format`), définitions référencées par identifiant, jeu et mods enregistrés, écriture atomique (fichier temporaire puis renommage), état complet (carte modifiée, découverte, unités, inventaires, minuteries, réserve, générateur aléatoire) : une bataille rechargée continue exactement comme l'originale (testé). Refus explicites : autre jeu, format inconnu, définitions manquantes (avec la liste et les mods de la sauvegarde), fichier corrompu. La mémoire interne de l'IA (cible de patrouille) n'est pas sauvegardée. |
+| Sauvegarde de campagne | ❌ | Avec le Geoscape. |
 | Geoscape (temps, bases, recherche, fabrication, véhicules, interceptions, économie) | ❌ Lot 3. |
 | Campagne, événements, encyclopédie | ❌ Lot 4. |
 

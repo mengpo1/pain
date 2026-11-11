@@ -4,6 +4,7 @@ using Game.Core.Battle.Movement;
 using Game.Core.Common;
 using Game.Core.Content;
 using Game.Core.Definitions;
+using Game.Core.Saves;
 using Game.Desktop.Graphics;
 using Game.Desktop.Input;
 using Game.Desktop.Tactical;
@@ -32,6 +33,7 @@ public sealed class BattleScreen : Screen
     private readonly AiController _ai;
     private HudAction? _hudAction;
     private bool _paused;
+    private float _pausedAt;
     private float _time;
     private float _endDelay = 1.6f;
 
@@ -52,6 +54,56 @@ public sealed class BattleScreen : Screen
     {
         Log.Info($"Starting mission '{mission.Id}' with seed {seed}.");
         return new BattleScreen(host, BattleFactory.Create(host.Session.Content.Rules, mission, seed));
+    }
+
+    /// <summary>Path of the quick save (one per game pack).</summary>
+    public static string QuickSavePath(GameHost host) =>
+        Path.Combine(host.Paths.SavesDirectory, $"{host.Session.Content.GamePack.Manifest.Id}-quicksave.json");
+
+    /// <summary>Loads the quick save; null (with a logged reason) if it cannot be loaded.</summary>
+    public static BattleScreen? Resume(GameHost host, out string? error)
+    {
+        error = null;
+        try
+        {
+            Battle battle = BattleSaves.Read(QuickSavePath(host), host.Session.Content);
+            Log.Info($"Loaded {QuickSavePath(host)}.");
+            return new BattleScreen(host, battle);
+        }
+        catch (SaveException exception)
+        {
+            Log.Error(exception.Message);
+            error = exception.Message;
+            return null;
+        }
+    }
+
+    private void SaveGame()
+    {
+        if (!Idle || _battle.IsOver) return;
+        try
+        {
+            BattleSaves.Write(_battle, Session.Content, QuickSavePath(Host));
+            _hud.Show(Texts.Get("ui.saved"), 2f);
+            Log.Info($"Saved to {QuickSavePath(Host)}.");
+        }
+        catch (SaveException exception)
+        {
+            Log.Error(exception.Message);
+            _hud.Show(Texts.Format("error.save_failed", ("message", exception.Message)), 5f);
+        }
+    }
+
+    private void LoadGame()
+    {
+        if (!File.Exists(QuickSavePath(Host))) return;
+        if (Resume(Host, out string? error) is { } screen)
+        {
+            Host.SetScreen(screen);
+            return;
+        }
+
+        _hud.Show(Texts.Format("error.load_failed", ("message", error ?? "")), 6f);
     }
 
     private bool PlayerControls => _battle.CurrentFaction == Faction.Player && !Host.Options.Autoplay;
@@ -251,6 +303,8 @@ public sealed class BattleScreen : Screen
         if (input.Pressed(GameAction.EndTurn)) HandleHud(new EndTurnAction());
         if (input.Pressed(GameAction.CenterOnUnit)) HandleHud(new CenterOnSelected());
         if (input.Pressed(GameAction.Inventory)) HandleHud(new ToggleInventory());
+        if (input.Pressed(GameAction.QuickSave)) SaveGame();
+        if (input.Pressed(GameAction.QuickLoad)) LoadGame();
         if (input.Pressed(GameAction.Cancel))
         {
             if (_view.Targeting is not null || _view.ActionMenu is not null)
@@ -260,7 +314,7 @@ public sealed class BattleScreen : Screen
             }
             else
             {
-                _paused = true;
+                Pause();
             }
         }
 
@@ -330,7 +384,7 @@ public sealed class BattleScreen : Screen
                 Execute(new EndTurnCommand());
                 break;
             case OpenPauseMenu:
-                _paused = true;
+                Pause();
                 break;
             case OpenActionMenu open:
                 _view.ActionMenu = _view.ActionMenu == open.Item ? null : open.Item;
@@ -363,6 +417,12 @@ public sealed class BattleScreen : Screen
                 Execute(new PrimeCommand(unit.Id, prime.Grenade.Id, prime.Fuse));
                 break;
         }
+    }
+
+    private void Pause()
+    {
+        _paused = true;
+        _pausedAt = _time;
     }
 
     private void SelectNext(bool previous)
@@ -486,11 +546,20 @@ public sealed class BattleScreen : Screen
         Rectangle screen = batch.GraphicsDevice.Viewport.Bounds;
         batch.Begin(samplerState: SamplerState.PointClamp);
         batch.Draw(ui.Assets.Pixel, screen, Color.Black * 0.55f);
-        var panel = new Rectangle(screen.Center.X - ui.S(170), screen.Center.Y - ui.S(90), ui.S(340), ui.S(160));
+        var panel = new Rectangle(screen.Center.X - ui.S(170), screen.Center.Y - ui.S(150), ui.S(340), ui.S(296));
         ui.Panel(batch, panel);
-        if (ui.Button(batch, new Rectangle(panel.X + ui.S(20), panel.Y + ui.S(20), panel.Width - ui.S(40), ui.S(48)), Texts.Get("ui.resume")) || Host.Input.Pressed(GameAction.Back) && _time > 0.2f)
+        int row = ui.S(68), x = panel.X + ui.S(20), w = panel.Width - ui.S(40), h = ui.S(48);
+        if (ui.Button(batch, new Rectangle(x, panel.Y + ui.S(20), w, h), Texts.Get("ui.resume")) || Host.Input.Pressed(GameAction.Back) && _time > _pausedAt)
             _paused = false;
-        if (ui.Button(batch, new Rectangle(panel.X + ui.S(20), panel.Y + ui.S(88), panel.Width - ui.S(40), ui.S(48)), Texts.Get("ui.abandon")))
+        if (ui.Button(batch, new Rectangle(x, panel.Y + ui.S(20) + row, w, h), Texts.Get("ui.save"), Idle && !_battle.IsOver))
+        {
+            SaveGame();
+            _paused = false;
+        }
+
+        if (ui.Button(batch, new Rectangle(x, panel.Y + ui.S(20) + row * 2, w, h), Texts.Get("ui.load"), File.Exists(QuickSavePath(Host))))
+            LoadGame();
+        if (ui.Button(batch, new Rectangle(x, panel.Y + ui.S(20) + row * 3, w, h), Texts.Get("ui.abandon")))
         {
             Session.Audio.PlayMusic(Session.Content.Game.Sounds.MenuMusic);
             Host.SetScreen(new MenuScreen(Host));

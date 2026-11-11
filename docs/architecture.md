@@ -44,7 +44,15 @@ lit que ce que son camp a le droit de savoir (ennemis vus récemment, à leur de
 
 Tous les tirages passent par `GameRandom` (SplitMix64, état sur un entier, bornes incluses comme
 `RNG::generate`). Même graine et mêmes commandes donnent exactement la même bataille ; les tests
-le vérifient. L'état du générateur est prévu pour être sauvegardé.
+le vérifient. L'état du générateur est enregistré dans les sauvegardes.
+
+## Sauvegardes
+
+`BattleSaves` écrit l'état d'une bataille en JSON versionné : les définitions sont référencées
+par identifiant, jamais copiées ; le jeu et les mods utilisés sont notés. L'écriture passe par un
+fichier temporaire renommé, pour qu'une interruption ne laisse jamais une sauvegarde à moitié
+écrite. Le chargement vérifie le format, le jeu et chaque identifiant, et explique ce qui manque.
+Une bataille ne se sauvegarde qu'entre deux actions (pile d'actions vide).
 
 ## Contenu
 

@@ -104,6 +104,31 @@ public sealed class Battle
         CheckOutcome();
     }
 
+    // ------------------------------------------------------------------ restoring a saved battle
+
+    /// <summary>Adds a unit rebuilt from a save (keeps its id).</summary>
+    internal void Adopt(BattleUnit unit)
+    {
+        _units.Add(unit);
+        if (unit.IsActive) Map[unit.Position]!.Unit = unit;
+        _nextUnitId = Math.Max(_nextUnitId, unit.Id + 1);
+    }
+
+    /// <summary>Adds an item rebuilt from a save (keeps its id; placement is done by the caller).</summary>
+    internal void Adopt(BattleItem item)
+    {
+        _items.Add(item);
+        _nextItemId = Math.Max(_nextItemId, item.Id + 1);
+    }
+
+    internal void RestoreTurn(int turn, Faction faction)
+    {
+        Turn = turn;
+        CurrentFaction = faction;
+    }
+
+    internal HashSet<BattleUnit> SpottedThisTurn(Faction faction) => _spottedThisTurn[(int)faction];
+
     // ------------------------------------------------------------------ queries
 
     public BattleUnit? GetUnit(int id) => _units.FirstOrDefault(u => u.Id == id);

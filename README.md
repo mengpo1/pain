@@ -66,7 +66,8 @@ dotnet publish src/Game.Desktop -c Release -r osx-arm64 --self-contained
 
 (`osx-x64`, `linux-x64`, `win-x64` pour les autres plateformes.) Les dossiers `Content/` et `Mods/`
 sont copiés à côté de l'exécutable et restent modifiables sans recompiler. Les réglages et le journal
-(`settings.json`, `log.txt`) sont dans le dossier utilisateur dont le chemin est écrit au démarrage.
+(`settings.json`, `log.txt`) et les sauvegardes (`saves/`) sont dans le dossier utilisateur dont le
+chemin est écrit au démarrage.
 
 ### Options de lancement
 
@@ -97,6 +98,7 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler. 
 | Fin du tour | `E` |
 | Caméra | flèches, ZQSD/WASD, bords de l'écran, clic molette maintenu ; zoom à la molette ; `C` centre |
 | Niveaux | `Page préc.` / `Page suiv.` |
+| Sauvegarde rapide / chargement | `F5` / `F9` (aussi dans le menu `Échap` ; « Reprendre » dans le menu principal) |
 | Menu | `Échap` |
 | Tout montrer (débogage) | `F1` |
 | Plein écran | `F11` |
@@ -138,14 +140,14 @@ mort ; tirs de réaction ; vision, lumière et brouillard de guerre ; moral ; IA
 blocs ; deux univers ; mods ; FR/EN.
 
 Grenades (amorçage, lancer en cloche, explosion en fin de tour, destruction du décor) et
-inventaire (déplacement d'objets avec les coûts en UT), réserve d'UT, panique et berserk sont aussi
-en place.
+inventaire (déplacement d'objets avec les coûts en UT), réserve d'UT, panique et berserk, et la
+sauvegarde des batailles sont aussi en place.
 
-**Pas encore fait** : feu et fumée, sauvegarde, expérience, inventaire en
+**Pas encore fait** : feu et fumée, expérience, inventaire en
 grille, grenades pour l'IA, et toute la couche stratégique (Geoscape). Le détail est dans
 [docs/mechanics.md](docs/mechanics.md).
 
-**Vérifié** : compilation sans avertissement et 102 tests sous Linux ; le jeu réel lancé sous Linux
+**Vérifié** : compilation sans avertissement et 108 tests sous Linux ; le jeu réel lancé sous Linux
 (Xvfb, OpenGL logiciel), joué à la souris et au clavier (sélection, déplacement, menu de tir, tir,
 fin de tour, inventaire, grenade amorcée, lancée et explosant en fin de tour) et en pilotage
 automatique sur les deux packs. L'intégration continue
