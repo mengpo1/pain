@@ -1,0 +1,9 @@
+// A new weapon: nothing in the engine changes, it uses existing mechanics (self-powered firearm).
+{
+  "id": "rail_rifle", "nameKey": "item.rail_rifle", "kind": "firearm", "weight": 10,
+  "inventoryWidth": 1, "inventoryHeight": 3, "twoHanded": true, "flatTu": true,
+  "snap": { "accuracy": 70, "tu": 24 },
+  "aimed": { "accuracy": 125, "tu": 40 },
+  "damage": { "power": 70, "type": "kinetic" }, "rounds": 0,
+  "floorSprite": "item.rifle", "inventorySprite": "item.rifle", "projectileSprite": "fx.pulse", "fireSound": "sfx.pulse"
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "id": "village_warden", "nameKey": "unit.village_warden", "armor": "gambeson",
+    "stats": { "tu": 52, "stamina": 70, "health": 32, "bravery": 45, "reactions": 48, "firing": 55, "throwing": 50, "strength": 32, "melee": 55 },
+    "loadout": [
+      { "item": "crossbow", "slot": "rightHand", "ammo": "bolt" },
+      { "item": "bolt", "slot": "belt" }, { "item": "bolt", "slot": "belt" }, { "item": "bolt", "slot": "belt" },
+      { "item": "bolt", "slot": "backpack" }, { "item": "bolt", "slot": "backpack" }
+    ]
+  },
+  {
+    "id": "veteran", "nameKey": "unit.veteran", "armor": "mail",
+    "stats": { "tu": 58, "stamina": 80, "health": 42, "bravery": 70, "reactions": 55, "firing": 45, "throwing": 50, "strength": 45, "melee": 80 },
+    "loadout": [ { "item": "sword", "slot": "rightHand" } ]
+  },
+  {
+    "id": "raider", "nameKey": "unit.raider", "armor": "leathers", "value": 8,
+    "stats": { "tu": 56, "stamina": 70, "health": 28, "bravery": 35, "reactions": 50, "firing": 50, "throwing": 50, "strength": 30, "melee": 55 },
+    "loadout": [ { "item": "longbow", "slot": "rightHand", "ammo": "quiver" }, { "item": "quiver", "slot": "belt" } ],
+    "ai": { "aggression": 1, "intelligence": 2, "retreatHealthPercent": 45 }
+  },
+  {
+    "id": "revenant", "nameKey": "unit.revenant", "armor": "grave_bones", "value": 15, "deathSound": "sfx.death_revenant",
+    "stats": { "tu": 44, "stamina": 200, "health": 45, "bravery": 110, "reactions": 30, "firing": 10, "throwing": 10, "strength": 60, "melee": 75 },
+    "loadout": [ { "item": "rusty_blade", "slot": "rightHand" } ],
+    "ai": { "aggression": 3, "intelligence": 3, "retreatHealthPercent": 0 }
+  }
+]

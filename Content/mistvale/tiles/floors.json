@@ -1,0 +1,7 @@
+[
+  { "id": "grass", "sprite": "tile.floor_grass", "shape": "floor", "tuWalk": 4 },
+  { "id": "mud", "sprite": "tile.floor_mud", "shape": "floor", "tuWalk": 6 },
+  { "id": "cobble", "sprite": "tile.floor_cobble", "shape": "floor", "tuWalk": 4 },
+  { "id": "planks", "sprite": "tile.floor_planks", "shape": "floor", "tuWalk": 4 },
+  { "id": "thatch", "sprite": "tile.floor_thatch", "shape": "floor", "tuWalk": 4 }
+]

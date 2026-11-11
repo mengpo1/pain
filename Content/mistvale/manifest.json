@@ -1,0 +1,9 @@
+{
+  "id": "mistvale",
+  "name": "Brumeval",
+  "version": "0.1.0",
+  "formatVersion": 1,
+  "description": "Pack B: a misty medieval valley. Same engine, other units, weapons, texts, graphics and objectives. Original content.",
+  "author": "OpenTactics contributors",
+  "dependencies": []
+}

@@ -1,0 +1,20 @@
+[
+  { "id": "stone_w", "sprite": "tile.wall_stone_w", "shape": "wallW", "blocksSight": true, "blocksExplosions": true, "armor": 70, "destroyedInto": "stone_ruin_w" },
+  { "id": "stone_n", "sprite": "tile.wall_stone_n", "shape": "wallN", "blocksSight": true, "blocksExplosions": true, "armor": 70, "destroyedInto": "stone_ruin_n" },
+  { "id": "stone_ruin_w", "sprite": "tile.wall_stone_ruin_w", "shape": "ruinW", "walkable": true, "tuWalk": 2 },
+  { "id": "stone_ruin_n", "sprite": "tile.wall_stone_ruin_n", "shape": "ruinN", "walkable": true, "tuWalk": 2 },
+  { "id": "timber_w", "sprite": "tile.wall_timber_w", "shape": "wallW", "blocksSight": true, "armor": 30, "destroyedInto": "timber_ruin_w" },
+  { "id": "timber_n", "sprite": "tile.wall_timber_n", "shape": "wallN", "blocksSight": true, "armor": 30, "destroyedInto": "timber_ruin_n" },
+  { "id": "timber_ruin_w", "sprite": "tile.wall_timber_ruin_w", "shape": "ruinW", "walkable": true, "tuWalk": 2 },
+  { "id": "timber_ruin_n", "sprite": "tile.wall_timber_ruin_n", "shape": "ruinN", "walkable": true, "tuWalk": 2 },
+  { "id": "shutter_w", "sprite": "tile.shutter_w", "shape": "windowW", "blocksSight": true, "armor": 10, "destroyedInto": "shutter_broken_w" },
+  { "id": "shutter_n", "sprite": "tile.shutter_n", "shape": "windowN", "blocksSight": true, "armor": 10, "destroyedInto": "shutter_broken_n" },
+  { "id": "shutter_broken_w", "sprite": "tile.shutter_broken_w", "shape": "brokenWindowW", "armor": 30, "destroyedInto": "timber_ruin_w" },
+  { "id": "shutter_broken_n", "sprite": "tile.shutter_broken_n", "shape": "brokenWindowN", "armor": 30, "destroyedInto": "timber_ruin_n" },
+  { "id": "door_w", "sprite": "tile.door_w", "shape": "wallW", "blocksSight": true, "door": "swing", "openInto": "door_open_w", "armor": 25, "destroyedInto": "door_open_w" },
+  { "id": "door_n", "sprite": "tile.door_n", "shape": "wallN", "blocksSight": true, "door": "swing", "openInto": "door_open_n", "armor": 25, "destroyedInto": "door_open_n" },
+  { "id": "door_open_w", "sprite": "tile.door_open_w", "shape": "doorFrameW", "walkable": true, "closedInto": "door_w" },
+  { "id": "door_open_n", "sprite": "tile.door_open_n", "shape": "doorFrameN", "walkable": true, "closedInto": "door_n" },
+  { "id": "palisade_w", "sprite": "tile.palisade_w", "shape": "fenceW", "armor": 25 },
+  { "id": "palisade_n", "sprite": "tile.palisade_n", "shape": "fenceN", "armor": 25 }
+]

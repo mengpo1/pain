@@ -1,0 +1,12 @@
+// Unit statistics. The rules read the ids; names and training caps are content.
+[
+  { "id": "tu", "nameKey": "stat.tu", "shortKey": "stat.tu.short", "max": 70, "order": 0 },
+  { "id": "stamina", "nameKey": "stat.stamina", "shortKey": "stat.stamina.short", "max": 100, "order": 1 },
+  { "id": "health", "nameKey": "stat.health", "shortKey": "stat.health.short", "max": 60, "order": 2 },
+  { "id": "bravery", "nameKey": "stat.bravery", "shortKey": "stat.bravery.short", "max": 100, "order": 3 },
+  { "id": "reactions", "nameKey": "stat.reactions", "shortKey": "stat.reactions.short", "max": 100, "order": 4 },
+  { "id": "firing", "nameKey": "stat.firing", "shortKey": "stat.firing.short", "max": 120, "order": 5 },
+  { "id": "throwing", "nameKey": "stat.throwing", "shortKey": "stat.throwing.short", "max": 100, "order": 6 },
+  { "id": "strength", "nameKey": "stat.strength", "shortKey": "stat.strength.short", "max": 70, "order": 7 },
+  { "id": "melee", "nameKey": "stat.melee", "shortKey": "stat.melee.short", "max": 120, "order": 8 }
+]

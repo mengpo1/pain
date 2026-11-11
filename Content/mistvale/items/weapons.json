@@ -1,0 +1,47 @@
+// The valley's arms behave differently from the Horizon pack: the crossbow holds a single
+// bolt (reload after each shot), the bow is fast but weak, swords are real melee weapons.
+[
+  {
+    "id": "crossbow", "nameKey": "item.crossbow", "kind": "firearm", "weight": 7,
+    "inventoryWidth": 1, "inventoryHeight": 3, "twoHanded": true,
+    "snap": { "accuracy": 55, "tu": 30 },
+    "aimed": { "accuracy": 120, "tu": 55 },
+    "ammo": ["bolt"], "reloadTu": 20,
+    "range": { "aimed": 22, "dropoff": 3 },
+    "floorSprite": "item.crossbow", "inventorySprite": "item.crossbow", "projectileSprite": "fx.bolt", "fireSound": "sfx.crossbow"
+  },
+  {
+    "id": "bolt", "nameKey": "item.bolt", "kind": "ammo", "weight": 1, "rounds": 1,
+    "damage": { "power": 55, "type": "pierce" },
+    "floorSprite": "item.bolts", "inventorySprite": "item.bolts"
+  },
+  {
+    "id": "longbow", "nameKey": "item.longbow", "kind": "firearm", "weight": 3,
+    "inventoryWidth": 1, "inventoryHeight": 3, "twoHanded": true,
+    "snap": { "accuracy": 70, "tu": 20 },
+    "aimed": { "accuracy": 95, "tu": 40 },
+    "ammo": ["quiver"], "reloadTu": 10,
+    "range": { "aimed": 16, "dropoff": 4 },
+    "floorSprite": "item.bow", "inventorySprite": "item.bow", "projectileSprite": "fx.arrow", "fireSound": "sfx.bow"
+  },
+  {
+    "id": "quiver", "nameKey": "item.quiver", "kind": "ammo", "weight": 2, "rounds": 12,
+    "damage": { "power": 28, "type": "pierce" },
+    "floorSprite": "item.bolts", "inventorySprite": "item.bolts"
+  },
+  {
+    "id": "sword", "nameKey": "item.sword", "kind": "melee", "weight": 4, "inventoryHeight": 3,
+    "melee": { "accuracy": 110, "tu": 20 },
+    "damage": { "power": 45, "type": "slash" },
+    "floorSprite": "item.sword", "inventorySprite": "item.sword", "fireSound": "sfx.sword", "hitSound": "sfx.sword"
+  },
+  {
+    "id": "rusty_blade", "nameKey": "item.rusty_blade", "kind": "melee", "weight": 4, "inventoryHeight": 3,
+    "melee": { "accuracy": 90, "tu": 25 },
+    "damage": { "power": 38, "type": "crush" },
+    "floorSprite": "item.sword", "inventorySprite": "item.sword", "fireSound": "sfx.sword", "hitSound": "sfx.sword"
+  },
+  { "id": "corpse_warden", "nameKey": "item.corpse_warden", "kind": "corpse", "weight": 20, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_warden" },
+  { "id": "corpse_raider", "nameKey": "item.corpse_raider", "kind": "corpse", "weight": 20, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_raider" },
+  { "id": "corpse_revenant", "nameKey": "item.corpse_revenant", "kind": "corpse", "weight": 12, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_revenant" }
+]

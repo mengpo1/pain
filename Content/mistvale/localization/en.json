@@ -1,0 +1,192 @@
+{
+  "menu": {
+    "missions": "Missions",
+    "quit": "Quit",
+    "language": "Language: {name}",
+    "pack": "Game: {name}",
+    "start": "Start mission",
+    "back": "Back",
+    "load": "Continue last save",
+    "errors": "{count} content problem(s), see log.txt",
+    "seed": "Seed {seed}",
+    "objective": "Objective",
+    "mods": "Mods: {list}",
+    "mods_none": "none"
+  },
+  "ui": {
+    "end_turn": "End turn",
+    "next_unit": "Next",
+    "previous_unit": "Previous",
+    "kneel": "Kneel",
+    "stand": "Stand",
+    "reload": "Reload",
+    "level_up": "Level +",
+    "level_down": "Level −",
+    "center": "Center",
+    "menu": "Menu",
+    "turn": "Turn {turn}",
+    "enemy_turn": "{side} are moving…",
+    "your_turn": "{side}: your turn",
+    "tu": "AP",
+    "energy": "BR",
+    "health": "LF",
+    "morale": "SP",
+    "stun": "stun",
+    "accuracy": "{value}%",
+    "cost": "{value} TU",
+    "rounds": "{rounds}/{max}",
+    "no_weapon": "Empty hands",
+    "target_hint": "Choose a target — right click or Esc to cancel",
+    "path_cost": "{cost} TU",
+    "level": "Level {level}",
+    "visible_enemies": "Enemies in sight",
+    "wounds": "{count} fatal wound(s)",
+    "resume": "Resume",
+    "save": "Save",
+    "load": "Load",
+    "abandon": "Abandon mission",
+    "saved": "Game saved",
+    "loaded": "Game loaded",
+    "zone": "In zone: {inside}/{needed}",
+    "survive": "Hold until the end of turn {turns}",
+    "kneeling": "kneeling",
+    "unconscious": "unconscious",
+    "dead": "dead"
+  },
+  "mode": {
+    "snap": "Quick shot",
+    "aimed": "Careful shot",
+    "auto": "Volley",
+    "melee": "Strike",
+    "throw": "Throw"
+  },
+  "debrief": {
+    "title_victory": "Mission accomplished",
+    "title_defeat": "Mission failed",
+    "turns": "Turns played: {turn}",
+    "survivors": "Survivors",
+    "losses": "Losses",
+    "kills": "Hostiles neutralised: {count}",
+    "continue": "Back to menu",
+    "status_ok": "fit",
+    "status_wounded": "wounded ({health}/{max})",
+    "status_dead": "killed",
+    "status_unconscious": "unconscious"
+  },
+  "error": {
+    "battle_over": "The battle is over.",
+    "busy": "Wait for the current action.",
+    "no_unit": "No such unit.",
+    "not_your_turn": "Not your turn.",
+    "unit_down": "This unit cannot act.",
+    "unknown_command": "Unknown order.",
+    "no_path": "No path to this tile.",
+    "not_enough_tu": "Not enough time units ({value} needed).",
+    "not_enough_energy": "Not enough energy.",
+    "path_blocked": "Path blocked.",
+    "cannot_kneel": "This unit cannot kneel.",
+    "not_in_hand": "The item must be held in hand.",
+    "invalid_target": "Invalid target.",
+    "mode_unavailable": "This weapon cannot do that.",
+    "out_of_reach": "Too far: the target must be adjacent.",
+    "no_ammo": "No ammunition.",
+    "out_of_range": "Out of range.",
+    "no_line_of_fire": "No line of fire.",
+    "cannot_reload": "This weapon is not reloaded.",
+    "already_loaded": "The weapon is already loaded.",
+    "save_failed": "Saving failed: {message}",
+    "load_failed": "Loading failed: {message}"
+  },
+  "info": {
+    "enemy_spotted": "Enemy spotted!"
+  },
+  "game": {
+    "title": "Mistvale",
+    "subtitle": "Tales of the misty valley — second demonstration pack"
+  },
+  "mission": {
+    "victory": {
+      "eliminated": "The marauders are routed.",
+      "survived": "Dawn breaks: the mill held.",
+      "zone": "Someone reached the bridge and sounded the horn."
+    },
+    "defeat": {
+      "all_down": "The village has fallen.",
+      "time": "The bridge was raised before you arrived."
+    },
+    "hold_the_mill": {
+      "name": "Hold the mill",
+      "briefing": "Night has fallen on Mistvale. Revenants walk out of the barrows and raiders follow them. Hold the stone mill until the end of turn 8, when dawn breaks."
+    },
+    "to_the_bridge": {
+      "name": "To the bridge",
+      "briefing": "Raiders occupy the village. Cross it from the west and bring at least one warden to the bridge in the east within 12 turns."
+    }
+  },
+  "objective": {
+    "hold": "Hold until dawn.",
+    "bridge": "Bring one warden to the bridge."
+  },
+  "faction": {
+    "player": "Player",
+    "hostile": "Hostiles",
+    "neutral": "Villagers",
+    "village": "The village watch",
+    "marauders": "Marauders"
+  },
+  "stat": {
+    "tu": "Action points",
+    "tu.short": "AP",
+    "stamina": "Breath",
+    "stamina.short": "BR",
+    "health": "Life",
+    "health.short": "LF",
+    "bravery": "Spirit",
+    "bravery.short": "SP",
+    "reactions": "Vigilance",
+    "reactions.short": "VIG",
+    "firing": "Marksmanship",
+    "firing.short": "MRK",
+    "throwing": "Throwing",
+    "throwing.short": "THR",
+    "strength": "Might",
+    "strength.short": "MGT",
+    "melee": "Swordplay",
+    "melee.short": "SWD"
+  },
+  "item": {
+    "crossbow": "Crossbow",
+    "bolt": "Bolt",
+    "longbow": "Longbow",
+    "quiver": "Quiver of arrows",
+    "sword": "Arming sword",
+    "rusty_blade": "Rusty blade",
+    "corpse_warden": "Fallen warden",
+    "corpse_raider": "Dead raider",
+    "corpse_revenant": "Revenant bones"
+  },
+  "armor": {
+    "gambeson": "Gambeson",
+    "mail": "Mail hauberk",
+    "leathers": "Leathers",
+    "grave_bones": "Grave bones"
+  },
+  "unit": {
+    "village_warden": "Warden",
+    "veteran": "Veteran",
+    "raider": "Raider",
+    "revenant": "Revenant"
+  },
+  "damage": {
+    "pierce": "Piercing",
+    "slash": "Slashing",
+    "crush": "Crushing"
+  },
+  "slot": {
+    "right_hand": "Right hand",
+    "left_hand": "Left hand",
+    "belt": "Belt",
+    "backpack": "Backpack",
+    "ground": "Ground"
+  }
+}

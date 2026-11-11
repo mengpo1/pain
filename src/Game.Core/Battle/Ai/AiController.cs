@@ -85,7 +85,8 @@ public sealed class AiController
         {
             BattleUnit target = targets.MinBy(t => unit.Position.HorizontalDistanceSquared(t.Position))!;
             if (Attack(unit, weapon, target) is { } attack) return attack;
-            if (FirePoint(unit, weapon, target, known) is { } move) return move;
+            if (!weapon.IsFirearm && Charge(unit, weapon, target) is { } charge) return charge;
+            if (weapon.IsFirearm && FirePoint(unit, weapon, target, known) is { } move) return move;
         }
 
         if (known.Count > 0)
@@ -167,6 +168,30 @@ public sealed class AiController
         }
 
         return best is { } destination ? new MoveCommand(unit.Id, destination) : null;
+    }
+
+    /// <summary>
+    /// OXCE meleeAction, reduced: walk to the cheapest free tile next to the target that leaves
+    /// enough TU to strike; if none is reachable this turn, close in as far as possible.
+    /// </summary>
+    private BattleCommand? Charge(BattleUnit unit, BattleItem weapon, BattleUnit target)
+    {
+        int strike = CombatRules.AttackTu(unit, weapon.Definition, AttackMode.Melee);
+        Dictionary<Position, int> reachable = Pathfinder.Reachable(_battle, unit, unit.Tu - strike);
+        Position? best = null;
+        int bestCost = int.MaxValue;
+        for (int direction = 0; direction < Directions.Count; direction++)
+        {
+            Position next = target.Position.Step(direction);
+            if (reachable.TryGetValue(next, out int cost) && cost < bestCost && _battle.UnitAt(next) is null)
+            {
+                best = next;
+                bestCost = cost;
+            }
+        }
+
+        if (best is { } spot) return spot == unit.Position ? null : new MoveCommand(unit.Id, spot);
+        return MoveTowards(unit, target.Position, 0);
     }
 
     /// <summary>Retreat (OXCE escape, reduced): the reachable tile seen by the fewest known enemies, then the farthest from them.</summary>

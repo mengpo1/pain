@@ -1,0 +1,4 @@
+// Replaces the look of the base pack's Warden by mapping its sprite id to a file of this mod.
+{
+  "textures": { "texture.unit.warden": "assets/warden_red.png" }
+}

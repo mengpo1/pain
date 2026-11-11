@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Game.Core.Content;
 
 namespace Game.Core.Definitions;
@@ -97,6 +98,10 @@ public sealed class TilePartDefinition : Definition
 
     /// <summary>Sound id played when destroyed.</summary>
     public string? DestroySound { get; init; }
+
+    /// <summary>The shape definition, looked up once (voxel tests run millions of times).</summary>
+    [JsonIgnore]
+    internal ShapeDefinition? ResolvedShape { get; set; }
 }
 
 /// <summary>One symbol of a map block legend: the parts placed on a tile, plus markers.</summary>

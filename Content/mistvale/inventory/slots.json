@@ -1,0 +1,14 @@
+// Inventory slots (OXCE "invs"). Costs: TU to move an item from this slot to another one
+// (values from OpenXcom's standard ruleset). Hands and ground are required by the rules.
+[
+  { "id": "rightHand", "nameKey": "slot.right_hand", "kind": "hand", "screenPosition": [0, 2], "fillOrder": 0,
+    "costs": { "ground": 2, "leftHand": 4, "belt": 8, "backpack": 14 } },
+  { "id": "leftHand", "nameKey": "slot.left_hand", "kind": "hand", "screenPosition": [11, 2], "fillOrder": 1,
+    "costs": { "ground": 2, "rightHand": 4, "belt": 8, "backpack": 14 } },
+  { "id": "belt", "nameKey": "slot.belt", "kind": "grid", "width": 4, "height": 1, "screenPosition": [3, 6], "fillOrder": 3,
+    "costs": { "ground": 6, "rightHand": 4, "leftHand": 4, "backpack": 16 } },
+  { "id": "backpack", "nameKey": "slot.backpack", "kind": "grid", "width": 3, "height": 3, "screenPosition": [8, 0], "fillOrder": 4,
+    "costs": { "ground": 10, "rightHand": 8, "leftHand": 8, "belt": 12 } },
+  { "id": "ground", "nameKey": "slot.ground", "kind": "ground",
+    "costs": { "rightHand": 8, "leftHand": 8, "belt": 12, "backpack": 20 } }
+]

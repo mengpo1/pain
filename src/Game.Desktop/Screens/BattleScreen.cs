@@ -139,7 +139,8 @@ public sealed class BattleScreen : Screen
                 BattleItem? weapon = _battle.GetItem(shot.WeaponId);
                 Vector2 from = Iso.VoxelToWorld(shot.Origin), to = Iso.VoxelToWorld(shot.Impact);
                 float seconds = Math.Clamp(Vector2.Distance(from, to) / 1400f, 0.06f, 0.45f);
-                _playback.PlayProjectile(new ProjectileAnimation(shot.Mode == AttackMode.Melee ? null : weapon?.Definition.ProjectileSprite, from, to), seconds);
+                if (shot.Mode == AttackMode.Melee) _playback.Wait(0.2f);
+                else _playback.PlayProjectile(new ProjectileAnimation(weapon?.Definition.ProjectileSprite, from, to), seconds);
                 Session.Audio.Play(weapon?.Definition.FireSound, Pan(shot.Origin.Tile));
                 break;
             }

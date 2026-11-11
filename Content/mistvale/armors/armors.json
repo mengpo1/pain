@@ -1,0 +1,13 @@
+[
+  { "id": "gambeson", "nameKey": "armor.gambeson", "front": 8, "side": 6, "rear": 4, "under": 2,
+    "sprite": "unit.warden", "corpse": "corpse_warden", "standHeight": 21, "kneelHeight": 14 },
+  { "id": "mail", "nameKey": "armor.mail", "front": 22, "side": 18, "rear": 14, "under": 8, "stats": { "tu": -6 },
+    "damageModifiers": { "slash": 70 },
+    "sprite": "unit.veteran", "corpse": "corpse_warden", "standHeight": 22, "kneelHeight": 14 },
+  { "id": "leathers", "nameKey": "armor.leathers", "front": 6, "side": 5, "rear": 3, "under": 2,
+    "sprite": "unit.raider", "corpse": "corpse_raider", "standHeight": 21, "kneelHeight": 14, "canKneel": false },
+  { "id": "grave_bones", "nameKey": "armor.grave_bones", "front": 10, "side": 10, "rear": 10, "under": 10,
+    "damageModifiers": { "pierce": 50, "crush": 150 },
+    "visibilityAtDark": 20,
+    "sprite": "unit.revenant", "corpse": "corpse_revenant", "standHeight": 22, "kneelHeight": 14, "canKneel": false }
+]

@@ -1,0 +1,192 @@
+{
+  "menu": {
+    "missions": "Missions",
+    "quit": "Quitter",
+    "language": "Langue : {name}",
+    "pack": "Jeu : {name}",
+    "start": "Lancer la mission",
+    "back": "Retour",
+    "load": "Reprendre la dernière sauvegarde",
+    "errors": "{count} problème(s) de contenu, voir log.txt",
+    "seed": "Graine {seed}",
+    "objective": "Objectif",
+    "mods": "Mods : {list}",
+    "mods_none": "aucun"
+  },
+  "ui": {
+    "end_turn": "Fin du tour",
+    "next_unit": "Suivant",
+    "previous_unit": "Précédent",
+    "kneel": "Genou à terre",
+    "stand": "Debout",
+    "reload": "Recharger",
+    "level_up": "Niveau +",
+    "level_down": "Niveau −",
+    "center": "Centrer",
+    "menu": "Menu",
+    "turn": "Tour {turn}",
+    "enemy_turn": "{side} se déplacent…",
+    "your_turn": "{side} : à vous de jouer",
+    "tu": "PA",
+    "energy": "SO",
+    "health": "VI",
+    "morale": "CO",
+    "stun": "étourdi",
+    "accuracy": "{value} %",
+    "cost": "{value} UT",
+    "rounds": "{rounds}/{max}",
+    "no_weapon": "Mains vides",
+    "target_hint": "Choisissez une cible — clic droit ou Échap pour annuler",
+    "path_cost": "{cost} UT",
+    "level": "Niveau {level}",
+    "visible_enemies": "Ennemis en vue",
+    "wounds": "{count} blessure(s) mortelle(s)",
+    "resume": "Reprendre",
+    "save": "Sauvegarder",
+    "load": "Charger",
+    "abandon": "Abandonner la mission",
+    "saved": "Partie sauvegardée",
+    "loaded": "Partie chargée",
+    "zone": "Dans la zone : {inside}/{needed}",
+    "survive": "Tenir jusqu'à la fin du tour {turns}",
+    "kneeling": "à genou",
+    "unconscious": "inconscient",
+    "dead": "mort"
+  },
+  "mode": {
+    "snap": "Tir vif",
+    "aimed": "Tir ajusté",
+    "auto": "Volée",
+    "melee": "Frapper",
+    "throw": "Lancer"
+  },
+  "debrief": {
+    "title_victory": "Mission accomplie",
+    "title_defeat": "Mission échouée",
+    "turns": "Tours joués : {turn}",
+    "survivors": "Survivants",
+    "losses": "Pertes",
+    "kills": "Hostiles neutralisés : {count}",
+    "continue": "Retour au menu",
+    "status_ok": "valide",
+    "status_wounded": "blessé ({health}/{max})",
+    "status_dead": "tué",
+    "status_unconscious": "inconscient"
+  },
+  "error": {
+    "battle_over": "La bataille est terminée.",
+    "busy": "Attendez la fin de l'action en cours.",
+    "no_unit": "Unité inconnue.",
+    "not_your_turn": "Ce n'est pas votre tour.",
+    "unit_down": "Cette unité ne peut pas agir.",
+    "unknown_command": "Ordre inconnu.",
+    "no_path": "Aucun chemin vers cette case.",
+    "not_enough_tu": "Pas assez d'unités de temps ({value} nécessaires).",
+    "not_enough_energy": "Pas assez d'énergie.",
+    "path_blocked": "Chemin bloqué.",
+    "cannot_kneel": "Cette unité ne peut pas s'agenouiller.",
+    "not_in_hand": "L'objet doit être tenu en main.",
+    "invalid_target": "Cible invalide.",
+    "mode_unavailable": "Cette arme ne le permet pas.",
+    "out_of_reach": "Trop loin : la cible doit être adjacente.",
+    "no_ammo": "Pas de munitions.",
+    "out_of_range": "Hors de portée.",
+    "no_line_of_fire": "Pas de ligne de tir.",
+    "cannot_reload": "Cette arme ne se recharge pas.",
+    "already_loaded": "L'arme est déjà chargée.",
+    "save_failed": "Échec de la sauvegarde : {message}",
+    "load_failed": "Échec du chargement : {message}"
+  },
+  "info": {
+    "enemy_spotted": "Ennemi repéré !"
+  },
+  "game": {
+    "title": "Brumeval",
+    "subtitle": "Chroniques de la vallée des brumes — second pack de démonstration"
+  },
+  "mission": {
+    "victory": {
+      "eliminated": "Les pillards sont mis en déroute.",
+      "survived": "L'aube se lève : le moulin a tenu.",
+      "zone": "Quelqu'un a atteint le pont et sonné du cor."
+    },
+    "defeat": {
+      "all_down": "Le village est tombé.",
+      "time": "Le pont a été levé avant votre arrivée."
+    },
+    "hold_the_mill": {
+      "name": "Tenir le moulin",
+      "briefing": "La nuit est tombée sur Brumeval. Des revenants sortent des tertres et des pillards les suivent. Tenez le moulin de pierre jusqu'à la fin du tour 8, quand l'aube se lèvera."
+    },
+    "to_the_bridge": {
+      "name": "Jusqu'au pont",
+      "briefing": "Des pillards occupent le village. Traversez-le depuis l'ouest et amenez au moins un garde jusqu'au pont, à l'est, en 12 tours."
+    }
+  },
+  "objective": {
+    "hold": "Tenir jusqu'à l'aube.",
+    "bridge": "Amener un garde jusqu'au pont."
+  },
+  "faction": {
+    "player": "Joueur",
+    "hostile": "Hostiles",
+    "neutral": "Villageois",
+    "village": "La garde du village",
+    "marauders": "Les maraudeurs"
+  },
+  "stat": {
+    "tu": "Points d'action",
+    "tu.short": "PA",
+    "stamina": "Souffle",
+    "stamina.short": "SOU",
+    "health": "Vie",
+    "health.short": "VI",
+    "bravery": "Courage",
+    "bravery.short": "COU",
+    "reactions": "Vigilance",
+    "reactions.short": "VIG",
+    "firing": "Adresse au tir",
+    "firing.short": "TIR",
+    "throwing": "Lancer",
+    "throwing.short": "LAN",
+    "strength": "Vigueur",
+    "strength.short": "VIG",
+    "melee": "Escrime",
+    "melee.short": "ESC"
+  },
+  "item": {
+    "crossbow": "Arbalète",
+    "bolt": "Carreau",
+    "longbow": "Arc long",
+    "quiver": "Carquois",
+    "sword": "Épée d'armes",
+    "rusty_blade": "Lame rouillée",
+    "corpse_warden": "Garde tombé",
+    "corpse_raider": "Pillard mort",
+    "corpse_revenant": "Ossements de revenant"
+  },
+  "armor": {
+    "gambeson": "Gambison",
+    "mail": "Haubert de mailles",
+    "leathers": "Cuirs",
+    "grave_bones": "Os de tombe"
+  },
+  "unit": {
+    "village_warden": "Garde",
+    "veteran": "Vétéran",
+    "raider": "Pillard",
+    "revenant": "Revenant"
+  },
+  "damage": {
+    "pierce": "Perforant",
+    "slash": "Tranchant",
+    "crush": "Contondant"
+  },
+  "slot": {
+    "right_hand": "Main droite",
+    "left_hand": "Main gauche",
+    "belt": "Ceinture",
+    "backpack": "Sac à dos",
+    "ground": "Sol"
+  }
+}

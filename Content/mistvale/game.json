@@ -1,0 +1,34 @@
+{
+  "titleKey": "game.title",
+  "subtitleKey": "game.subtitle",
+  "defaultLanguage": "fr",
+  "fallbackLanguage": "en",
+  "missions": ["hold_the_mill", "to_the_bridge"],
+  "battle": {
+    // Medieval combat: weapons hit harder but less randomly (50–150 %, like TFTD).
+    "damageRangePercent": 50
+  },
+  "ui": {
+    "background": "#14120e",
+    "panel": "#221d16dd",
+    "panelBorder": "#7a6646",
+    "text": "#efe6d2",
+    "muted": "#a39478",
+    "accent": "#e0b860",
+    "friendly": "#9cc870",
+    "hostile": "#d86048",
+    "neutral": "#c8b880"
+  },
+  "sounds": {
+    "click": "sfx.click",
+    "footstep": "sfx.footstep",
+    "door": "sfx.door",
+    "explosion": "sfx.firepot",
+    "death": "sfx.death_human",
+    "turnStart": "sfx.turn",
+    "victory": "sfx.victory",
+    "defeat": "sfx.defeat",
+    "menuMusic": "sfx.ambience",
+    "battleMusic": "sfx.ambience"
+  }
+}

@@ -1,0 +1,240 @@
+// Mistvale: crossing the village from the west to the bridge in the east.
+{
+  "id": "mill_crossing",
+  "size": [
+    22,
+    22,
+    2
+  ],
+  "legend": {
+    ".": {
+      "floor": "grass"
+    },
+    ",": {
+      "floor": "cobble"
+    },
+    "m": {
+      "floor": "mud"
+    },
+    "k": {
+      "floor": "planks"
+    },
+    "W": {
+      "floor": "planks",
+      "west": "stone_w"
+    },
+    "N": {
+      "floor": "planks",
+      "north": "stone_n"
+    },
+    "C": {
+      "floor": "planks",
+      "west": "stone_w",
+      "north": "stone_n"
+    },
+    "E": {
+      "floor": "grass",
+      "west": "stone_w"
+    },
+    "S": {
+      "floor": "grass",
+      "north": "stone_n"
+    },
+    "x": {
+      "floor": "cobble",
+      "north": "door_n"
+    },
+    "X": {
+      "floor": "grass",
+      "west": "door_w"
+    },
+    "w": {
+      "floor": "planks",
+      "west": "shutter_w"
+    },
+    "n": {
+      "floor": "planks",
+      "north": "shutter_n"
+    },
+    "s": {
+      "floor": "grass",
+      "north": "shutter_n"
+    },
+    "L": {
+      "floor": "planks",
+      "object": "stairs_low_n"
+    },
+    "H": {
+      "floor": "planks",
+      "object": "stairs_high_n"
+    },
+    "q": {
+      "floor": "planks",
+      "object": "table"
+    },
+    "o": {
+      "floor": "planks",
+      "object": "barrel"
+    },
+    "P": {
+      "floor": "planks"
+    },
+    "{": {
+      "west": "stone_w"
+    },
+    "}": {
+      "north": "stone_n"
+    },
+    "[": {
+      "west": "shutter_w"
+    },
+    "]": {
+      "north": "shutter_n"
+    },
+    "p": {
+      "floor": "planks"
+    },
+    "V": {
+      "floor": "planks",
+      "west": "timber_w"
+    },
+    "U": {
+      "floor": "planks",
+      "north": "timber_n"
+    },
+    "Y": {
+      "floor": "planks",
+      "west": "timber_w",
+      "north": "timber_n"
+    },
+    "v": {
+      "floor": "grass",
+      "west": "timber_w"
+    },
+    "u": {
+      "floor": "grass",
+      "north": "timber_n"
+    },
+    "Z": {
+      "floor": "planks",
+      "north": "door_n"
+    },
+    "z": {
+      "floor": "grass",
+      "west": "shutter_w"
+    },
+    "T": {
+      "floor": "planks",
+      "object": "table"
+    },
+    "f": {
+      "floor": "grass",
+      "north": "palisade_n"
+    },
+    "g": {
+      "floor": "grass",
+      "west": "palisade_w"
+    },
+    "h": {
+      "floor": "mud",
+      "object": "haystack"
+    },
+    "c": {
+      "floor": "grass",
+      "object": "cart"
+    },
+    "A": {
+      "floor": "grass",
+      "object": "pine"
+    },
+    "b": {
+      "floor": "grass",
+      "object": "bush"
+    },
+    "r": {
+      "floor": "grass",
+      "object": "rock"
+    },
+    "R": {
+      "floor": "grass",
+      "object": "shrine"
+    },
+    "2": {
+      "floor": "grass",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "3": {
+      "floor": "grass",
+      "spawn": "player"
+    },
+    "4": {
+      "floor": "planks",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "5": {
+      "floor": "cobble",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "j": {
+      "floor": "grass",
+      "patrol": true
+    },
+    "B": {
+      "floor": "cobble",
+      "zone": "bridge"
+    }
+  },
+  "levels": [
+    [
+      "......................",
+      ".A..........r.........",
+      "....A............2.A..",
+      "......2..........b....",
+      "...b....CNNNNNE.......",
+      "........WokkkHE.......",
+      ".A....j.Wk4kkLX.....A.",
+      "........wkqk4kE.R.....",
+      ".....c..WkkkkkE.......",
+      "33......SSxSsS........",
+      ",,,,,,,,,,,,,,,5,,,,BB",
+      ",,,,j,,,,5,,,,,,,,,,BB",
+      "33..............cj....",
+      "33gffmfff....j.....r..",
+      "..gmmmmm......YUZUUv..",
+      "b.gmhmmm...b..V4pppv..",
+      "..gmmmmm......VpT4pz..",
+      "..gmmmhm......Vppppv..",
+      "..gmmmmm......uuuuu2..",
+      "..g.......A...........",
+      "..A.....b.....2.....A.",
+      "......................"
+    ],
+    [
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "        CNNnNN{       ",
+      "        WPPPP {       ",
+      "        wPPPP {       ",
+      "        WPPPPP[       ",
+      "        WPPPPP{       ",
+      "        }}]}}}        ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      "
+    ]
+  ]
+}

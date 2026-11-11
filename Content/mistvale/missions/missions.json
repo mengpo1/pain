@@ -1,0 +1,19 @@
+[
+  {
+    "id": "hold_the_mill", "nameKey": "mission.hold_the_mill.name", "briefingKey": "mission.hold_the_mill.briefing",
+    "map": { "block": "mill" }, "light": 3,
+    "player": [ { "unit": "village_warden", "count": 4 }, { "unit": "veteran", "count": 2 } ],
+    "hostile": [ { "unit": "revenant", "count": 5 }, { "unit": "raider", "count": 2 } ],
+    "objective": { "kind": "survive", "turns": 8, "descriptionKey": "objective.hold" },
+    "playerNameKey": "faction.village", "hostileNameKey": "faction.marauders"
+  },
+  {
+    "id": "to_the_bridge", "nameKey": "mission.to_the_bridge.name", "briefingKey": "mission.to_the_bridge.briefing",
+    "map": { "block": "mill_crossing" }, "light": 13,
+    "player": [ { "unit": "village_warden", "count": 3 }, { "unit": "veteran", "count": 1 } ],
+    "hostile": [ { "unit": "raider", "count": 5 }, { "unit": "revenant", "count": 2 } ],
+    "objective": { "kind": "reachZone", "zone": "bridge", "units": 1, "descriptionKey": "objective.bridge" },
+    "turnLimit": 12,
+    "playerNameKey": "faction.village", "hostileNameKey": "faction.marauders"
+  }
+]

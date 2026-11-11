@@ -85,7 +85,8 @@ public static class LineTracer
     {
         if (part is null || part.Shape.Length == 0) return false;
         if (sightOnly && !part.BlocksSight) return false;
-        return battle.Rules.Shapes.TryGetValue(part.Shape, out ShapeDefinition? shape) && shape.Contains(x, y, z);
+        ShapeDefinition? shape = part.ResolvedShape ??= battle.Rules.Shapes.GetValueOrDefault(part.Shape);
+        return shape is not null && shape.Contains(x, y, z);
     }
 
     /// <summary>

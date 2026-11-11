@@ -138,9 +138,9 @@ public sealed class BattleRenderer
                 new Vector2(arrow.Source.Width / 2f, arrow.Source.Height), ArrowSize / (float)Math.Max(1, arrow.Source.Width), SpriteEffects.None, 0f);
         }
 
-        if (playback.Projectile is { } projectile && playback.ProjectilePosition is { } position)
+        if (playback.Projectile is { Sprite: { } projectileSprite } projectile && playback.ProjectilePosition is { } position)
         {
-            SpriteFrame sprite = _session.Assets.Sprite(projectile.Sprite ?? "fx.bullet");
+            SpriteFrame sprite = _session.Assets.Sprite(projectileSprite);
             Vector2 delta = projectile.To - projectile.From;
             float angle = MathF.Atan2(delta.Y, delta.X);
             batch.Draw(sprite.Texture, position, sprite.Source, Color.White, angle, new Vector2(sprite.Source.Width / 2f, sprite.Source.Height / 2f), 1f, SpriteEffects.None, 0f);

@@ -1,0 +1,8 @@
+// Changes to the base pack: only the listed properties are replaced (merge by id).
+[
+  // The K-7 magazine holds more rounds.
+  { "id": "k7_clip", "rounds": 30 },
+  // The pulse cell is entirely redefined ($replace discards the base definition first).
+  { "$replace": true, "id": "pulse_cell", "nameKey": "item.pulse_cell", "kind": "ammo", "weight": 2, "rounds": 16,
+    "damage": { "power": 46, "type": "pulse" }, "floorSprite": "item.cell", "inventorySprite": "item.cell" }
+]

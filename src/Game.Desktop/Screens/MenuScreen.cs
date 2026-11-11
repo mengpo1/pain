@@ -67,6 +67,15 @@ public sealed class MenuScreen : Screen
         string languageName = texts.Language.ToUpperInvariant();
         if (ui.Button(batch, new Rectangle(left + buttonWidth + ui.S(16), bottom, ui.S(200), ui.S(40)), texts.Format("menu.language", ("name", languageName))))
             CycleLanguage();
+        IReadOnlyList<ContentPack> mods = Session.Content.InstalledMods;
+        if (mods.Count > 0)
+        {
+            List<string> active = Session.Content.LoadedPacks.Skip(1).Select(p => p.Manifest.Name).ToList();
+            string label = texts.Format("menu.mods", ("list", active.Count == 0 ? texts.Get("menu.mods_none") : string.Join(", ", active)));
+            if (ui.Button(batch, new Rectangle(left + buttonWidth + ui.S(232), bottom, ui.S(330), ui.S(40)), label, size: 14f))
+                ToggleMods();
+        }
+
         if (ui.Button(batch, new Rectangle(screen.Width - left - ui.S(160), bottom, ui.S(160), ui.S(40)), texts.Get("menu.quit")))
             Host.Exit();
 
@@ -107,6 +116,17 @@ public sealed class MenuScreen : Screen
         string next = packs[(index + 1) % packs.Count].Manifest.Id;
         Host.Settings.Mods.Clear();
         Host.LoadSession(next, []);
+        Host.SaveSettings();
+        Host.SetScreen(new MenuScreen(Host));
+    }
+
+    /// <summary>Switches between no mod and every installed mod (mods made for another game are refused by the loader).</summary>
+    private void ToggleMods()
+    {
+        List<string> mods = Session.Content.LoadedPacks.Count > 1 ? [] : Session.Content.InstalledMods.Select(m => m.Manifest.Id).ToList();
+        Host.Settings.Mods.Clear();
+        Host.Settings.Mods.AddRange(mods);
+        Host.LoadSession(Session.Content.GamePack.Manifest.Id, mods);
         Host.SaveSettings();
         Host.SetScreen(new MenuScreen(Host));
     }

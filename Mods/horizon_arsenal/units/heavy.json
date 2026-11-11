@@ -1,0 +1,5 @@
+// Heavy operatives now carry the rail rifle (arrays such as "loadout" are replaced as a whole).
+{
+  "id": "operative_heavy",
+  "loadout": [ { "item": "rail_rifle", "slot": "rightHand" }, { "item": "p9_pistol", "slot": "belt", "ammo": "p9_clip" } ]
+}

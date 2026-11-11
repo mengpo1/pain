@@ -1,0 +1,131 @@
+// Logical asset ids → files of this pack. Rules and data only use the ids; a mod replaces a
+// sprite or a sound by mapping the same id to another file. Map sprites are 64 × 80 frames whose
+// pixel (32, 48) is the north corner of the tile's floor diamond (see docs/content.md).
+{
+  "textures": {
+    "tile.barrel": "assets/tiles/barrel.png",
+    "tile.bush": "assets/tiles/bush.png",
+    "tile.cart": "assets/tiles/cart.png",
+    "tile.debris": "assets/tiles/debris.png",
+    "tile.door_n": "assets/tiles/door_n.png",
+    "tile.door_open_n": "assets/tiles/door_open_n.png",
+    "tile.door_open_w": "assets/tiles/door_open_w.png",
+    "tile.door_w": "assets/tiles/door_w.png",
+    "tile.floor_cobble": "assets/tiles/floor_cobble.png",
+    "tile.floor_grass": "assets/tiles/floor_grass.png",
+    "tile.floor_mud": "assets/tiles/floor_mud.png",
+    "tile.floor_planks": "assets/tiles/floor_planks.png",
+    "tile.floor_thatch": "assets/tiles/floor_thatch.png",
+    "tile.haystack": "assets/tiles/haystack.png",
+    "tile.palisade_n": "assets/tiles/palisade_n.png",
+    "tile.palisade_w": "assets/tiles/palisade_w.png",
+    "tile.rock": "assets/tiles/rock.png",
+    "tile.shrine": "assets/tiles/shrine.png",
+    "tile.shutter_broken_n": "assets/tiles/shutter_broken_n.png",
+    "tile.shutter_broken_w": "assets/tiles/shutter_broken_w.png",
+    "tile.shutter_n": "assets/tiles/shutter_n.png",
+    "tile.shutter_w": "assets/tiles/shutter_w.png",
+    "tile.stairs_high_n": "assets/tiles/stairs_high_n.png",
+    "tile.stairs_high_w": "assets/tiles/stairs_high_w.png",
+    "tile.stairs_low_n": "assets/tiles/stairs_low_n.png",
+    "tile.stairs_low_w": "assets/tiles/stairs_low_w.png",
+    "tile.table": "assets/tiles/table.png",
+    "tile.tree": "assets/tiles/tree.png",
+    "tile.wall_stone_n": "assets/tiles/wall_stone_n.png",
+    "tile.wall_stone_ruin_n": "assets/tiles/wall_stone_ruin_n.png",
+    "tile.wall_stone_ruin_w": "assets/tiles/wall_stone_ruin_w.png",
+    "tile.wall_stone_w": "assets/tiles/wall_stone_w.png",
+    "tile.wall_timber_n": "assets/tiles/wall_timber_n.png",
+    "tile.wall_timber_ruin_n": "assets/tiles/wall_timber_ruin_n.png",
+    "tile.wall_timber_ruin_w": "assets/tiles/wall_timber_ruin_w.png",
+    "tile.wall_timber_w": "assets/tiles/wall_timber_w.png",
+    "item.bolts": "assets/items/bolts.png",
+    "item.bow": "assets/items/bow.png",
+    "item.corpse_raider": "assets/items/corpse_raider.png",
+    "item.corpse_revenant": "assets/items/corpse_revenant.png",
+    "item.corpse_warden": "assets/items/corpse_warden.png",
+    "item.crossbow": "assets/items/crossbow.png",
+    "item.firepot": "assets/items/firepot.png",
+    "item.sword": "assets/items/sword.png",
+    "fx.arrow": "assets/fx/arrow.png",
+    "fx.bolt": "assets/fx/bolt.png",
+    "ui.arrow": "assets/ui/arrow.png",
+    "ui.cursor": "assets/ui/cursor.png",
+    "ui.cursor_blocked": "assets/ui/cursor_blocked.png",
+    "ui.cursor_target": "assets/ui/cursor_target.png",
+    "ui.path": "assets/ui/path.png",
+    "ui.path_short": "assets/ui/path_short.png",
+    "ui.zone": "assets/ui/zone.png",
+    "texture.unit.raider": "assets/units/raider.png",
+    "texture.unit.revenant": "assets/units/revenant.png",
+    "texture.unit.veteran": "assets/units/veteran.png",
+    "texture.unit.warden": "assets/units/warden.png",
+    "texture.fx.explosion": "assets/fx/explosion.png"
+  },
+  "sheets": {
+    "unit.raider": {
+      "texture": "texture.unit.raider",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "unit.revenant": {
+      "texture": "texture.unit.revenant",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "unit.veteran": {
+      "texture": "texture.unit.veteran",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "unit.warden": {
+      "texture": "texture.unit.warden",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "fx.explosion": {
+      "texture": "texture.fx.explosion",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "anchor": [
+        32,
+        40
+      ]
+    }
+  },
+  "sounds": {
+    "sfx.ambience": "assets/audio/ambience.wav",
+    "sfx.bow": "assets/audio/bow.wav",
+    "sfx.click": "assets/audio/click.wav",
+    "sfx.crossbow": "assets/audio/crossbow.wav",
+    "sfx.death_human": "assets/audio/death_human.wav",
+    "sfx.death_revenant": "assets/audio/death_revenant.wav",
+    "sfx.defeat": "assets/audio/defeat.wav",
+    "sfx.door": "assets/audio/door.wav",
+    "sfx.firepot": "assets/audio/firepot.wav",
+    "sfx.footstep": "assets/audio/footstep.wav",
+    "sfx.sword": "assets/audio/sword.wav",
+    "sfx.turn": "assets/audio/turn.wav",
+    "sfx.victory": "assets/audio/victory.wav"
+  },
+  "fonts": {
+    "font.ui": "assets/fonts/JetBrainsMono-Regular.ttf",
+    "font.bold": "assets/fonts/JetBrainsMono-Bold.ttf"
+  }
+}

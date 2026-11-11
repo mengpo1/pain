@@ -1,0 +1,9 @@
+{
+  "id": "horizon_arsenal",
+  "name": "Horizon — Arsenal",
+  "version": "1.0.0",
+  "formatVersion": 1,
+  "description": "Example mod for the Horizon pack: adds a weapon, changes existing definitions, replaces a sprite and adds texts.",
+  "author": "OpenTactics contributors",
+  "dependencies": ["horizon"]
+}

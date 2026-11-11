@@ -1,0 +1,222 @@
+// Mistvale: the mill holds out (players inside, enemies at the edges).
+{
+  "id": "mill",
+  "size": [
+    22,
+    22,
+    2
+  ],
+  "legend": {
+    ".": {
+      "floor": "grass"
+    },
+    ",": {
+      "floor": "cobble"
+    },
+    "m": {
+      "floor": "mud"
+    },
+    "k": {
+      "floor": "planks"
+    },
+    "W": {
+      "floor": "planks",
+      "west": "stone_w"
+    },
+    "N": {
+      "floor": "planks",
+      "north": "stone_n"
+    },
+    "C": {
+      "floor": "planks",
+      "west": "stone_w",
+      "north": "stone_n"
+    },
+    "E": {
+      "floor": "grass",
+      "west": "stone_w"
+    },
+    "S": {
+      "floor": "grass",
+      "north": "stone_n"
+    },
+    "x": {
+      "floor": "cobble",
+      "north": "door_n"
+    },
+    "X": {
+      "floor": "grass",
+      "west": "door_w"
+    },
+    "w": {
+      "floor": "planks",
+      "west": "shutter_w"
+    },
+    "n": {
+      "floor": "planks",
+      "north": "shutter_n"
+    },
+    "s": {
+      "floor": "grass",
+      "north": "shutter_n"
+    },
+    "L": {
+      "floor": "planks",
+      "object": "stairs_low_n"
+    },
+    "H": {
+      "floor": "planks",
+      "object": "stairs_high_n"
+    },
+    "q": {
+      "floor": "planks",
+      "object": "table"
+    },
+    "P": {
+      "floor": "planks"
+    },
+    "{": {
+      "west": "stone_w"
+    },
+    "}": {
+      "north": "stone_n"
+    },
+    "[": {
+      "west": "shutter_w"
+    },
+    "]": {
+      "north": "shutter_n"
+    },
+    "p": {
+      "floor": "planks"
+    },
+    "V": {
+      "floor": "planks",
+      "west": "timber_w"
+    },
+    "U": {
+      "floor": "planks",
+      "north": "timber_n"
+    },
+    "Y": {
+      "floor": "planks",
+      "west": "timber_w",
+      "north": "timber_n"
+    },
+    "v": {
+      "floor": "grass",
+      "west": "timber_w"
+    },
+    "u": {
+      "floor": "grass",
+      "north": "timber_n"
+    },
+    "Z": {
+      "floor": "planks",
+      "north": "door_n"
+    },
+    "z": {
+      "floor": "grass",
+      "west": "shutter_w"
+    },
+    "T": {
+      "floor": "planks",
+      "object": "table"
+    },
+    "f": {
+      "floor": "grass",
+      "north": "palisade_n"
+    },
+    "g": {
+      "floor": "grass",
+      "west": "palisade_w"
+    },
+    "h": {
+      "floor": "mud",
+      "object": "haystack"
+    },
+    "c": {
+      "floor": "grass",
+      "object": "cart"
+    },
+    "A": {
+      "floor": "grass",
+      "object": "pine"
+    },
+    "b": {
+      "floor": "grass",
+      "object": "bush"
+    },
+    "r": {
+      "floor": "grass",
+      "object": "rock"
+    },
+    "R": {
+      "floor": "grass",
+      "object": "shrine"
+    },
+    "1": {
+      "floor": "planks",
+      "spawn": "player"
+    },
+    "2": {
+      "floor": "grass",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "j": {
+      "floor": "grass",
+      "patrol": true
+    }
+  },
+  "levels": [
+    [
+      "..2.................2.",
+      ".A..........r.........",
+      "2...A..............A..",
+      ".................b....",
+      "...b....CNNNNNE......2",
+      "........W11kkHE.......",
+      ".A....j.Wkk1kLX.....A.",
+      "........wkqk1kE.R.....",
+      ".....c..W1kk1kE.......",
+      "........SSxSsS........",
+      ",,,,,,,,,,,,,,,,,j,,,,",
+      ",,,,j,,,,,,,,,,,,,,,,,",
+      "................c.....",
+      "..gffmfff....j.....r..",
+      "..gmmmmm......YUZUUv..",
+      "b.gmhmmm...b..Vppppv.2",
+      "..gmmmmm......VpTppz..",
+      "..gmmmhm......Vppppv..",
+      "..gmmmmm......uuuuu...",
+      "..g.......A...........",
+      "2.A.....b...........A.",
+      ".....2......2........2"
+    ],
+    [
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "        CNNnNN{       ",
+      "        WPPPP {       ",
+      "        wP1PP {       ",
+      "        WPP1PP[       ",
+      "        WPPPPP{       ",
+      "        }}]}}}        ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      ",
+      "                      "
+    ]
+  ]
+}

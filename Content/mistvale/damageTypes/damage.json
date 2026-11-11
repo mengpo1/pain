@@ -1,0 +1,7 @@
+// Damage types of the valley. Omitted fields keep OXCE's defaults (0–200 % damage, armour
+// fully effective, random stun, wounds, armour worn by 10 % of the damage).
+[
+  { "id": "pierce", "nameKey": "damage.pierce" },
+  { "id": "slash", "nameKey": "damage.slash", "toStun": 0.1 },
+  { "id": "crush", "nameKey": "damage.crush", "toStun": 0.5, "toArmor": 0.2 }
+]
