@@ -22,8 +22,21 @@ public enum ActorState
     BeingExecuted,
     /// <summary>Badly hurt on the floor: crawls, never gets up, waits to be finished off.</summary>
     Wounded,
+    /// <summary>Leap attack in progress (crouch, jump, landing; see <see cref="Actor.LeapPhase"/>).</summary>
+    Leaping,
     /// <summary>Final: never acts or gets up again.</summary>
     Dead,
+}
+
+public enum LeapPhase
+{
+    None,
+    /// <summary>Gathering itself: the warning.</summary>
+    Crouch,
+    /// <summary>In the air, moving fast in a straight line.</summary>
+    Airborne,
+    /// <summary>Landed: catching its balance, vulnerable.</summary>
+    Landing,
 }
 
 /// <summary>
@@ -43,6 +56,7 @@ public sealed class Actor
         Facing = facing;
         PreviousFacing = facing;
         Health = definition.Health;
+        Stamina = definition.Stamina?.Max ?? 0f;
     }
 
     public int Id { get; }
@@ -119,6 +133,31 @@ public sealed class Actor
     public Actor? Executioner { get; private set; }
     private float _downTimeBeforeExecution;
 
+    // --- Running (player) ---
+    public float Stamina { get; internal set; }
+    public bool IsRunning { get; internal set; }
+    /// <summary>Ran out of stamina: cannot run again before recovering a bit.</summary>
+    internal bool Exhausted { get; set; }
+    internal float StaminaRestTimer { get; set; }
+    internal float RunNoiseTimer { get; set; }
+
+    // --- Reloading ---
+    /// <summary>Time left to finish reloading (0 = not reloading).</summary>
+    public float ReloadTimer { get; internal set; }
+    public bool IsReloading => ReloadTimer > 0f;
+    internal WeaponInstance? ReloadingWeapon { get; set; }
+
+    // --- Leap ---
+    public LeapPhase LeapPhase { get; private set; }
+    public Vector2 LeapDirection { get; private set; }
+    public Actor? LeapTarget { get; private set; }
+    internal bool LeapHit { get; set; }
+    public float LeapCooldown { get; internal set; }
+    private float _leapPhaseStart;
+
+    /// <summary>Time spent in the current leap phase.</summary>
+    public float LeapPhaseElapsed => StateElapsed - _leapPhaseStart;
+
     public EnemyBrain? Brain { get; internal set; }
 
     /// <summary>Distance travelled, used to animate legs.</summary>
@@ -180,6 +219,48 @@ public sealed class Actor
         CancelActions();
         SetState(ActorState.Stunned);
         StateTimer = duration;
+    }
+
+    internal bool BeginLeap(Actor target)
+    {
+        if (State != ActorState.Active || !IsAlive) return false;
+        SetState(ActorState.Leaping);
+        LeapPhase = LeapPhase.Crouch;
+        _leapPhaseStart = 0f;
+        LeapTarget = target;
+        LeapHit = false;
+        MoveIntent = Vector2.Zero;
+        return true;
+    }
+
+    internal void LaunchLeap(Vector2 direction)
+    {
+        if (State != ActorState.Leaping) return;
+        LeapPhase = LeapPhase.Airborne;
+        LeapDirection = direction;
+        _leapPhaseStart = StateElapsed;
+    }
+
+    internal void LandLeap()
+    {
+        if (State != ActorState.Leaping) return;
+        LeapPhase = LeapPhase.Landing;
+        _leapPhaseStart = StateElapsed;
+    }
+
+    internal void EndLeap(float cooldown)
+    {
+        if (State != ActorState.Leaping) return;
+        ResetLeap();
+        LeapCooldown = cooldown;
+        SetState(ActorState.Active);
+    }
+
+    private void ResetLeap()
+    {
+        LeapPhase = LeapPhase.None;
+        LeapTarget = null;
+        LeapHit = false;
     }
 
     /// <summary>On the floor for good, crawling. Any further damage kills.</summary>
@@ -291,6 +372,7 @@ public sealed class Actor
     internal void TickState(float dt)
     {
         AttackCooldown = MathF.Max(0f, AttackCooldown - dt);
+        LeapCooldown = MathF.Max(0f, LeapCooldown - dt);
         StateElapsed += dt;
         switch (State)
         {
@@ -341,6 +423,10 @@ public sealed class Actor
 
     private void CancelActions()
     {
+        if (State == ActorState.Leaping) ResetLeap();
+        ReloadTimer = 0f;
+        ReloadingWeapon = null;
+        IsRunning = false;
         CurrentAttack = null;
         AttackResolved = true;
         ReleaseTarget();

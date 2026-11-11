@@ -61,9 +61,11 @@ public sealed class CombatSystem
 
     private bool TryFire(Actor shooter, WeaponInstance weapon)
     {
-        if (shooter.State != ActorState.Active) return false;
+        if (shooter.State != ActorState.Active || shooter.IsReloading) return false;
         WeaponDefinition definition = weapon.Definition;
         bool infinite = !shooter.IsPlayer && Rules.EnemiesHaveInfiniteAmmo && !weapon.IsEmpty;
+        // Trigger pulled on an empty magazine with spare rounds: reload instead of clicking.
+        if (weapon.IsEmpty && !infinite && TryReload(shooter)) return true;
         if (!infinite && !weapon.TryConsumeAmmo())
         {
             shooter.AttackCooldown = EmptyClickCooldown;
@@ -572,6 +574,126 @@ public sealed class CombatSystem
 
         return best;
     }
+
+    /// <summary>
+    /// Starts reloading the weapon in hand from the player's spare ammunition (weapons with an
+    /// <c>ammoType</c> only). The weapon cannot fire until the reload ends.
+    /// </summary>
+    public bool TryReload(Actor actor)
+    {
+        if (!actor.IsPlayer || !actor.CanAct || actor.IsReloading) return false;
+        if (actor.Weapon is not { Definition: { IsFirearm: true, AmmoType: { } type } } weapon || weapon.IsFull) return false;
+        if (_world.Inventory.AmmoOf(type) <= 0) return false;
+        actor.ReloadTimer = MathF.Max(0.01f, weapon.Definition.ReloadTime);
+        actor.ReloadingWeapon = weapon;
+        _world.AddEvent(new ReloadStarted(actor, weapon.Definition));
+        return true;
+    }
+
+    /// <summary>Finishes reloads; a weapon dropped or thrown meanwhile cancels its reload.</summary>
+    internal void UpdateReloads(float dt)
+    {
+        foreach (Actor actor in _world.Actors)
+        {
+            if (!actor.IsReloading) continue;
+            if (actor.Weapon is not { } weapon || weapon != actor.ReloadingWeapon || !actor.IsAlive)
+            {
+                actor.ReloadTimer = 0f;
+                actor.ReloadingWeapon = null;
+                continue;
+            }
+
+            actor.ReloadTimer -= dt;
+            if (actor.ReloadTimer > 0f) continue;
+            actor.ReloadTimer = 0f;
+            actor.ReloadingWeapon = null;
+            string type = weapon.Definition.AmmoType!;
+            int taken = _world.Inventory.TakeAmmo(type, weapon.Definition.MagazineSize - weapon.Ammo);
+            int loaded = weapon.Refill(taken);
+            _world.Inventory.AddAmmo(type, taken - loaded);
+            _world.AddEvent(new ReloadFinished(actor, weapon.Definition, loaded));
+        }
+    }
+
+    /// <summary>Starts a leap at <paramref name="target"/>: the crouch (warning) comes first.</summary>
+    public bool TryLeap(Actor actor, Actor target)
+    {
+        if (actor.Definition.Ai.Leap is null || actor.LeapCooldown > 0f || !actor.BeginLeap(target)) return false;
+        actor.Velocity = Vector2.Zero;
+        _world.AddEvent(new LeapStarted(actor, target));
+        return true;
+    }
+
+    /// <summary>
+    /// Leap phases: crouch while turning to the target, then a straight jump in the direction the
+    /// target was at the end of the crouch (a quick sidestep dodges it), then a vulnerable landing.
+    /// </summary>
+    internal void UpdateLeaps(float dt)
+    {
+        foreach (Actor actor in _world.Actors)
+        {
+            if (actor.State != ActorState.Leaping) continue;
+            if (actor.Definition.Ai.Leap is not { } leap)
+            {
+                actor.EndLeap(0f);
+                continue;
+            }
+
+            actor.MoveIntent = Vector2.Zero;
+            switch (actor.LeapPhase)
+            {
+                case LeapPhase.Crouch:
+                    Vector2 toTarget = actor.LeapTarget is { IsAlive: true } target ? target.Position - actor.Position : Geo.FromAngle(actor.Facing);
+                    if (toTarget.LengthSquared() > Geo.Epsilon) actor.Facing = Geo.RotateTowards(actor.Facing, Geo.ToAngle(toTarget), LeapAimTurnSpeed * dt);
+                    if (actor.LeapPhaseElapsed >= leap.WindUp)
+                    {
+                        Vector2 direction = toTarget.LengthSquared() > Geo.Epsilon ? Vector2.Normalize(toTarget) : Geo.FromAngle(actor.Facing);
+                        actor.Facing = Geo.ToAngle(direction);
+                        actor.LaunchLeap(direction);
+                        _world.AddEvent(new LeapLaunched(actor, direction));
+                    }
+                    break;
+                case LeapPhase.Airborne:
+                    if (actor.LeapPhaseElapsed >= leap.Distance / MathF.Max(1f, leap.Speed)) Land(actor, hit: false);
+                    break;
+                case LeapPhase.Landing:
+                    if (actor.LeapPhaseElapsed >= leap.Recovery) actor.EndLeap(leap.Cooldown);
+                    break;
+            }
+        }
+    }
+
+    /// <summary>After movement: a leaping creature hits the first hostile it touches, once; a wall stops it.</summary>
+    internal void ResolveLeapContacts()
+    {
+        foreach (Actor actor in _world.Actors)
+        {
+            if (actor.State != ActorState.Leaping || actor.LeapPhase != LeapPhase.Airborne || actor.Definition.Ai.Leap is not { } leap) continue;
+            foreach (Actor other in _world.Actors)
+            {
+                if (actor.LeapHit || other == actor || !other.IsAlive || other.IsDown || !CanDamage(actor, other, DamageKind.Melee)) continue;
+                if (Vector2.Distance(actor.Position, other.Position) > actor.Radius + other.Radius + LeapContactMargin) continue;
+                WeaponDefinition weapon = CurrentWeapon(actor);
+                ApplyHit(other, new Hit(weapon.Damage, weapon.DamageType, weapon.Knockdown, weapon.KnockdownDuration, actor.LeapDirection,
+                    weapon.Knockback, actor, HitMethod.Melee, weapon, weapon.StunDuration));
+                actor.LeapHit = true;
+            }
+
+            if (actor.LeapHit) Land(actor, hit: true);
+            else if (actor.LeapPhaseElapsed > LeapBlockCheckDelay && actor.Velocity.Length() < leap.Speed * 0.3f) Land(actor, hit: false);
+        }
+    }
+
+    private void Land(Actor actor, bool hit)
+    {
+        actor.LandLeap();
+        actor.Velocity *= 0.2f;
+        _world.AddEvent(new LeapLanded(actor, hit));
+    }
+
+    private const float LeapAimTurnSpeed = 14f;
+    private const float LeapContactMargin = 3f;
+    private const float LeapBlockCheckDelay = 0.04f;
 
     /// <summary>Starts an execution on a nearby vulnerable enemy, or uses a nearby interactable.</summary>
     public bool TryInteract(Actor actor)

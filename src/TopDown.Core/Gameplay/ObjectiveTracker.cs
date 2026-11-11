@@ -35,8 +35,10 @@ public sealed class ObjectiveTracker
     {
         ObjectiveType.EliminateAll => !world.Actors.Any(actor => IsRemainingEnemy(world, actor, objective.Tag)),
         ObjectiveType.ReachZone => objective.Zone is { } zone && world.Zones.TryGetValue(zone, out var rect)
-            && world.Player.IsAlive && rect.Contains(world.Player.Position),
-        ObjectiveType.Collect => world.Items.Any(item => item.Definition.Id == objective.Target && item.Collected),
+            && world.Player.IsAlive && rect.Contains(world.Player.Position)
+            && (objective.Requires is null || world.Inventory.Has(objective.Requires)),
+        ObjectiveType.Collect => objective.Target is { } target
+            && (world.Inventory.Has(target) || world.Items.Any(item => item.Definition.Id == target && item.Collected)),
         ObjectiveType.Survive => world.Player.IsAlive && Elapsed >= objective.Duration,
         ObjectiveType.Activate => world.Interactables.Any(i => i.Definition.Id == objective.Target && i.Used),
         _ => false,

@@ -29,6 +29,8 @@ internal static class ContentValidator
             }
 
             if (weapon.FireRate <= 0f) d.Error(source, "'fireRate' must be > 0.");
+            if (weapon.AmmoType is not null && (!weapon.IsFirearm || weapon.ReloadTime <= 0f))
+                d.Error(source, "'ammoType' is for firearms and needs a 'reloadTime' > 0.");
             if (weapon.Execution.Strikes < 1) d.Error(source, "'execution.strikes' must be at least 1.");
             if (weapon.Dismember is { } dismember)
             {
@@ -63,7 +65,10 @@ internal static class ContentValidator
             foreach (BodyPart part in actor.Sprites.Parts) Sprite(assets, d, source, part.Sprite);
             if (actor.Sprites.Parts.Count > 0 && actor.Sprites.Torso is null)
                 d.Warning(source, "'sprites.parts' needs 'sprites.torso' (the body without its parts).");
-            Sound(assets, d, source, actor.Sounds.Death, actor.Sounds.Hurt, actor.Sounds.Alert);
+            Sound(assets, d, source, actor.Sounds.Death, actor.Sounds.Hurt, actor.Sounds.Alert, actor.Sounds.Idle, actor.Sounds.Leap);
+            if (actor.Ai.Leap is { } leap && (leap.Speed <= 0f || leap.Distance <= 0f || leap.Range < leap.MinRange))
+                d.Error(source, "'ai.leap' needs speed and distance > 0 and range >= minRange.");
+            if (actor.Stamina is { Max: <= 0f }) d.Error(source, "'stamina.max' must be > 0.");
         }
 
         foreach (TileDefinition tile in defs.Tiles.Values)
@@ -202,7 +207,24 @@ internal static class ContentValidator
         foreach (LevelInteractable interactable in level.Interactables)
         {
             Sprite(content.Assets, d, source, interactable.Sprite);
+            if (interactable.UsedSprite is not null) Sprite(content.Assets, d, source, interactable.UsedSprite);
             position.Check(interactable.Position, $"interactable '{interactable.Id}'");
+        }
+
+        // Mission items: from items without loot, and from any loot entry.
+        var missionItems = new HashSet<string>(StringComparer.Ordinal);
+        IEnumerable<LootEntry> allLoot = level.Player.Inventory
+            .Concat(level.Items.SelectMany(i => i.Loot))
+            .Concat(level.Interactables.SelectMany(i => i.Loot));
+        foreach (LevelItem item in level.Items.Where(i => i.Loot.Count == 0)) missionItems.Add(item.Id);
+        foreach (LootEntry loot in allLoot)
+        {
+            if (loot.Item is not null) missionItems.Add(loot.Item);
+            Reference(defs.Weapons, d, source, "weapon", loot.Weapon);
+            if (loot.Ammo is not null && !defs.Weapons.Values.Any(w => w.AmmoType == loot.Ammo))
+                d.Warning(source, $"Loot gives ammunition '{loot.Ammo}' that no weapon uses.");
+            if (loot.Ammo is null && loot.Medkits <= 0 && loot.Weapon is null && loot.Item is null)
+                d.Warning(source, "A loot entry gives nothing.");
         }
 
         foreach ((string name, LevelZone zone) in level.Zones)
@@ -218,7 +240,7 @@ internal static class ContentValidator
                 case ObjectiveType.ReachZone when objective.Zone is null || !level.Zones.ContainsKey(objective.Zone):
                     d.Error(source, $"Objective 'reachZone' uses unknown zone '{objective.Zone}'.");
                     break;
-                case ObjectiveType.Collect when !level.Items.Any(i => i.Id == objective.Target):
+                case ObjectiveType.Collect when objective.Target is null || !missionItems.Contains(objective.Target):
                     d.Error(source, $"Objective 'collect' uses unknown item '{objective.Target}'.");
                     break;
                 case ObjectiveType.Activate when !level.Interactables.Any(i => i.Id == objective.Target):
@@ -231,6 +253,9 @@ internal static class ContentValidator
                     d.Warning(source, $"Objective 'eliminateAll' uses tag '{objective.Tag}' that no actor has.");
                     break;
             }
+
+            if (objective.Requires is not null && !missionItems.Contains(objective.Requires))
+                d.Error(source, $"Objective requires item '{objective.Requires}' that nothing in the level gives.");
         }
 
         foreach (TriggerDefinition trigger in level.Triggers)
@@ -246,6 +271,9 @@ internal static class ContentValidator
                 case TriggerCondition.ObjectiveCompleted when !int.TryParse(trigger.Subject, out int index) || index < 0 || index >= level.Objectives.Count:
                     d.Error(source, $"Trigger uses unknown objective index '{trigger.Subject}'.");
                     break;
+                case TriggerCondition.Collected when !missionItems.Contains(trigger.Subject):
+                    d.Error(source, $"Trigger uses unknown item '{trigger.Subject}'.");
+                    break;
             }
 
             foreach (TriggerAction action in trigger.Actions)
@@ -254,7 +282,14 @@ internal static class ContentValidator
                     d.Warning(source, $"Trigger action '{action.Type}' uses tag '{action.Tag}' that no actor has.");
                 if (action.Type == TriggerActionType.UnlockDoor && (action.Door is null || !doorIds.Contains(action.Door)))
                     d.Error(source, $"Trigger action 'unlockDoor' uses unknown door '{action.Door}'.");
-                if (action.Type == TriggerActionType.PlaySound) Sound(content.Assets, d, source, action.Sound);
+                if (action.Type is TriggerActionType.PlaySound or TriggerActionType.Transmission) Sound(content.Assets, d, source, action.Sound);
+                if (action.Type == TriggerActionType.Spawn)
+                {
+                    if (action.Definition is null || !defs.Actors.ContainsKey(action.Definition))
+                        d.Error(source, $"Trigger action 'spawn' uses unknown character '{action.Definition}'.");
+                    position.Check(action.Position, $"spawn of '{action.Definition}'");
+                    if (action.Tag is not null) tags.Add(action.Tag);
+                }
             }
         }
 

@@ -16,6 +16,8 @@ public enum AiState
     Chase,
     Search,
     Return,
+    /// <summary>Lying in wait, blind and still, until the target comes close.</summary>
+    Ambush,
 }
 
 /// <summary>
@@ -118,6 +120,14 @@ public sealed class EnemyBrain
     internal void OnNoise(Vector2 position, Actor? source)
     {
         if (State == AiState.Dormant) return;
+        if (State == AiState.Ambush)
+        {
+            // Only a noise made close by its prey gives away the ambush.
+            if (source is not null && _self.IsHostileTo(source) && Vector2.Distance(position, _self.Position) <= _ai.WakeRadius * 2f)
+                WakeUp(source, position);
+            return;
+        }
+
         if (State == AiState.Chase)
         {
             if (!CanSeeTarget && source is not null && source == Target) LastKnownTargetPosition = position;
@@ -155,8 +165,8 @@ public sealed class EnemyBrain
         if (!_self.CanAct)
         {
             _self.MoveIntent = Vector2.Zero;
-            // Executing is an action of its own, not an incapacity.
-            if (_self.State != ActorState.Executing) _wasIncapacitated = true;
+            // Executing and leaping are actions of their own, not an incapacity.
+            if (_self.State is not (ActorState.Executing or ActorState.Leaping)) _wasIncapacitated = true;
             return;
         }
 
@@ -173,6 +183,13 @@ public sealed class EnemyBrain
         if (State == AiState.Dormant)
         {
             _self.MoveIntent = Vector2.Zero;
+            return;
+        }
+
+        if (State == AiState.Ambush)
+        {
+            Stop();
+            if (PreyWithinWakeRadius() is { } prey) WakeUp(prey, prey.Position);
             return;
         }
 
@@ -239,6 +256,24 @@ public sealed class EnemyBrain
     private const float CrawlTurnSpeed = 2.5f;
     private const float CrawlStuckTime = 0.5f;
     private const float CrawlDetourTime = 1.2f;
+
+    /// <summary>Leaves the ambush and hunts <paramref name="prey"/>, last seen (or heard) at <paramref name="at"/>.</summary>
+    private void WakeUp(Actor prey, Vector2 at)
+    {
+        Target = prey;
+        LastKnownTargetPosition = at;
+        TimeSinceTargetSeen = 0f;
+        BecomeAlerted(prey, shareAlert: true);
+    }
+
+    /// <summary>The player, if it came within the wake radius in clear view.</summary>
+    private Actor? PreyWithinWakeRadius()
+    {
+        Actor player = _world.Player;
+        if (!player.IsAlive || !_self.IsHostileTo(player)) return null;
+        if (Vector2.Distance(player.Position, _self.Position) > _ai.WakeRadius + player.Radius) return null;
+        return _world.Physics.HasLineOfSight(_self.Position, player.Position, Blocking.Vision) ? player : null;
+    }
 
     /// <summary>Distance, field of view and line of sight (walls and closed doors block vision).</summary>
     public bool CanSee(Actor target)
@@ -422,6 +457,11 @@ public sealed class EnemyBrain
             return;
         }
 
+        // Leapers pounce from mid range when the way is clear (the crouch warns the player).
+        if (_ai.Leap is { } leap && _reactionTimer <= 0f && !Target.IsDown && distance >= leap.MinRange && distance <= leap.Range
+            && _world.Physics.HasLineOfSight(_self.Position, Target.Position, Blocking.Movement) && _world.Combat.TryLeap(_self, Target))
+            return;
+
         float reach = weapon.Range + Target.Radius;
         if (distance > reach * 0.8f) MoveTo(Target.Position, _self.Definition.RunSpeed, dt, faceMovement: false);
         else Stop();
@@ -549,6 +589,7 @@ public sealed class EnemyBrain
 
     private AiState RestingState() => _behavior switch
     {
+        AiBehavior.Ambush => AiState.Ambush,
         AiBehavior.Patrol when _patrol.Count > 0 => AiState.Patrol,
         AiBehavior.Wander or AiBehavior.Dormant => AiState.Wander,
         _ => AiState.Idle,

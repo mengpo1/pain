@@ -53,6 +53,26 @@ public sealed class LevelPlayer
     public Vector2 Position { get; set; }
     public float FacingDegrees { get; set; }
     public string? WeaponId { get; set; }
+
+    /// <summary>What the player carries at the start (spare ammunition, medkits).</summary>
+    public List<LootEntry> Inventory { get; set; } = new();
+}
+
+/// <summary>
+/// Something given to the player: spare ammunition of a type, medkits, a weapon (dropped at the
+/// spot) or a mission item. One field per entry is enough.
+/// </summary>
+public sealed class LootEntry
+{
+    /// <summary>Ammunition type (see the weapons' <c>ammoType</c>) and its amount.</summary>
+    public string? Ammo { get; set; }
+    public int Amount { get; set; }
+    public int Medkits { get; set; }
+    /// <summary>Weapon definition id: placed on the floor where it was found.</summary>
+    public string? Weapon { get; set; }
+    /// <summary>Mission item id (for "collect" objectives and "requires").</summary>
+    public string? Item { get; set; }
+    public string? NameKey { get; set; }
 }
 
 public sealed class LevelActor
@@ -158,21 +178,29 @@ public sealed class LevelLight
     public float Flicker { get; set; }
 }
 
+/// <summary>Picked up by walking over it. Without <see cref="Loot"/> it is a mission item.</summary>
 public sealed class LevelItem
 {
     public string Id { get; set; } = "";
     public string Sprite { get; set; } = "";
     public string NameKey { get; set; } = "";
     public Vector2 Position { get; set; }
+    /// <summary>What it gives (ammunition box, medkit…).</summary>
+    public List<LootEntry> Loot { get; set; } = new();
 }
 
+/// <summary>Used with the interact key (switch, locker to search…).</summary>
 public sealed class LevelInteractable
 {
     public string Id { get; set; } = "";
     public string Sprite { get; set; } = "";
+    /// <summary>Drawn once it has been used (an open, empty locker). Default: <see cref="Sprite"/>, dimmed.</summary>
+    public string? UsedSprite { get; set; }
     public string PromptKey { get; set; } = "";
     public Vector2 Position { get; set; }
     public bool Once { get; set; } = true;
+    /// <summary>Found inside when searched (given once).</summary>
+    public List<LootEntry> Loot { get; set; } = new();
 }
 
 /// <summary>Rectangle of whole tiles: (X, Y) is the top-left tile, size in tiles.</summary>
@@ -206,6 +234,8 @@ public sealed class ObjectiveDefinition
     public string? Tag { get; set; }
     /// <summary>Seconds for Survive.</summary>
     public float Duration { get; set; }
+    /// <summary>Mission item the player must carry (an extraction that needs what was found).</summary>
+    public string? Requires { get; set; }
 }
 
 public enum TriggerCondition
@@ -213,6 +243,10 @@ public enum TriggerCondition
     EnterZone,
     ObjectiveCompleted,
     Activated,
+    /// <summary>The level has just started.</summary>
+    Start,
+    /// <summary>The player got a mission item (subject = item id).</summary>
+    Collected,
 }
 
 public enum TriggerActionType
@@ -224,6 +258,10 @@ public enum TriggerActionType
     Message,
     UnlockDoor,
     PlaySound,
+    /// <summary>A message from the observer (radio panel with a signal sound).</summary>
+    Transmission,
+    /// <summary>A new character appears (definition, position, tag), hunting the player if "alert".</summary>
+    Spawn,
 }
 
 public sealed class TriggerDefinition
@@ -243,4 +281,10 @@ public sealed class TriggerAction
     public string? Door { get; set; }
     public string? Sound { get; set; }
     public float Duration { get; set; } = 3f;
+    /// <summary>Spawn: character definition, position in tiles, facing.</summary>
+    public string? Definition { get; set; }
+    public Vector2 Position { get; set; }
+    public float FacingDegrees { get; set; }
+    /// <summary>Spawn: hunts the player at once.</summary>
+    public bool Alert { get; set; }
 }

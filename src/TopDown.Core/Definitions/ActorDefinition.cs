@@ -11,6 +11,8 @@ public enum AiBehavior
     Wander,
     /// <summary>Does nothing until a level event activates it.</summary>
     Dormant,
+    /// <summary>Lies in wait without moving; wakes up when its target comes within <see cref="AiDefinition.WakeRadius"/>.</summary>
+    Ambush,
 }
 
 /// <summary>Data describing a character (the player or any enemy).</summary>
@@ -30,6 +32,9 @@ public sealed class ActorDefinition
 
     /// <summary>How this character crawls when wounded (see <see cref="WeaponDefinition.WoundChance"/>). Null: never wounded.</summary>
     public WoundDefinition? Wound { get; set; }
+
+    /// <summary>The player can run (at <see cref="RunSpeed"/>) while it has stamina. Null: no running.</summary>
+    public StaminaDefinition? Stamina { get; set; }
 
     /// <summary>Walking speed (units/s).</summary>
     public float Speed { get; set; } = 120f;
@@ -76,6 +81,34 @@ public sealed class WoundDefinition
     public float BleedOutTime { get; set; }
 }
 
+/// <summary>Stamina spent by running, recovered when not running.</summary>
+public sealed class StaminaDefinition
+{
+    public float Max { get; set; } = 100f;
+    /// <summary>Spent per second of running.</summary>
+    public float RunDrain { get; set; } = 28f;
+    /// <summary>Recovered per second when not running.</summary>
+    public float Regen { get; set; } = 22f;
+    /// <summary>Pause after running before recovery starts.</summary>
+    public float RegenDelay { get; set; } = 0.6f;
+    /// <summary>Once exhausted, running is possible again from this amount.</summary>
+    public float RecoverThreshold { get; set; } = 25f;
+    /// <summary>Running footsteps can be heard this far (0 = silent).</summary>
+    public float RunNoise { get; set; }
+}
+
+/// <summary>
+/// Presentation of a character on a thermal camera: how bright it is at rest and when active, and
+/// a slow pulse that gives away a creature lying in wait.
+/// </summary>
+public sealed class HeatDefinition
+{
+    public float Rest { get; set; } = 1f;
+    public float Active { get; set; } = 1f;
+    /// <summary>Amplitude of the slow breathing pulse at rest.</summary>
+    public float Pulse { get; set; }
+}
+
 public sealed class ActorSprites
 {
     public string Body { get; set; } = "";
@@ -101,6 +134,9 @@ public sealed class ActorSprites
 
     /// <summary>Colour multiplied with blood effects ("#rrggbb").</summary>
     public string BloodTint { get; set; } = "#ffffff";
+
+    /// <summary>Thermal signature (brightness at rest and when active). Null: always fully visible.</summary>
+    public HeatDefinition? Heat { get; set; }
 }
 
 /// <summary>A piece of a body that can be torn off ("head", "leg").</summary>
@@ -118,6 +154,10 @@ public sealed class ActorSounds
     public string? Death { get; set; }
     public string? Hurt { get; set; }
     public string? Alert { get; set; }
+    /// <summary>Played now and then while it lies in wait (a hint for an attentive player).</summary>
+    public string? Idle { get; set; }
+    /// <summary>A leap is being prepared.</summary>
+    public string? Leap { get; set; }
 }
 
 /// <summary>Perception and reaction parameters, reused by every AI behaviour.</summary>
@@ -154,4 +194,30 @@ public sealed class AiDefinition
 
     /// <summary>When alerted, allies within this radius are alerted too.</summary>
     public float AlertAlliesRadius { get; set; }
+
+    /// <summary>Behaviour "ambush": wakes up when the target comes this close in clear view (units).</summary>
+    public float WakeRadius { get; set; } = 110f;
+
+    /// <summary>Leap attack (see <see cref="LeapDefinition"/>). Null: no leaping.</summary>
+    public LeapDefinition? Leap { get; set; }
+}
+
+/// <summary>
+/// A sudden leap at the target: a visible crouch, a fast straight jump stopped by walls, one hit on
+/// contact (with the character's natural weapon), then a short recovery.
+/// </summary>
+public sealed class LeapDefinition
+{
+    /// <summary>Leaps when the target is between these distances (units, centre to centre).</summary>
+    public float MinRange { get; set; } = 40f;
+    public float Range { get; set; } = 170f;
+    /// <summary>Crouch before the leap: the warning the player can react to.</summary>
+    public float WindUp { get; set; } = 0.45f;
+    public float Speed { get; set; } = 560f;
+    /// <summary>Length of the leap (units).</summary>
+    public float Distance { get; set; } = 210f;
+    /// <summary>Vulnerable pause after landing.</summary>
+    public float Recovery { get; set; } = 0.7f;
+    /// <summary>Time before the next leap.</summary>
+    public float Cooldown { get; set; } = 1.4f;
 }

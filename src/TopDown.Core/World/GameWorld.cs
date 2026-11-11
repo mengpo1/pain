@@ -68,6 +68,9 @@ public sealed class GameWorld
     public ObjectiveTracker Objectives { get; }
     public ScoreTracker Score { get; }
     public TriggerSystem Triggers { get; }
+
+    /// <summary>What the player carries (spare ammunition, medkits, mission items).</summary>
+    public Inventory Inventory { get; } = new();
     public Pathfinder Pathfinder { get; private set; } = null!;
     public Random Random { get; }
 
@@ -104,6 +107,7 @@ public sealed class GameWorld
             actor.TickState(dt);
         }
 
+        Combat.UpdateReloads(dt);
         ApplyPlayerCommands(commands, dt);
         DeliverNoises();
         foreach (Actor actor in _actors) actor.Brain?.Update(dt);
@@ -111,8 +115,10 @@ public sealed class GameWorld
         Combat.UpdateMeleeAttacks();
         Combat.UpdateExecutions(dt);
         Combat.UpdateWounds();
+        Combat.UpdateLeaps(dt);
 
         foreach (Actor actor in _actors) Physics.MoveActor(actor, dt);
+        Combat.ResolveLeapContacts();
         Physics.SeparateActors();
         DoorLogic.Update(dt);
 
@@ -163,7 +169,7 @@ public sealed class GameWorld
         }
 
         player.MoveIntent = move;
-        player.MoveSpeed = player.Definition.Speed;
+        player.MoveSpeed = UpdateRunning(player, commands.Run && move != Vector2.Zero, dt);
 
         Vector2 aim = commands.AimTarget - player.Position;
         if (player.CanAct && aim.LengthSquared() > 1f) player.Facing = Geo.ToAngle(aim);
@@ -174,6 +180,9 @@ public sealed class GameWorld
             _attackBuffer = 0f;
             return;
         }
+
+        if (commands.ReloadPressed) Combat.TryReload(player);
+        if (commands.HealPressed) TryHeal(player);
 
         bool automatic = Combat.CurrentWeapon(player).Automatic;
         if ((_attackBuffer > 0f || (commands.AttackHeld && automatic)) && Combat.TryAttack(player)) _attackBuffer = 0f;
@@ -187,6 +196,88 @@ public sealed class GameWorld
     public Actor? FindActor(string levelId) => _actors.FirstOrDefault(a => a.LevelId == levelId);
 
     internal void AddEvent(GameEvent gameEvent) => _events.Add(gameEvent);
+
+    /// <summary>
+    /// Walking or running speed. Running spends stamina; once exhausted, the character walks until
+    /// it has recovered enough. Running footsteps can be heard by enemies.
+    /// </summary>
+    private float UpdateRunning(Actor actor, bool wantsToRun, float dt)
+    {
+        if (actor.Definition.Stamina is not { } stamina)
+        {
+            actor.IsRunning = false;
+            return actor.Definition.Speed;
+        }
+
+        if (actor.Exhausted && actor.Stamina >= stamina.RecoverThreshold) actor.Exhausted = false;
+        actor.IsRunning = wantsToRun && !actor.Exhausted && actor.Stamina > 0f;
+        if (actor.IsRunning)
+        {
+            actor.Stamina = MathF.Max(0f, actor.Stamina - stamina.RunDrain * dt);
+            actor.StaminaRestTimer = stamina.RegenDelay;
+            if (actor.Stamina <= 0f) actor.Exhausted = true;
+            actor.RunNoiseTimer -= dt;
+            if (actor.RunNoiseTimer <= 0f)
+            {
+                actor.RunNoiseTimer = RunNoiseInterval;
+                EmitNoise(actor.Position, stamina.RunNoise, actor);
+            }
+
+            return actor.Definition.RunSpeed;
+        }
+
+        actor.StaminaRestTimer -= dt;
+        if (actor.StaminaRestTimer <= 0f) actor.Stamina = MathF.Min(stamina.Max, actor.Stamina + stamina.Regen * dt);
+        return actor.Definition.Speed;
+    }
+
+    private const float RunNoiseInterval = 0.35f;
+
+    /// <summary>Uses a medkit if the player is hurt and has one.</summary>
+    public bool TryHeal(Actor actor)
+    {
+        if (!actor.IsPlayer || !actor.CanAct || Inventory.Medkits <= 0 || actor.Health >= actor.Definition.Health) return false;
+        float before = actor.Health;
+        actor.Health = MathF.Min(actor.Definition.Health, actor.Health + Rules.MedkitHeal);
+        Inventory.Medkits--;
+        AddEvent(new Healed(actor, actor.Health - before));
+        return true;
+    }
+
+    /// <summary>
+    /// Gives loot to the player: ammunition and medkits go to the inventory, a weapon is placed on
+    /// the floor at <paramref name="where"/>, a mission item is kept (and announced to triggers).
+    /// </summary>
+    internal void GiveLoot(IReadOnlyList<LootEntry> loot, Vector2 where, bool announce = true)
+    {
+        if (loot.Count == 0) return;
+        foreach (LootEntry entry in loot)
+        {
+            if (entry.Ammo is { } type) Inventory.AddAmmo(type, entry.Amount);
+            if (entry.Medkits > 0) Inventory.Medkits += entry.Medkits;
+            if (entry.Weapon is { } weaponId && Definitions.Weapons.TryGetValue(weaponId, out WeaponDefinition? weapon))
+                AddWeapon(new WorldWeapon(new WeaponInstance(weapon), where + new Vector2(0f, Map.TileSize * 0.5f), 0.4f));
+            if (entry.Item is { } item && Inventory.AddItem(item, entry.NameKey)) Triggers.OnCollected(item);
+        }
+
+        if (announce) AddEvent(new LootReceived(loot, where));
+    }
+
+    /// <summary>Makes a new character appear (level trigger); it hunts the player if asked.</summary>
+    internal Actor? SpawnFromTrigger(TriggerAction action)
+    {
+        if (action.Definition is null || !Definitions.Actors.ContainsKey(action.Definition)) return null;
+        Actor actor = LevelBuilder.SpawnEnemy(this, Level, Definitions, new LevelActor
+        {
+            Definition = action.Definition,
+            Position = action.Position,
+            FacingDegrees = action.FacingDegrees,
+            Tag = action.Tag,
+        });
+        if (action.Alert) actor.Brain?.AlertTo(Player);
+        AddEvent(new ActorSpawned(actor));
+        return actor;
+    }
 
     internal void AddWeapon(WorldWeapon weapon) => _pendingWeapons.Add(weapon);
 
@@ -289,6 +380,9 @@ public sealed class GameWorld
             {
                 item.Collected = true;
                 AddEvent(new ItemCollected(Player, item));
+                // Without loot, the item itself is what the mission needs.
+                if (item.Definition.Loot.Count > 0) GiveLoot(item.Definition.Loot, item.Position);
+                else if (Inventory.AddItem(item.Definition.Id, item.Definition.NameKey)) Triggers.OnCollected(item.Definition.Id);
             }
         }
     }
@@ -298,6 +392,7 @@ public sealed class GameWorld
         if (!interactable.Available) return;
         interactable.Used = true;
         AddEvent(new Activated(interactable));
+        GiveLoot(interactable.Definition.Loot, interactable.Position);
         Triggers.OnActivated(interactable.Definition.Id);
     }
 

@@ -13,13 +13,23 @@ public sealed class TriggerSystem
     internal TriggerSystem(IEnumerable<TriggerDefinition> triggers) =>
         _triggers = triggers.Select(definition => new TriggerState(definition)).ToList();
 
+    private bool _started;
+
     internal void OnActivated(string interactableId) => _signals.Enqueue((TriggerCondition.Activated, interactableId));
+
+    internal void OnCollected(string itemId) => _signals.Enqueue((TriggerCondition.Collected, itemId));
 
     internal void OnObjectiveCompleted(int index) =>
         _signals.Enqueue((TriggerCondition.ObjectiveCompleted, index.ToString(CultureInfo.InvariantCulture)));
 
     internal void Update(GameWorld world)
     {
+        if (!_started)
+        {
+            _started = true;
+            foreach (TriggerState trigger in _triggers.Where(t => t.Definition.On == TriggerCondition.Start)) Fire(world, trigger);
+        }
+
         foreach (TriggerState trigger in _triggers)
         {
             if (trigger.Definition.On != TriggerCondition.EnterZone) continue;
@@ -65,6 +75,12 @@ public sealed class TriggerSystem
                 break;
             case TriggerActionType.PlaySound when action.Sound is not null:
                 world.AddEvent(new SoundRequested(action.Sound, null));
+                break;
+            case TriggerActionType.Transmission when action.TextKey is not null:
+                world.AddEvent(new TransmissionRequested(action.TextKey, action.Duration, action.Sound));
+                break;
+            case TriggerActionType.Spawn:
+                world.SpawnFromTrigger(action);
                 break;
         }
     }

@@ -26,6 +26,9 @@ public sealed class GameRules
     /// <summary>Faster than this, a thrown weapon still hurts (units/s).</summary>
     public float ThrownHarmSpeed { get; set; } = 260f;
 
+    /// <summary>Health given back by a medkit (key H).</summary>
+    public float MedkitHeal { get; set; } = 50f;
+
     public ExecutionRules Execution { get; set; } = new();
     public CombatRules Combat { get; set; } = new();
     public ScoreRules Score { get; set; } = new();

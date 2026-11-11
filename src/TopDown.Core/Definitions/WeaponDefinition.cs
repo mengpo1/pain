@@ -83,6 +83,16 @@ public sealed class WeaponDefinition
     /// <summary>Ammunition for firearms. 0 for melee weapons.</summary>
     public int MagazineSize { get; set; }
 
+    /// <summary>
+    /// Kind of spare ammunition ("9mm", "shells"…). Set: the weapon is reloaded from the player's
+    /// reserve (key R, or automatically when the trigger is pulled on an empty magazine). Null: no
+    /// reloading, an empty gun only clicks or is thrown (the action game).
+    /// </summary>
+    public string? AmmoType { get; set; }
+
+    /// <summary>Time to reload (seconds).</summary>
+    public float ReloadTime { get; set; } = 1.2f;
+
     public int Pellets { get; set; } = 1;
     public float SpreadDegrees { get; set; }
 

@@ -120,8 +120,16 @@ public sealed class Physics
             ? Geo.ClampLength(actor.MoveIntent, 1f) * actor.MoveSpeed * (crawling ? 1f : actor.SpeedMultiplier)
             : Vector2.Zero;
         Vector2 velocity = actor.Velocity;
-        float rate = target == Vector2.Zero ? actor.Definition.Friction : actor.Definition.Acceleration;
-        velocity += Geo.ClampLength(target - velocity, rate * dt);
+        if (actor.LeapPhase == LeapPhase.Airborne && actor.Definition.Ai.Leap is { } leap)
+        {
+            // In the air: full speed in a straight line at once.
+            velocity = actor.LeapDirection * leap.Speed;
+        }
+        else
+        {
+            float rate = target == Vector2.Zero ? actor.Definition.Friction : actor.Definition.Acceleration;
+            velocity += Geo.ClampLength(target - velocity, rate * dt);
+        }
 
         Vector2 start = actor.Position;
         Vector2 displacement = velocity * dt;

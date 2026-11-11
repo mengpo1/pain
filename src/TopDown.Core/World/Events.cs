@@ -84,3 +84,25 @@ public sealed record MessageRequested(string TextKey, float Duration) : GameEven
 
 /// <summary>A level script asks to play a sound.</summary>
 public sealed record SoundRequested(string SoundId, Vector2? Position) : GameEvent;
+
+/// <summary>The player received something (ammunition, medkits, a mission item; weapons lie on the floor).</summary>
+public sealed record LootReceived(IReadOnlyList<LootEntry> Loot, Vector2 Position) : GameEvent;
+
+/// <summary>A message from the observer, shown in the radio panel.</summary>
+public sealed record TransmissionRequested(string TextKey, float Duration, string? Sound) : GameEvent;
+
+/// <summary>A character appeared during the level (trigger).</summary>
+public sealed record ActorSpawned(Actor Actor) : GameEvent;
+
+public sealed record ReloadStarted(Actor Actor, WeaponDefinition Weapon) : GameEvent;
+
+public sealed record ReloadFinished(Actor Actor, WeaponDefinition Weapon, int Rounds) : GameEvent;
+
+public sealed record Healed(Actor Actor, float Amount) : GameEvent;
+
+/// <summary>A creature crouches before leaping at its target (the warning).</summary>
+public sealed record LeapStarted(Actor Actor, Actor Target) : GameEvent;
+
+public sealed record LeapLaunched(Actor Actor, Vector2 Direction) : GameEvent;
+
+public sealed record LeapLanded(Actor Actor, bool HitSomeone) : GameEvent;

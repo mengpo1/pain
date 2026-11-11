@@ -121,9 +121,11 @@ internal static class LevelBuilder
             WeaponDefinition weapon = Find(definitions.Weapons, weaponId, "weapon", level);
             if (modifier.AllowFirearms || !weapon.IsFirearm) player.Weapon = new WeaponInstance(weapon);
         }
+
+        world.GiveLoot(level.Player.Inventory, player.Position, announce: false);
     }
 
-    private static void SpawnEnemy(GameWorld world, LevelDefinition level, DefinitionSet definitions, LevelActor placement)
+    internal static Actor SpawnEnemy(GameWorld world, LevelDefinition level, DefinitionSet definitions, LevelActor placement)
     {
         ActorDefinition definition = Find(definitions.Actors, placement.Definition, "actor", level);
         float facing = Geo.DegToRad(placement.FacingDegrees);
@@ -137,6 +139,7 @@ internal static class LevelBuilder
 
         List<Vector2> patrol = placement.Patrol.Select(level.ToWorld).ToList();
         actor.Brain = new EnemyBrain(actor, world, placement.Behavior ?? definition.Ai.Behavior, patrol);
+        return actor;
     }
 
     private static Door BuildDoor(LevelDefinition level, DefinitionSet definitions, LevelDoor placement)

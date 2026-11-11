@@ -18,4 +18,9 @@ public struct PlayerCommands
     public bool AttackHeld;
     public bool PickupOrThrowPressed;
     public bool InteractPressed;
+
+    /// <summary>Held: run (when the character has stamina).</summary>
+    public bool Run;
+    public bool ReloadPressed;
+    public bool HealPressed;
 }

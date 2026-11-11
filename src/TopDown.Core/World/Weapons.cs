@@ -16,6 +16,16 @@ public sealed class WeaponInstance
     public int Ammo { get; private set; }
     public bool IsEmpty => Definition.IsFirearm && Ammo <= 0;
 
+    public bool IsFull => !Definition.IsFirearm || Ammo >= Definition.MagazineSize;
+
+    /// <summary>Puts rounds back in the magazine; returns how many fitted.</summary>
+    internal int Refill(int rounds)
+    {
+        int added = Math.Clamp(rounds, 0, Math.Max(0, Definition.MagazineSize - Ammo));
+        Ammo += added;
+        return added;
+    }
+
     public bool TryConsumeAmmo()
     {
         if (!Definition.IsFirearm) return true;
