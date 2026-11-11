@@ -1,0 +1,80 @@
+{
+  "id": "outskirts_landing",
+  "size": [
+    10,
+    10,
+    1
+  ],
+  "legend": {
+    ".": {
+      "floor": "grass"
+    },
+    "b": {
+      "floor": "grass",
+      "object": "bush"
+    },
+    "r": {
+      "floor": "grass",
+      "object": "rock"
+    },
+    "K": {
+      "floor": "hull"
+    },
+    "J": {
+      "floor": "hull",
+      "west": "hull_w"
+    },
+    "I": {
+      "floor": "hull",
+      "north": "hull_n"
+    },
+    "Q": {
+      "floor": "hull",
+      "west": "hull_w",
+      "north": "hull_n"
+    },
+    "j": {
+      "floor": "grass",
+      "west": "hull_w"
+    },
+    "i": {
+      "floor": "grass",
+      "north": "hull_n"
+    },
+    "h": {
+      "floor": "grass",
+      "north": "hatch_n"
+    },
+    "V": {
+      "floor": "hull",
+      "object": "pod"
+    },
+    "2": {
+      "floor": "grass",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "4": {
+      "floor": "hull",
+      "spawn": "hostile"
+    },
+    "p": {
+      "floor": "grass",
+      "patrol": true
+    }
+  },
+  "levels": [
+    [
+      "..........",
+      "..QIIIj...",
+      "..JV4Kj...",
+      "..J4KKj...",
+      "..JK4Kj...",
+      "..ihii....",
+      "..........",
+      "...2..b...",
+      ".r.....p..",
+      ".........."
+    ]
+  ]
+}

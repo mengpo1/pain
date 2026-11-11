@@ -1,0 +1,44 @@
+{
+  "id": "outskirts_grove",
+  "size": [
+    10,
+    10,
+    1
+  ],
+  "legend": {
+    ".": {
+      "floor": "grass"
+    },
+    "T": {
+      "floor": "grass",
+      "object": "tree"
+    },
+    "b": {
+      "floor": "grass",
+      "object": "bush"
+    },
+    "2": {
+      "floor": "grass",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "p": {
+      "floor": "grass",
+      "patrol": true
+    }
+  },
+  "levels": [
+    [
+      "T..T....T.",
+      "..T...b...",
+      "T....T....",
+      "...b...T..",
+      ".T..p.....",
+      "....T...T.",
+      "T.....b...",
+      "..T.2..T..",
+      "....T.....",
+      ".T......T."
+    ]
+  ]
+}

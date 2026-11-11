@@ -1,0 +1,51 @@
+// Weapons and ammo. Attack modes: accuracy in % (× the firing skill), tu in % of the unit's
+// maximum TU (or flat with "flatTu": true). Ranges and drop-off follow OXCE's defaults unless set.
+[
+  {
+    "id": "k7_rifle", "nameKey": "item.k7_rifle", "kind": "firearm", "weight": 8,
+    "inventoryWidth": 1, "inventoryHeight": 3, "twoHanded": true,
+    "snap": { "accuracy": 60, "tu": 25 },
+    "aimed": { "accuracy": 110, "tu": 80 },
+    "auto": { "accuracy": 35, "tu": 35, "shots": 3 },
+    "ammo": ["k7_clip"], "reloadTu": 15,
+    "floorSprite": "item.rifle", "inventorySprite": "item.rifle", "projectileSprite": "fx.bullet", "fireSound": "sfx.rifle"
+  },
+  {
+    "id": "k7_clip", "nameKey": "item.k7_clip", "kind": "ammo", "weight": 3, "rounds": 20,
+    "damage": { "power": 30, "type": "kinetic" },
+    "floorSprite": "item.clip", "inventorySprite": "item.clip"
+  },
+  {
+    "id": "p9_pistol", "nameKey": "item.p9_pistol", "kind": "firearm", "weight": 5,
+    "inventoryWidth": 1, "inventoryHeight": 2,
+    "snap": { "accuracy": 60, "tu": 18 },
+    "aimed": { "accuracy": 78, "tu": 30 },
+    "ammo": ["p9_clip"], "reloadTu": 15,
+    "floorSprite": "item.pistol", "inventorySprite": "item.pistol", "projectileSprite": "fx.bullet", "fireSound": "sfx.pistol"
+  },
+  {
+    "id": "p9_clip", "nameKey": "item.p9_clip", "kind": "ammo", "weight": 3, "rounds": 12,
+    "damage": { "power": 26, "type": "kinetic" },
+    "floorSprite": "item.clip", "inventorySprite": "item.clip"
+  },
+  {
+    "id": "pulse_carbine", "nameKey": "item.pulse_carbine", "kind": "firearm", "weight": 6,
+    "inventoryWidth": 1, "inventoryHeight": 3, "twoHanded": true,
+    "snap": { "accuracy": 65, "tu": 30 },
+    "aimed": { "accuracy": 90, "tu": 60 },
+    "auto": { "accuracy": 45, "tu": 40, "shots": 3 },
+    "ammo": ["pulse_cell"], "reloadTu": 12,
+    "floorSprite": "item.pulse_carbine", "inventorySprite": "item.pulse_carbine", "projectileSprite": "fx.pulse", "fireSound": "sfx.pulse"
+  },
+  {
+    "id": "pulse_cell", "nameKey": "item.pulse_cell", "kind": "ammo", "weight": 2, "rounds": 24,
+    "damage": { "power": 40, "type": "pulse" },
+    "floorSprite": "item.cell", "inventorySprite": "item.cell"
+  },
+  {
+    "id": "combat_knife", "nameKey": "item.combat_knife", "kind": "melee", "weight": 1,
+    "melee": { "accuracy": 100, "tu": 12 },
+    "damage": { "power": 25, "type": "blade" },
+    "floorSprite": "item.knife", "inventorySprite": "item.knife"
+  }
+]

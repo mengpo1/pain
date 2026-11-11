@@ -1,0 +1,74 @@
+{
+  "game": { "title": "Horizon", "subtitle": "Opérations tactiques — pack de démonstration" },
+  "menu": {
+    "missions": "Missions", "quit": "Quitter", "language": "Langue : {name}", "pack": "Jeu : {name}",
+    "start": "Lancer la mission", "back": "Retour", "load": "Reprendre la dernière sauvegarde", "errors": "{count} problème(s) de contenu, voir log.txt",
+    "seed": "Graine {seed}", "objective": "Objectif"
+  },
+  "ui": {
+    "end_turn": "Fin du tour", "next_unit": "Suivant", "previous_unit": "Précédent", "kneel": "Genou à terre", "stand": "Debout",
+    "reload": "Recharger", "level_up": "Niveau +", "level_down": "Niveau −", "center": "Centrer", "menu": "Menu",
+    "turn": "Tour {turn}", "enemy_turn": "{side} se déplacent…", "your_turn": "{side} : à vous de jouer",
+    "tu": "UT", "energy": "EN", "health": "PV", "morale": "MO", "stun": "étourdi",
+    "accuracy": "{value} %", "cost": "{value} UT", "rounds": "{rounds}/{max}", "no_weapon": "Mains vides",
+    "target_hint": "Choisissez une cible — clic droit ou Échap pour annuler", "path_cost": "{cost} UT",
+    "level": "Niveau {level}", "visible_enemies": "Ennemis en vue", "wounds": "{count} blessure(s) mortelle(s)",
+    "resume": "Reprendre", "save": "Sauvegarder", "load": "Charger", "abandon": "Abandonner la mission", "saved": "Partie sauvegardée", "loaded": "Partie chargée",
+    "zone": "Dans la zone : {inside}/{needed}", "survive": "Tenir jusqu'à la fin du tour {turns}",
+    "kneeling": "à genou", "unconscious": "inconscient", "dead": "mort"
+  },
+  "mode": { "snap": "Tir rapide", "aimed": "Tir visé", "auto": "Tir automatique", "melee": "Frapper", "throw": "Lancer" },
+  "debrief": {
+    "title_victory": "Mission accomplie", "title_defeat": "Mission échouée", "turns": "Tours joués : {turn}",
+    "survivors": "Survivants", "losses": "Pertes", "kills": "Hostiles neutralisés : {count}", "continue": "Retour au menu",
+    "status_ok": "valide", "status_wounded": "blessé ({health}/{max})", "status_dead": "tué", "status_unconscious": "inconscient"
+  },
+  "mission": {
+    "victory": { "eliminated": "Tous les hostiles sont neutralisés.", "survived": "Vous avez tenu la position.", "zone": "L'équipe a atteint le point d'extraction." },
+    "defeat": { "all_down": "Tous les agents sont hors de combat.", "time": "Le temps est écoulé." },
+    "first_contact": {
+      "name": "Premier contact",
+      "briefing": "Un appareil s'est posé près d'un avant-poste agricole. Nettoyez la zone : les visiteurs se cachent dans la maison, le hangar et autour de leur appareil."
+    },
+    "night_extraction": {
+      "name": "Extraction de nuit",
+      "briefing": "Il fait nuit. Votre équipe doit traverser l'avant-poste et rejoindre le point d'extraction au nord-est. Deux agents doivent y parvenir en 15 tours."
+    },
+    "patrol_sweep": {
+      "name": "Ratissage (carte générée)",
+      "briefing": "Fin d'après-midi en périphérie. La carte est assemblée à partir de blocs avec la graine de la bataille : chaque partie est différente."
+    }
+  },
+  "objective": {
+    "eliminate": "Neutraliser tous les hostiles.",
+    "extraction": "Atteindre la zone d'extraction avec 2 agents."
+  },
+  "faction": { "player": "Joueur", "hostile": "Hostiles", "neutral": "Civils", "operatives": "Agents", "visitors": "Visiteurs" },
+  "error": {
+    "battle_over": "La bataille est terminée.", "busy": "Attendez la fin de l'action en cours.", "no_unit": "Unité inconnue.",
+    "not_your_turn": "Ce n'est pas votre tour.", "unit_down": "Cette unité ne peut pas agir.", "unknown_command": "Ordre inconnu.",
+    "no_path": "Aucun chemin vers cette case.", "not_enough_tu": "Pas assez d'unités de temps ({value} nécessaires).",
+    "not_enough_energy": "Pas assez d'énergie.", "path_blocked": "Chemin bloqué.", "cannot_kneel": "Cette unité ne peut pas s'agenouiller.",
+    "not_in_hand": "L'objet doit être tenu en main.", "invalid_target": "Cible invalide.", "mode_unavailable": "Cette arme ne le permet pas.",
+    "out_of_reach": "Trop loin : la cible doit être adjacente.", "no_ammo": "Pas de munitions.", "out_of_range": "Hors de portée.",
+    "no_line_of_fire": "Pas de ligne de tir.", "cannot_reload": "Cette arme ne se recharge pas.", "already_loaded": "L'arme est déjà chargée.",
+    "save_failed": "Échec de la sauvegarde : {message}", "load_failed": "Échec du chargement : {message}"
+  },
+  "info": { "enemy_spotted": "Ennemi repéré !" },
+  "stat": {
+    "tu": "Unités de temps", "tu.short": "UT", "stamina": "Endurance", "stamina.short": "END", "health": "Santé", "health.short": "PV",
+    "bravery": "Bravoure", "bravery.short": "BRA", "reactions": "Réactions", "reactions.short": "RÉA", "firing": "Précision au tir",
+    "firing.short": "TIR", "throwing": "Précision au lancer", "throwing.short": "LAN", "strength": "Force", "strength.short": "FOR",
+    "melee": "Corps à corps", "melee.short": "CàC"
+  },
+  "item": {
+    "k7_rifle": "Fusil K-7", "k7_clip": "Chargeur K-7", "p9_pistol": "Pistolet P-9", "p9_clip": "Chargeur P-9",
+    "pulse_carbine": "Carabine à impulsions", "pulse_cell": "Cellule à impulsions", "combat_knife": "Couteau de combat",
+    "corpse_operative": "Corps d'un agent", "corpse_gaunt": "Cadavre de Gaunt", "corpse_warden": "Cadavre de Gardien"
+  },
+  "armor": { "field_vest": "Gilet de terrain", "plated_suit": "Combinaison blindée", "gaunt_hide": "Peau de Gaunt", "warden_shell": "Carapace de Gardien" },
+  "unit": { "operative": "Agent", "operative_heavy": "Agent lourd", "gaunt": "Gaunt", "warden": "Gardien" },
+  "damage": { "kinetic": "Cinétique", "pulse": "Impulsion", "blade": "Lame", "explosive": "Explosif" },
+  "slot": { "right_hand": "Main droite", "left_hand": "Main gauche", "belt": "Ceinture", "backpack": "Sac à dos", "ground": "Sol" },
+  "terrain": { "outskirts": "Périphérie" }
+}

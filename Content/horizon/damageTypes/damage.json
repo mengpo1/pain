@@ -1,0 +1,12 @@
+// Damage types (OXCE RuleDamageType). Omitted fields keep OXCE's armour-piercing defaults:
+// 0–200 % damage, armour fully effective, 25 % random stun, wounds, armour worn by 10 %.
+[
+  { "id": "kinetic", "nameKey": "damage.kinetic" },
+  { "id": "pulse", "nameKey": "damage.pulse" },
+  { "id": "blade", "nameKey": "damage.blade" },
+  {
+    "id": "explosive", "nameKey": "damage.explosive",
+    "random": "explosion", "radiusEffectiveness": 0.05, "toItem": 1.0, "tileDamageMethod": 2,
+    "explosionSprite": "fx.explosion", "explosionSound": "sfx.explosion"
+  }
+]

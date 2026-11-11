@@ -100,18 +100,25 @@ public static class TileArt
         return c;
     }
 
-    /// <summary>Stairs rising towards the north (<paramref name="west"/> = false) or the west.</summary>
-    public static Canvas Stairs(bool west, Material material)
+    /// <summary>
+    /// One tile of a two-tile staircase rising towards the north (or the west): the low tile goes
+    /// from 4 to 8 voxels, the high one from 12 to 16 (shapes stepLow*/stepHigh*).
+    /// </summary>
+    public static Canvas Stairs(bool west, bool high, Material material)
     {
         Canvas c = New();
-        for (int step = 3; step >= 0; step--)
-        {
-            float a = step * 4f, b = a + 4f, top = 24f - step * 6f;
-            if (west) IsoDraw.Box(c, a, 0, 0, b, 16, top, material);
-            else IsoDraw.Box(c, 0, a, 0, 16, b, top, material);
-        }
-
+        float baseZ = high ? 8 : 0;
+        if (high) Box(c, west, 0, 16, 0, 8, material);
+        Box(c, west, 0, 8, baseZ, baseZ + 8, material);   // back half, higher step
+        Box(c, west, 8, 16, baseZ, baseZ + 4, material);  // front half, lower step
         return c;
+
+        // Along the rising axis: from/to measured from the high (north or west) edge.
+        static void Box(Canvas c, bool west, float from, float to, float z0, float z1, Material m)
+        {
+            if (west) IsoDraw.Box(c, from, 0, z0, to, 16, z1, m);
+            else IsoDraw.Box(c, 0, from, z0, 16, to, z1, m);
+        }
     }
 
     public static Canvas Crate(Material material)

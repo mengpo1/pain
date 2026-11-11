@@ -1,0 +1,138 @@
+// Logical asset ids → files of this pack. Rules and data only use the ids; a mod replaces a
+// sprite or a sound by mapping the same id to another file. Map sprites are 64 × 80 frames whose
+// pixel (32, 48) is the north corner of the tile's floor diamond (see docs/content.md).
+{
+  "textures": {
+    "tile.barrel": "assets/tiles/barrel.png",
+    "tile.bush": "assets/tiles/bush.png",
+    "tile.console": "assets/tiles/console.png",
+    "tile.crate": "assets/tiles/crate.png",
+    "tile.debris": "assets/tiles/debris.png",
+    "tile.door_n": "assets/tiles/door_n.png",
+    "tile.door_open_n": "assets/tiles/door_open_n.png",
+    "tile.door_open_w": "assets/tiles/door_open_w.png",
+    "tile.door_w": "assets/tiles/door_w.png",
+    "tile.fence_n": "assets/tiles/fence_n.png",
+    "tile.fence_w": "assets/tiles/fence_w.png",
+    "tile.floor_concrete": "assets/tiles/floor_concrete.png",
+    "tile.floor_dirt": "assets/tiles/floor_dirt.png",
+    "tile.floor_grass": "assets/tiles/floor_grass.png",
+    "tile.floor_hull": "assets/tiles/floor_hull.png",
+    "tile.floor_road": "assets/tiles/floor_road.png",
+    "tile.floor_roof": "assets/tiles/floor_roof.png",
+    "tile.floor_tiles": "assets/tiles/floor_tiles.png",
+    "tile.hatch_n": "assets/tiles/hatch_n.png",
+    "tile.hatch_open_n": "assets/tiles/hatch_open_n.png",
+    "tile.hatch_open_w": "assets/tiles/hatch_open_w.png",
+    "tile.hatch_w": "assets/tiles/hatch_w.png",
+    "tile.hull_n": "assets/tiles/hull_n.png",
+    "tile.hull_w": "assets/tiles/hull_w.png",
+    "tile.pod": "assets/tiles/pod.png",
+    "tile.rock": "assets/tiles/rock.png",
+    "tile.stairs_high_n": "assets/tiles/stairs_high_n.png",
+    "tile.stairs_high_w": "assets/tiles/stairs_high_w.png",
+    "tile.stairs_low_n": "assets/tiles/stairs_low_n.png",
+    "tile.stairs_low_w": "assets/tiles/stairs_low_w.png",
+    "tile.table": "assets/tiles/table.png",
+    "tile.tree": "assets/tiles/tree.png",
+    "tile.wall_brick_n": "assets/tiles/wall_brick_n.png",
+    "tile.wall_brick_ruin_n": "assets/tiles/wall_brick_ruin_n.png",
+    "tile.wall_brick_ruin_w": "assets/tiles/wall_brick_ruin_w.png",
+    "tile.wall_brick_w": "assets/tiles/wall_brick_w.png",
+    "tile.window_broken_n": "assets/tiles/window_broken_n.png",
+    "tile.window_broken_w": "assets/tiles/window_broken_w.png",
+    "tile.window_n": "assets/tiles/window_n.png",
+    "tile.window_w": "assets/tiles/window_w.png",
+    "item.cell": "assets/items/cell.png",
+    "item.clip": "assets/items/clip.png",
+    "item.corpse_gaunt": "assets/items/corpse_gaunt.png",
+    "item.corpse_operative": "assets/items/corpse_operative.png",
+    "item.corpse_warden": "assets/items/corpse_warden.png",
+    "item.grenade": "assets/items/grenade.png",
+    "item.knife": "assets/items/knife.png",
+    "item.pistol": "assets/items/pistol.png",
+    "item.pulse_carbine": "assets/items/pulse_carbine.png",
+    "item.rifle": "assets/items/rifle.png",
+    "fx.bullet": "assets/fx/bullet.png",
+    "fx.pulse": "assets/fx/pulse.png",
+    "ui.arrow": "assets/ui/arrow.png",
+    "ui.cursor": "assets/ui/cursor.png",
+    "ui.cursor_blocked": "assets/ui/cursor_blocked.png",
+    "ui.cursor_target": "assets/ui/cursor_target.png",
+    "ui.path": "assets/ui/path.png",
+    "ui.path_short": "assets/ui/path_short.png",
+    "ui.zone": "assets/ui/zone.png",
+    "texture.unit.gaunt": "assets/units/gaunt.png",
+    "texture.unit.operative": "assets/units/operative.png",
+    "texture.unit.operative_heavy": "assets/units/operative_heavy.png",
+    "texture.unit.warden": "assets/units/warden.png",
+    "texture.fx.explosion": "assets/fx/explosion.png"
+  },
+  "sheets": {
+    "unit.gaunt": {
+      "texture": "texture.unit.gaunt",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "unit.operative": {
+      "texture": "texture.unit.operative",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "unit.operative_heavy": {
+      "texture": "texture.unit.operative_heavy",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "unit.warden": {
+      "texture": "texture.unit.warden",
+      "frameWidth": 64,
+      "frameHeight": 80,
+      "anchor": [
+        32,
+        48
+      ]
+    },
+    "fx.explosion": {
+      "texture": "texture.fx.explosion",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "anchor": [
+        32,
+        40
+      ]
+    }
+  },
+  "sounds": {
+    "sfx.ambience": "assets/audio/ambience.wav",
+    "sfx.click": "assets/audio/click.wav",
+    "sfx.death_alien": "assets/audio/death_alien.wav",
+    "sfx.death_human": "assets/audio/death_human.wav",
+    "sfx.defeat": "assets/audio/defeat.wav",
+    "sfx.door": "assets/audio/door.wav",
+    "sfx.explosion": "assets/audio/explosion.wav",
+    "sfx.footstep": "assets/audio/footstep.wav",
+    "sfx.hatch": "assets/audio/hatch.wav",
+    "sfx.pistol": "assets/audio/pistol.wav",
+    "sfx.pulse": "assets/audio/pulse.wav",
+    "sfx.rifle": "assets/audio/rifle.wav",
+    "sfx.turn": "assets/audio/turn.wav",
+    "sfx.victory": "assets/audio/victory.wav"
+  },
+  "fonts": {
+    "font.ui": "assets/fonts/DejaVuSans.ttf",
+    "font.bold": "assets/fonts/DejaVuSans-Bold.ttf"
+  }
+}

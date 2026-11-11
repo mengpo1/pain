@@ -1,0 +1,34 @@
+// Unit types: base statistics, armour, starting equipment and AI settings.
+[
+  {
+    "id": "operative", "nameKey": "unit.operative", "armor": "field_vest",
+    "stats": { "tu": 56, "stamina": 60, "health": 34, "bravery": 40, "reactions": 50, "firing": 58, "throwing": 55, "strength": 30, "melee": 45 },
+    "loadout": [
+      { "item": "k7_rifle", "slot": "rightHand", "ammo": "k7_clip" },
+      { "item": "k7_clip", "slot": "belt" },
+      { "item": "k7_clip", "slot": "belt" },
+      { "item": "combat_knife", "slot": "belt" }
+    ]
+  },
+  {
+    "id": "operative_heavy", "nameKey": "unit.operative_heavy", "armor": "plated_suit",
+    "stats": { "tu": 58, "stamina": 70, "health": 40, "bravery": 60, "reactions": 45, "firing": 62, "throwing": 50, "strength": 40, "melee": 50 },
+    "loadout": [
+      { "item": "k7_rifle", "slot": "rightHand", "ammo": "k7_clip" },
+      { "item": "p9_pistol", "slot": "belt", "ammo": "p9_clip" },
+      { "item": "k7_clip", "slot": "backpack" }
+    ]
+  },
+  {
+    "id": "gaunt", "nameKey": "unit.gaunt", "armor": "gaunt_hide", "value": 10, "deathSound": "sfx.death_alien",
+    "stats": { "tu": 54, "stamina": 90, "health": 30, "bravery": 80, "reactions": 63, "firing": 52, "throwing": 58, "strength": 30, "melee": 40 },
+    "loadout": [ { "item": "pulse_carbine", "slot": "rightHand", "ammo": "pulse_cell" }, { "item": "pulse_cell", "slot": "belt" } ],
+    "ai": { "aggression": 1, "intelligence": 3, "retreatHealthPercent": 35 }
+  },
+  {
+    "id": "warden", "nameKey": "unit.warden", "armor": "warden_shell", "value": 25, "deathSound": "sfx.death_alien",
+    "stats": { "tu": 60, "stamina": 100, "health": 50, "bravery": 90, "reactions": 55, "firing": 60, "throwing": 60, "strength": 60, "melee": 70 },
+    "loadout": [ { "item": "pulse_carbine", "slot": "rightHand", "ammo": "pulse_cell" }, { "item": "pulse_cell", "slot": "belt" } ],
+    "ai": { "aggression": 2, "intelligence": 4, "retreatHealthPercent": 20 }
+  }
+]

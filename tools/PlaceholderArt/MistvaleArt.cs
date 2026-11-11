@@ -40,8 +40,13 @@ public static class MistvaleArt
         p.Png("tiles/rock.png", TileArt.Rock(Rgba.Hex("#7a7a76"), 64));
         p.Png("tiles/table.png", TileArt.Table(IsoDraw.Planks(Rgba.Hex("#6a4a2a")), dark));
         p.Png("tiles/cart.png", TileArt.Crate(IsoDraw.Planks(Rgba.Hex("#8a6a3a"), 2f, 65)));
-        p.Png("tiles/stairs_n.png", TileArt.Stairs(west: false, IsoDraw.Planks(Rgba.Hex("#7a5a38"), 2f, 66)));
-        p.Png("tiles/stairs_w.png", TileArt.Stairs(west: true, IsoDraw.Planks(Rgba.Hex("#7a5a38"), 2f, 67)));
+        foreach (bool west in new[] { true, false })
+        {
+            string s = west ? "w" : "n";
+            p.Png($"tiles/stairs_low_{s}.png", TileArt.Stairs(west, high: false, IsoDraw.Planks(Rgba.Hex("#7a5a38"), 2f, 66)));
+            p.Png($"tiles/stairs_high_{s}.png", TileArt.Stairs(west, high: true, IsoDraw.Planks(Rgba.Hex("#7a5a38"), 2f, 66)));
+        }
+
         p.Png("tiles/debris.png", TileArt.Debris(Rgba.Hex("#7a6a5a"), 68));
         p.Png("tiles/shrine.png", TileArt.Console(IsoDraw.Bricks(stone, mortar, 4f, 3f, 69), Rgba.Hex("#80e0ff")));
 

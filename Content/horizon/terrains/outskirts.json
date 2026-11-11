@@ -1,0 +1,13 @@
+// Generated maps: a grid of 10 × 10 blocks. "required" blocks are placed first, then random
+// picks by weight ("max" limits copies). The battle seed makes the layout reproducible.
+{
+  "id": "outskirts", "nameKey": "terrain.outskirts", "blockSize": 10,
+  "blocks": [
+    { "block": "outskirts_lz", "required": 1, "weight": 0 },
+    { "block": "outskirts_landing", "required": 1, "weight": 0 },
+    { "block": "outskirts_field", "weight": 3 },
+    { "block": "outskirts_road", "weight": 2, "max": 2 },
+    { "block": "outskirts_house", "weight": 2, "max": 2 },
+    { "block": "outskirts_grove", "weight": 2 }
+  ]
+}

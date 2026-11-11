@@ -1,0 +1,5 @@
+[
+  { "id": "corpse_operative", "nameKey": "item.corpse_operative", "kind": "corpse", "weight": 22, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_operative" },
+  { "id": "corpse_gaunt", "nameKey": "item.corpse_gaunt", "kind": "corpse", "weight": 22, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_gaunt" },
+  { "id": "corpse_warden", "nameKey": "item.corpse_warden", "kind": "corpse", "weight": 30, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_warden" }
+]

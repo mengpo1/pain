@@ -6,8 +6,11 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Game.Desktop.Graphics;
 
-/// <summary>A drawable piece of a texture and the pixel placed on the anchor point.</summary>
-public readonly record struct SpriteFrame(Texture2D Texture, Rectangle Source, Vector2 Anchor);
+/// <summary>
+/// A drawable piece of a texture and the pixel placed on the anchor point. Without an explicit
+/// anchor in assets.json, <see cref="Anchor"/> is the frame centre and <see cref="HasAnchor"/> false.
+/// </summary>
+public readonly record struct SpriteFrame(Texture2D Texture, Rectangle Source, Vector2 Anchor, bool HasAnchor = false);
 
 /// <summary>
 /// Loads every texture, sound and font of the content catalog once, by logical id, and frees
@@ -104,11 +107,11 @@ public sealed class AssetCache : IDisposable
         }
 
         var source = new Rectangle(frame % columns * sheet.FrameWidth, frame / columns * sheet.FrameHeight, sheet.FrameWidth, sheet.FrameHeight);
-        return new SpriteFrame(texture, source, AnchorOf(sheet.Anchor, sheet.FrameWidth, sheet.FrameHeight));
+        return new SpriteFrame(texture, source, AnchorOf(sheet.Anchor, sheet.FrameWidth, sheet.FrameHeight), sheet.Anchor is { Length: 2 });
     }
 
     private static SpriteFrame Whole(Texture2D texture, int[]? anchor) =>
-        new(texture, texture.Bounds, AnchorOf(anchor, texture.Width, texture.Height));
+        new(texture, texture.Bounds, AnchorOf(anchor, texture.Width, texture.Height), anchor is { Length: 2 });
 
     private static Vector2 AnchorOf(int[]? anchor, int width, int height) =>
         anchor is { Length: 2 } ? new Vector2(anchor[0], anchor[1]) : new Vector2(width, height) * 0.5f;

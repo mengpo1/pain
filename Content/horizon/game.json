@@ -1,0 +1,35 @@
+{
+  "titleKey": "game.title",
+  "subtitleKey": "game.subtitle",
+  "defaultLanguage": "fr",
+  "fallbackLanguage": "en",
+  "missions": ["first_contact", "night_extraction", "patrol_sweep"],
+  // Global tactical constants: every value can be changed here (see docs/mechanics.md).
+  "battle": {
+    "maxViewDistance": 20,
+    "darkViewDistance": 9
+  },
+  "ui": {
+    "background": "#0e1418",
+    "panel": "#18222acc",
+    "panelBorder": "#46606e",
+    "text": "#e6eef2",
+    "muted": "#8898a4",
+    "accent": "#f0c840",
+    "friendly": "#58b0ff",
+    "hostile": "#ff5a4a",
+    "neutral": "#c8c070"
+  },
+  "sounds": {
+    "click": "sfx.click",
+    "footstep": "sfx.footstep",
+    "door": "sfx.door",
+    "explosion": "sfx.explosion",
+    "death": "sfx.death_human",
+    "turnStart": "sfx.turn",
+    "victory": "sfx.victory",
+    "defeat": "sfx.defeat",
+    "menuMusic": "sfx.ambience",
+    "battleMusic": "sfx.ambience"
+  }
+}

@@ -15,8 +15,9 @@ public readonly record struct Step(Position To, int Direction, int Tu, int Energ
 /// is not counted), 4 if that sum is 0, +1 when climbing, ×1.5 on diagonals, then plus the average
 /// TU of the walls crossed.</item>
 /// <item>A step rises at most 8 voxels. From a surface at least 16 high (top of stairs) a unit steps
-/// onto the floor of the level above; onto a tile without floor it goes down a level if the
-/// surface below is at least 12 high.</item>
+/// onto the floor of the level above whenever there is one (climbing wins over staying on the
+/// level); onto a tile without floor it goes down a level if the surface below is at least 12
+/// high.</item>
 /// <item>A diagonal step is blocked if any wall of the 2 × 2 corner square blocks; objects and units
 /// beside the corner do not block it.</item>
 /// </list>
@@ -38,7 +39,7 @@ public static class MovementRules
         int crossingLevel = from.Z;
         bool climbing = false;
 
-        if (startSurface >= rules.ClimbHeight && above?.Floor is not null && sameLevel.Floor is null)
+        if (startSurface >= rules.ClimbHeight && above?.Floor is not null)
         {
             to = new Position(x, y, from.Z + 1);
             crossingLevel = from.Z + 1;

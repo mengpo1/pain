@@ -1,0 +1,269 @@
+// Demo map of the Horizon pack, drawn level by level (rows north to south).
+{
+  "id": "outpost",
+  "size": [
+    24,
+    24,
+    2
+  ],
+  "legend": {
+    ".": {
+      "floor": "grass"
+    },
+    ",": {
+      "floor": "dirt"
+    },
+    "=": {
+      "floor": "concrete"
+    },
+    "T": {
+      "floor": "grass",
+      "object": "tree"
+    },
+    "b": {
+      "floor": "grass",
+      "object": "bush"
+    },
+    "r": {
+      "floor": "grass",
+      "object": "rock"
+    },
+    "f": {
+      "floor": "grass",
+      "north": "fence_n"
+    },
+    "g": {
+      "floor": "grass",
+      "west": "fence_w"
+    },
+    "t": {
+      "floor": "tiles"
+    },
+    "W": {
+      "floor": "tiles",
+      "west": "brick_w"
+    },
+    "N": {
+      "floor": "tiles",
+      "north": "brick_n"
+    },
+    "C": {
+      "floor": "tiles",
+      "west": "brick_w",
+      "north": "brick_n"
+    },
+    "w": {
+      "floor": "tiles",
+      "west": "window_w"
+    },
+    "n": {
+      "floor": "tiles",
+      "north": "window_n"
+    },
+    "E": {
+      "floor": "grass",
+      "west": "brick_w"
+    },
+    "S": {
+      "floor": "grass",
+      "north": "brick_n"
+    },
+    "e": {
+      "floor": "grass",
+      "west": "window_w"
+    },
+    "s": {
+      "floor": "grass",
+      "north": "window_n"
+    },
+    "X": {
+      "floor": "grass",
+      "west": "door_w"
+    },
+    "x": {
+      "floor": "grass",
+      "north": "door_n"
+    },
+    "k": {
+      "floor": "tiles",
+      "object": "crate"
+    },
+    "L": {
+      "floor": "tiles",
+      "object": "stairs_low_n"
+    },
+    "H": {
+      "floor": "tiles",
+      "object": "stairs_high_n"
+    },
+    "q": {
+      "floor": "tiles",
+      "object": "table"
+    },
+    "P": {
+      "floor": "tiles"
+    },
+    "{": {
+      "west": "brick_w"
+    },
+    "}": {
+      "north": "brick_n"
+    },
+    "[": {
+      "west": "window_w"
+    },
+    "]": {
+      "north": "window_n"
+    },
+    "G": {
+      "floor": "concrete",
+      "west": "brick_w"
+    },
+    "M": {
+      "floor": "concrete",
+      "north": "brick_n"
+    },
+    "Y": {
+      "floor": "concrete",
+      "west": "brick_w",
+      "north": "brick_n"
+    },
+    "U": {
+      "floor": "concrete",
+      "west": "brick_w"
+    },
+    "u": {
+      "floor": "concrete",
+      "north": "brick_n"
+    },
+    "O": {
+      "floor": "concrete",
+      "west": "door_w"
+    },
+    "c": {
+      "floor": "concrete",
+      "object": "crate"
+    },
+    "o": {
+      "floor": "concrete",
+      "object": "barrel"
+    },
+    "K": {
+      "floor": "hull"
+    },
+    "J": {
+      "floor": "hull",
+      "west": "hull_w"
+    },
+    "I": {
+      "floor": "hull",
+      "north": "hull_n"
+    },
+    "Q": {
+      "floor": "hull",
+      "west": "hull_w",
+      "north": "hull_n"
+    },
+    "j": {
+      "floor": "grass",
+      "west": "hull_w"
+    },
+    "i": {
+      "floor": "grass",
+      "north": "hull_n"
+    },
+    "h": {
+      "floor": "grass",
+      "north": "hatch_n"
+    },
+    "V": {
+      "floor": "hull",
+      "object": "pod"
+    },
+    "1": {
+      "floor": "grass",
+      "spawn": "player"
+    },
+    "2": {
+      "floor": "grass",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "3": {
+      "floor": "tiles",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "4": {
+      "floor": "hull",
+      "spawn": "hostile"
+    },
+    "p": {
+      "floor": "grass",
+      "patrol": true
+    },
+    "5": {
+      "floor": "concrete",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "z": {
+      "floor": "grass",
+      "zone": "extraction"
+    }
+  },
+  "levels": [
+    [
+      "......T....,,.........zz",
+      ".T..p......,,.........zz",
+      "...........,,r........zz",
+      "...CNNNNNE.,,.......T...",
+      "...WtqttkE.,,..QIIIj....",
+      "...Wttttte.,,..JVVKj....",
+      "...wttttHE.,,..J44Kj.b..",
+      "...WttttLX.,,..JKK4j....",
+      "...W3ttttE.,,..ihii.....",
+      "b..SSxSsS..,,...........",
+      "...........,,.b..p...2T.",
+      "..T...p....,,p....b.....",
+      ".........b.,,...........",
+      "ffff.fffg..,,.=======...",
+      "........g..,,.=YMMMMU...",
+      "..b.....g..,,.=G=cc=Ur..",
+      ".....b..g.p,,.=O===cU...",
+      "........g..,,.=G=5=oU...",
+      "........g..,,.=uuuuu=...",
+      ".......r...,,........p..",
+      "...........,,...r.2.....",
+      "..1111.....,,T......T...",
+      "..1111.....,,...........",
+      "...........,,..........."
+    ],
+    [
+      "                        ",
+      "                        ",
+      "                        ",
+      "   CNNnNN{              ",
+      "   W3PPPP{              ",
+      "   wPPPPP{              ",
+      "   WPPPP {              ",
+      "   WPPPP [              ",
+      "   WPPPPP{              ",
+      "   }]}}}}               ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        ",
+      "                        "
+    ]
+  ]
+}

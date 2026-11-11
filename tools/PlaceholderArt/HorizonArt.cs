@@ -45,8 +45,13 @@ public static class HorizonArt
         p.Png("tiles/rock.png", TileArt.Rock(Rgba.Hex("#8a8680"), 34));
         p.Png("tiles/table.png", TileArt.Table(IsoDraw.Planks(Rgba.Hex("#7a5232")), IsoDraw.Solid(Rgba.Hex("#4a3420"))));
         p.Png("tiles/console.png", TileArt.Console(IsoDraw.Solid(Rgba.Hex("#505868")), Rgba.Hex("#40e0c0")));
-        p.Png("tiles/stairs_n.png", TileArt.Stairs(west: false, IsoDraw.Solid(Rgba.Hex("#a8a49c"), 0.05f)));
-        p.Png("tiles/stairs_w.png", TileArt.Stairs(west: true, IsoDraw.Solid(Rgba.Hex("#a8a49c"), 0.05f)));
+        foreach (bool west in new[] { true, false })
+        {
+            string s = west ? "w" : "n";
+            p.Png($"tiles/stairs_low_{s}.png", TileArt.Stairs(west, high: false, IsoDraw.Solid(Rgba.Hex("#a8a49c"), 0.05f)));
+            p.Png($"tiles/stairs_high_{s}.png", TileArt.Stairs(west, high: true, IsoDraw.Solid(Rgba.Hex("#a8a49c"), 0.05f)));
+        }
+
         p.Png("tiles/debris.png", TileArt.Debris(Rgba.Hex("#8a6a50"), 35));
         p.Png("tiles/pod.png", TileArt.Console(IsoDraw.Panels(hull, hullSeam, 5f), Rgba.Hex("#c060ff")));
 
@@ -64,6 +69,7 @@ public static class HorizonArt
         p.Png("items/pulse_carbine.png", ItemArt.Gun(Rgba.Hex("#504070"), Rgba.Hex("#c070ff"), 18f, 2.8f));
         p.Png("items/clip.png", ItemArt.Clip(Rgba.Hex("#505050")));
         p.Png("items/cell.png", ItemArt.Clip(Rgba.Hex("#9060d0")));
+        p.Png("items/knife.png", ItemArt.Blade(Rgba.Hex("#b8bcc0"), Rgba.Hex("#303030")));
         p.Png("items/grenade.png", ItemArt.Grenade(Rgba.Hex("#506040"), Rgba.Hex("#c0c0c0")));
         p.Png("items/corpse_operative.png", Corpse(operative));
         p.Png("items/corpse_gaunt.png", Corpse(gaunt));

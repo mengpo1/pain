@@ -1,0 +1,52 @@
+{
+  "id": "outskirts_field",
+  "size": [
+    10,
+    10,
+    1
+  ],
+  "legend": {
+    ".": {
+      "floor": "grass"
+    },
+    "T": {
+      "floor": "grass",
+      "object": "tree"
+    },
+    "b": {
+      "floor": "grass",
+      "object": "bush"
+    },
+    "r": {
+      "floor": "grass",
+      "object": "rock"
+    },
+    "f": {
+      "floor": "grass",
+      "north": "fence_n"
+    },
+    "2": {
+      "floor": "grass",
+      "spawn": "hostile",
+      "patrol": true
+    },
+    "p": {
+      "floor": "grass",
+      "patrol": true
+    }
+  },
+  "levels": [
+    [
+      "..........",
+      ".b....T...",
+      "....p.....",
+      "..........",
+      "ffff.ffff.",
+      "..........",
+      "...b...2..",
+      ".T........",
+      "......r...",
+      ".........."
+    ]
+  ]
+}

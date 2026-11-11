@@ -1,0 +1,9 @@
+{
+  "id": "horizon",
+  "name": "Horizon",
+  "version": "0.1.0",
+  "formatVersion": 1,
+  "description": "Pack A: near-future tactical science fiction, close to OpenXcom's mechanics. Original content.",
+  "author": "OpenTactics contributors",
+  "dependencies": []
+}

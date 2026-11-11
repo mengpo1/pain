@@ -1,0 +1,10 @@
+// Floors: tuWalk is the TU to walk onto the tile (OpenXcom TU_Walk). armor 0 = indestructible.
+[
+  { "id": "grass", "sprite": "tile.floor_grass", "shape": "floor", "tuWalk": 4 },
+  { "id": "dirt", "sprite": "tile.floor_dirt", "shape": "floor", "tuWalk": 4 },
+  { "id": "road", "sprite": "tile.floor_road", "shape": "floor", "tuWalk": 4 },
+  { "id": "concrete", "sprite": "tile.floor_concrete", "shape": "floor", "tuWalk": 4 },
+  { "id": "tiles", "sprite": "tile.floor_tiles", "shape": "floor", "tuWalk": 4 },
+  { "id": "roof", "sprite": "tile.floor_roof", "shape": "floor", "tuWalk": 4 },
+  { "id": "hull", "sprite": "tile.floor_hull", "shape": "floor", "tuWalk": 4 }
+]

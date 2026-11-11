@@ -1,0 +1,22 @@
+// Armour values per side (front, side, rear, under). damageModifiers: % of damage taken per type.
+[
+  {
+    "id": "field_vest", "nameKey": "armor.field_vest", "front": 12, "side": 8, "rear": 5, "under": 2,
+    "sprite": "unit.operative", "corpse": "corpse_operative", "standHeight": 22, "kneelHeight": 14
+  },
+  {
+    "id": "plated_suit", "nameKey": "armor.plated_suit", "front": 30, "side": 24, "rear": 18, "under": 12,
+    "stats": { "tu": -4 },
+    "sprite": "unit.operative_heavy", "corpse": "corpse_operative", "standHeight": 22, "kneelHeight": 14
+  },
+  {
+    "id": "gaunt_hide", "nameKey": "armor.gaunt_hide", "front": 4, "side": 4, "rear": 4, "under": 4,
+    "damageModifiers": { "pulse": 80 },
+    "sprite": "unit.gaunt", "corpse": "corpse_gaunt", "standHeight": 18, "kneelHeight": 12, "canKneel": false
+  },
+  {
+    "id": "warden_shell", "nameKey": "armor.warden_shell", "front": 22, "side": 18, "rear": 14, "under": 10,
+    "damageModifiers": { "kinetic": 90, "blade": 70 },
+    "sprite": "unit.warden", "corpse": "corpse_warden", "standHeight": 23, "kneelHeight": 16, "canKneel": false
+  }
+]

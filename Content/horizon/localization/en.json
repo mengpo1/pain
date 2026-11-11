@@ -1,0 +1,74 @@
+{
+  "game": { "title": "Horizon", "subtitle": "Tactical operations — demonstration pack" },
+  "menu": {
+    "missions": "Missions", "quit": "Quit", "language": "Language: {name}", "pack": "Game: {name}",
+    "start": "Start mission", "back": "Back", "load": "Continue last save", "errors": "{count} content problem(s), see log.txt",
+    "seed": "Seed {seed}", "objective": "Objective"
+  },
+  "ui": {
+    "end_turn": "End turn", "next_unit": "Next", "previous_unit": "Previous", "kneel": "Kneel", "stand": "Stand",
+    "reload": "Reload", "level_up": "Level +", "level_down": "Level −", "center": "Center", "menu": "Menu",
+    "turn": "Turn {turn}", "enemy_turn": "{side} are moving…", "your_turn": "{side}: your turn",
+    "tu": "TU", "energy": "EN", "health": "HP", "morale": "MO", "stun": "stun",
+    "accuracy": "{value}%", "cost": "{value} TU", "rounds": "{rounds}/{max}", "no_weapon": "Empty hands",
+    "target_hint": "Choose a target — right click or Esc to cancel", "path_cost": "{cost} TU",
+    "level": "Level {level}", "visible_enemies": "Enemies in sight", "wounds": "{count} fatal wound(s)",
+    "resume": "Resume", "save": "Save", "load": "Load", "abandon": "Abandon mission", "saved": "Game saved", "loaded": "Game loaded",
+    "zone": "In zone: {inside}/{needed}", "survive": "Hold until the end of turn {turns}",
+    "kneeling": "kneeling", "unconscious": "unconscious", "dead": "dead"
+  },
+  "mode": { "snap": "Snap shot", "aimed": "Aimed shot", "auto": "Auto shot", "melee": "Strike", "throw": "Throw" },
+  "debrief": {
+    "title_victory": "Mission accomplished", "title_defeat": "Mission failed", "turns": "Turns played: {turn}",
+    "survivors": "Survivors", "losses": "Losses", "kills": "Hostiles neutralised: {count}", "continue": "Back to menu",
+    "status_ok": "fit", "status_wounded": "wounded ({health}/{max})", "status_dead": "killed", "status_unconscious": "unconscious"
+  },
+  "mission": {
+    "victory": { "eliminated": "All hostiles neutralised.", "survived": "You held your ground.", "zone": "The team reached the extraction point." },
+    "defeat": { "all_down": "Every operative is down.", "time": "Out of time." },
+    "first_contact": {
+      "name": "First contact",
+      "briefing": "A craft has landed near a farm outpost. Clear the area: the visitors are hiding in the house, the shed and around their craft."
+    },
+    "night_extraction": {
+      "name": "Night extraction",
+      "briefing": "Night. Your team must cross the outpost and reach the extraction point in the north-east corner. Two operatives must make it within 15 turns."
+    },
+    "patrol_sweep": {
+      "name": "Patrol sweep (generated map)",
+      "briefing": "Late afternoon on the outskirts. The map is assembled from blocks with the battle seed: every game is different."
+    }
+  },
+  "objective": {
+    "eliminate": "Neutralise every hostile.",
+    "extraction": "Reach the extraction zone with 2 operatives."
+  },
+  "faction": { "player": "Player", "hostile": "Hostiles", "neutral": "Civilians", "operatives": "Operatives", "visitors": "Visitors" },
+  "error": {
+    "battle_over": "The battle is over.", "busy": "Wait for the current action.", "no_unit": "No such unit.",
+    "not_your_turn": "Not your turn.", "unit_down": "This unit cannot act.", "unknown_command": "Unknown order.",
+    "no_path": "No path to this tile.", "not_enough_tu": "Not enough time units ({value} needed).",
+    "not_enough_energy": "Not enough energy.", "path_blocked": "Path blocked.", "cannot_kneel": "This unit cannot kneel.",
+    "not_in_hand": "The item must be held in hand.", "invalid_target": "Invalid target.", "mode_unavailable": "This weapon cannot do that.",
+    "out_of_reach": "Too far: the target must be adjacent.", "no_ammo": "No ammunition.", "out_of_range": "Out of range.",
+    "no_line_of_fire": "No line of fire.", "cannot_reload": "This weapon is not reloaded.", "already_loaded": "The weapon is already loaded.",
+    "save_failed": "Saving failed: {message}", "load_failed": "Loading failed: {message}"
+  },
+  "info": { "enemy_spotted": "Enemy spotted!" },
+  "stat": {
+    "tu": "Time units", "tu.short": "TU", "stamina": "Stamina", "stamina.short": "STA", "health": "Health", "health.short": "HP",
+    "bravery": "Bravery", "bravery.short": "BRA", "reactions": "Reactions", "reactions.short": "REA", "firing": "Firing accuracy",
+    "firing.short": "FIR", "throwing": "Throwing accuracy", "throwing.short": "THR", "strength": "Strength", "strength.short": "STR",
+    "melee": "Melee accuracy", "melee.short": "MEL"
+  },
+  "item": {
+    "k7_rifle": "K-7 rifle", "k7_clip": "K-7 magazine", "p9_pistol": "P-9 pistol", "p9_clip": "P-9 magazine",
+    "pulse_carbine": "Pulse carbine", "pulse_cell": "Pulse cell", "combat_knife": "Combat knife",
+    "corpse_operative": "Operative's body", "corpse_gaunt": "Gaunt corpse", "corpse_warden": "Warden corpse"
+  },
+  "armor": { "field_vest": "Field vest", "plated_suit": "Plated suit", "gaunt_hide": "Gaunt hide", "warden_shell": "Warden shell" },
+  "unit": { "operative": "Operative", "operative_heavy": "Heavy operative", "gaunt": "Gaunt", "warden": "Warden" },
+  "damage": { "kinetic": "Kinetic", "pulse": "Pulse", "blade": "Blade", "explosive": "Explosive" },
+  "slot": { "right_hand": "Right hand", "left_hand": "Left hand", "belt": "Belt", "backpack": "Backpack", "ground": "Ground" },
+  "terrain": { "outskirts": "Outskirts" }
+}

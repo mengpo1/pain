@@ -36,6 +36,12 @@ public sealed class UiStyle
     public string Neutral { get; init; } = "#c0c070";
     public string Good { get; init; } = "#60d070";
     public string Bad { get; init; } = "#e04040";
+
+    /// <summary>
+    /// Pixel of a map sprite placed on the north corner of its tile's floor diamond, for
+    /// textures that do not declare their own anchor (64 × 80 frames by default: 32, 48).
+    /// </summary>
+    public int[] MapSpriteAnchor { get; init; } = [32, 48];
 }
 
 /// <summary>Sounds of generic events (interface, footsteps). Ids from assets.json.</summary>

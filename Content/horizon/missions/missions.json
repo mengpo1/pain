@@ -1,0 +1,27 @@
+[
+  {
+    "id": "first_contact", "nameKey": "mission.first_contact.name", "briefingKey": "mission.first_contact.briefing",
+    "map": { "block": "outpost" }, "light": 15,
+    "player": [ { "unit": "operative", "count": 4 }, { "unit": "operative_heavy", "count": 2 } ],
+    "hostile": [ { "unit": "gaunt", "count": 5 }, { "unit": "warden", "count": 2 } ],
+    "objective": { "kind": "eliminateHostiles", "descriptionKey": "objective.eliminate" },
+    "playerNameKey": "faction.operatives", "hostileNameKey": "faction.visitors"
+  },
+  {
+    "id": "night_extraction", "nameKey": "mission.night_extraction.name", "briefingKey": "mission.night_extraction.briefing",
+    "map": { "block": "outpost" }, "light": 2,
+    "player": [ { "unit": "operative", "count": 3 }, { "unit": "operative_heavy", "count": 1 } ],
+    "hostile": [ { "unit": "gaunt", "count": 6 }, { "unit": "warden", "count": 1 } ],
+    "objective": { "kind": "reachZone", "zone": "extraction", "units": 2, "descriptionKey": "objective.extraction" },
+    "turnLimit": 15,
+    "playerNameKey": "faction.operatives", "hostileNameKey": "faction.visitors"
+  },
+  {
+    "id": "patrol_sweep", "nameKey": "mission.patrol_sweep.name", "briefingKey": "mission.patrol_sweep.briefing",
+    "map": { "terrain": "outskirts", "blocksX": 3, "blocksY": 3, "levels": 2 }, "light": 12,
+    "player": [ { "unit": "operative", "count": 4 }, { "unit": "operative_heavy", "count": 1 } ],
+    "hostile": [ { "unit": "gaunt", "count": 6 } ],
+    "objective": { "kind": "eliminateHostiles", "descriptionKey": "objective.eliminate" },
+    "playerNameKey": "faction.operatives", "hostileNameKey": "faction.visitors"
+  }
+]
