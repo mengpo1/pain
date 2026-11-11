@@ -166,3 +166,40 @@ public class MovementTests
         Assert.DoesNotContain(path.Steps, s => s.To == new Position(1, 1, 0));
     }
 }
+
+public class ReserveTests
+{
+    [Fact]
+    public void Reserved_snap_shot_stops_the_walk_but_not_the_shot()
+    {
+        Battle battle = TestWorld.Battle();
+        BattleUnit unit = battle.Soldier(Faction.Player, 0, 0, weapon: "rifle");
+        battle.PlayerReserve.Mode = ReserveMode.Snap; // 15 TU
+        battle.Do(new MoveCommand(unit.Id, new Position(19, 0, 0)));
+        Assert.Equal(new Position(11, 0, 0), unit.Position); // 11 steps × 4 = 44 TU, 16 left ≥ 15
+        Assert.Contains(battle.Events, e => e is ActionInterrupted { ReasonKey: "error.tu_reserved" });
+        Assert.True(battle.Execute(new AttackCommand(unit.Id, unit.ItemInSlot(Inventory.RightHand)!.Id, AttackMode.Snap, new Position(15, 0, 0))).Accepted);
+    }
+
+    [Fact]
+    public void Units_that_cannot_pay_the_reserve_are_not_restricted()
+    {
+        Battle battle = TestWorld.Battle();
+        BattleUnit unit = battle.Soldier(Faction.Player, 0, 0, weapon: "rifle");
+        battle.PlayerReserve.Mode = ReserveMode.Aimed; // 48 TU
+        unit.Tu = 20;
+        battle.Do(new MoveCommand(unit.Id, new Position(3, 0, 0)));
+        Assert.Equal(new Position(3, 0, 0), unit.Position);
+    }
+
+    [Fact]
+    public void Missing_mode_falls_back_to_snap()
+    {
+        Battle battle = TestWorld.Battle();
+        BattleUnit unit = battle.Soldier(Faction.Player, 0, 0, weapon: "laser");
+        battle.PlayerReserve.Mode = ReserveMode.Auto;
+        Assert.Equal(10, battle.PlayerReserve.For(battle, unit));
+        battle.PlayerReserve.Kneel = true;
+        Assert.Equal(14, battle.PlayerReserve.For(battle, unit));
+    }
+}

@@ -14,6 +14,7 @@ public static class TurnRules
         int cost = Directions.TurnSteps(unit.Direction, direction) * battle.Rules.Battle.TurnTu;
         if (cost == 0) return CommandResult.Ok;
         if (unit.Tu < cost) return CommandResult.Refused("error.not_enough_tu", cost);
+        if (!battle.PlayerReserve.Allows(battle, unit, cost)) return CommandResult.Refused("error.tu_reserved");
         unit.Tu -= cost;
         Face(battle, unit, direction);
         battle.RefreshVision();
@@ -36,6 +37,9 @@ public static class TurnRules
         BattleRules rules = battle.Rules.Battle;
         int cost = unit.Kneeling ? rules.StandUpTu : rules.KneelTu;
         if (unit.Tu < cost) return CommandResult.Refused("error.not_enough_tu", cost);
+        // Kneeling is what the kneel reserve is for, so it is always allowed.
+        bool kneelingDown = !unit.Kneeling && battle.PlayerReserve.Kneel;
+        if (!kneelingDown && !battle.PlayerReserve.Allows(battle, unit, cost)) return CommandResult.Refused("error.tu_reserved");
         unit.Tu -= cost;
         unit.Kneeling = !unit.Kneeling;
         battle.Emit(new UnitKneeled(unit.Id, unit.Kneeling));

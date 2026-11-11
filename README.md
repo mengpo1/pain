@@ -92,6 +92,7 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler. 
 | Genou à terre / debout | `K` |
 | Recharger | `R` |
 | Inventaire (prendre une grenade en main, ramasser, poser) | `I` |
+| Réserver des UT pour la réaction | boutons « Réserve » et « +Genou » en haut de l'écran |
 | Grenade | en main : clic sur elle → « Amorcer » puis « Lancer » → case ; elle explose en fin de tour |
 | Fin du tour | `E` |
 | Caméra | flèches, ZQSD/WASD, bords de l'écran, clic molette maintenu ; zoom à la molette ; `C` centre |
@@ -137,13 +138,14 @@ mort ; tirs de réaction ; vision, lumière et brouillard de guerre ; moral ; IA
 blocs ; deux univers ; mods ; FR/EN.
 
 Grenades (amorçage, lancer en cloche, explosion en fin de tour, destruction du décor) et
-inventaire (déplacement d'objets avec les coûts en UT), panique et berserk sont aussi en place.
+inventaire (déplacement d'objets avec les coûts en UT), réserve d'UT, panique et berserk sont aussi
+en place.
 
-**Pas encore fait** : feu et fumée, réserve d'UT, sauvegarde, expérience, inventaire en
+**Pas encore fait** : feu et fumée, sauvegarde, expérience, inventaire en
 grille, grenades pour l'IA, et toute la couche stratégique (Geoscape). Le détail est dans
 [docs/mechanics.md](docs/mechanics.md).
 
-**Vérifié** : compilation sans avertissement et 99 tests sous Linux ; le jeu réel lancé sous Linux
+**Vérifié** : compilation sans avertissement et 102 tests sous Linux ; le jeu réel lancé sous Linux
 (Xvfb, OpenGL logiciel), joué à la souris et au clavier (sélection, déplacement, menu de tir, tir,
 fin de tour, inventaire, grenade amorcée, lancée et explosant en fin de tour) et en pilotage
 automatique sur les deux packs. L'intégration continue

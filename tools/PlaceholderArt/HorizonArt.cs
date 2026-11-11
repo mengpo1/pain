@@ -117,6 +117,7 @@ public static class HorizonArt
         p.Png("ui/cursor_blocked.png", ItemArt.Cursor(Rgba.Hex("#909090")));
         p.Png("ui/path.png", ItemArt.Marker(Rgba.Hex("#60e070").WithAlpha(0.8f)));
         p.Png("ui/path_short.png", ItemArt.Marker(Rgba.Hex("#ff7040").WithAlpha(0.8f)));
+        p.Png("ui/path_reserve.png", ItemArt.Marker(Rgba.Hex("#f0d040").WithAlpha(0.8f)));
         p.Png("ui/zone.png", ItemArt.Marker(Rgba.Hex("#40c0ff").WithAlpha(0.28f), 0.95f));
         p.Png("ui/arrow.png", ItemArt.Arrow(accent));
     }

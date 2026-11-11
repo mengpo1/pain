@@ -39,6 +39,7 @@ public sealed class BattleScreen : Screen
     {
         _battle = battle;
         _renderer = new BattleRenderer(Session);
+        _view.Reserve = battle.PlayerReserve;
         _hud = new BattleHud(Session);
         _ai = new AiController(battle);
         _playback.Enqueue(battle.TakeEvents());
@@ -341,6 +342,14 @@ public sealed class BattleScreen : Screen
                 break;
             case FocusUnit focus:
                 CenterOn(focus.Unit.Position);
+                break;
+            case CycleReserve:
+                _battle.PlayerReserve.Mode = (ReserveMode)(((int)_battle.PlayerReserve.Mode + 1) % 4);
+                _view.Path = null;
+                break;
+            case ToggleKneelReserve:
+                _battle.PlayerReserve.Kneel = !_battle.PlayerReserve.Kneel;
+                _view.Path = null;
                 break;
             case ToggleInventory:
                 _view.InventoryOpen = !_view.InventoryOpen;

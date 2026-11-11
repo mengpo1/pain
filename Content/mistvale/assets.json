@@ -55,6 +55,7 @@
     "ui.cursor_blocked": "assets/ui/cursor_blocked.png",
     "ui.cursor_target": "assets/ui/cursor_target.png",
     "ui.path": "assets/ui/path.png",
+    "ui.path_reserve": "assets/ui/path_reserve.png",
     "ui.path_short": "assets/ui/path_short.png",
     "ui.zone": "assets/ui/zone.png",
     "texture.unit.raider": "assets/units/raider.png",

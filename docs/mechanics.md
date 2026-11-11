@@ -42,7 +42,7 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 | Exécution pas à pas | ✅ | UT et énergie payées au début de chaque pas ; arrêt sur la dernière case payable, sur une case occupée par une unité non vue (sans dépense), ou quand le camp repère un nouvel ennemi (sans réaction pour ce pas). |
 | Recherche de chemin | ✅ | Chemin le moins cher en UT (Dijkstra ; OXCE : A*, même résultat), sans tenir compte de l'énergie ni des UT restantes. Les unités connues sont contournées. |
 | Course, pas latéral, furtivité, vol, ascenseurs | ❌ | Options OXCE non reprises. |
-| Réserve d'UT du joueur | ❌ | Lot 2. |
+| Réserve d'UT du joueur | ✅ | Aucune, rapide, visé ou auto (repli auto → rapide → visé si l'arme n'a pas ce mode), + 4 UT pour s'agenouiller en option ; bloque marche, rotation et genou à terre qui entameraient la réserve, jamais le tir ; aucune contrainte si l'unité ne peut déjà plus payer sa réserve. Aperçu du chemin : vert, jaune (entame la réserve), orange (trop loin). |
 
 ### Précision et tir (`BattleUnit::getFiringAccuracy`, `Projectile::applyAccuracy`)
 

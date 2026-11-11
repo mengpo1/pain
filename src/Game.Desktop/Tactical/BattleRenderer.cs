@@ -115,7 +115,9 @@ public sealed class BattleRenderer
             {
                 Position step = path.Steps[i].To;
                 if (step.Z > view.Level) continue;
-                string marker = path.CostAfter(i + 1) <= walker.Tu ? "ui.path" : "ui.path_short";
+                // Green: affordable keeping the TU reserve; yellow: affordable but eats into it; orange: too far.
+                int cost = path.CostAfter(i + 1);
+                string marker = cost > walker.Tu ? "ui.path_short" : battle.PlayerReserve.Allows(battle, walker, cost) ? "ui.path" : "ui.path_reserve";
                 Sprite(batch, marker, Iso.TileTop(step) - new Vector2(0, battle.Map.StandElevation(step) * 2f), Color.White);
             }
         }

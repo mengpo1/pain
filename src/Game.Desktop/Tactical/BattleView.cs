@@ -28,6 +28,9 @@ public sealed class BattleView
     /// <summary>Hand whose action menu is open, if any.</summary>
     public BattleItem? ActionMenu { get; set; }
 
+    /// <summary>The player's TU reserve (shared with the battle so the rules apply it).</summary>
+    public Reserve Reserve { get; set; } = new();
+
     /// <summary>The inventory panel of the selected unit is open.</summary>
     public bool InventoryOpen { get; set; }
 

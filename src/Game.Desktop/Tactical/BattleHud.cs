@@ -23,6 +23,8 @@ public sealed record ChooseAttack(BattleItem Weapon, AttackMode Mode) : HudActio
 public sealed record FocusUnit(BattleUnit Unit) : HudAction;
 public sealed record PrimeGrenade(BattleItem Grenade, int Fuse) : HudAction;
 public sealed record ToggleInventory : HudAction;
+public sealed record CycleReserve : HudAction;
+public sealed record ToggleKneelReserve : HudAction;
 public sealed record MoveItem(BattleItem Item, string Slot) : HudAction;
 
 /// <summary>
@@ -237,6 +239,12 @@ public sealed class BattleHud
         if (ui.Button(batch, menu, texts.Get("ui.menu"), size: 12f)) action = new OpenPauseMenu();
         var inventory = new Rectangle(screen.Width - ui.S(222), ui.S(4), ui.S(120), ui.S(26));
         if (ui.Button(batch, inventory, texts.Get("ui.inventory"), unit is not null, view.InventoryOpen, size: 12f)) action = new ToggleInventory();
+        Reserve reserve = view.Reserve;
+        string mode = texts.Get($"reserve.{reserve.Mode.ToString().ToLowerInvariant()}");
+        var reserveButton = new Rectangle(screen.Width - ui.S(408), ui.S(4), ui.S(180), ui.S(26));
+        if (ui.Button(batch, reserveButton, texts.Format("ui.reserve", ("mode", mode)), enabled, reserve.Mode != ReserveMode.None, size: 12f)) action = new CycleReserve();
+        var kneelButton = new Rectangle(screen.Width - ui.S(474), ui.S(4), ui.S(60), ui.S(26));
+        if (ui.Button(batch, kneelButton, texts.Get("ui.reserve_kneel"), enabled, reserve.Kneel, size: 12f)) action = new ToggleKneelReserve();
         return action;
     }
 

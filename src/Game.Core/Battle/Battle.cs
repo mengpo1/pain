@@ -56,6 +56,9 @@ public sealed class Battle
 
     public BattleOutcome? Outcome { get; private set; }
 
+    /// <summary>TU the player keeps for reaction fire (set from the interface).</summary>
+    public Reserve PlayerReserve { get; } = new();
+
     public bool IsOver => Outcome is not null;
 
     /// <summary>True while queued actions remain (walking, shots in flight…).</summary>

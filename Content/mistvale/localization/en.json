@@ -56,7 +56,9 @@
     "unconscious": "unconscious",
     "dead": "dead",
     "primed": "primed ({fuse})",
-    "inventory": "Inventory"
+    "inventory": "Inventory",
+    "reserve": "Reserve: {mode}",
+    "reserve_kneel": "+Kneel"
   },
   "mode": {
     "snap": "Quick shot",
@@ -110,7 +112,8 @@
     "item_too_heavy": "Bodies cannot be carried yet.",
     "cannot_move_there": "The item cannot go there.",
     "no_room": "No room there.",
-    "panicking": "This unit has lost control this turn."
+    "panicking": "This unit has lost control this turn.",
+    "tu_reserved": "Time units are reserved for a shot."
   },
   "info": {
     "enemy_spotted": "Enemy spotted!",
@@ -208,5 +211,11 @@
     "belt": "Belt",
     "backpack": "Backpack",
     "ground": "Ground"
+  },
+  "reserve": {
+    "none": "none",
+    "snap": "snap",
+    "aimed": "aimed",
+    "auto": "auto"
   }
 }

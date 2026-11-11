@@ -60,7 +60,9 @@
     "unconscious": "inconscient",
     "dead": "mort",
     "primed": "amorcée ({fuse})",
-    "inventory": "Inventaire"
+    "inventory": "Inventaire",
+    "reserve": "Réserve : {mode}",
+    "reserve_kneel": "+Genou"
   },
   "mode": {
     "snap": "Tir rapide",
@@ -148,7 +150,8 @@
     "item_too_heavy": "Les corps ne se portent pas encore.",
     "cannot_move_there": "L'objet ne peut pas aller là.",
     "no_room": "Plus de place.",
-    "panicking": "Cette unité n'obéit plus ce tour-ci."
+    "panicking": "Cette unité n'obéit plus ce tour-ci.",
+    "tu_reserved": "Les UT sont réservées pour un tir."
   },
   "info": {
     "enemy_spotted": "Ennemi repéré !",
@@ -216,5 +219,11 @@
   },
   "terrain": {
     "outskirts": "Périphérie"
+  },
+  "reserve": {
+    "none": "aucune",
+    "snap": "rapide",
+    "aimed": "visé",
+    "auto": "auto"
   }
 }

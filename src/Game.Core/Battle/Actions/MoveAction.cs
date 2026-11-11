@@ -66,6 +66,7 @@ internal sealed class MoveAction : BattleAction
         }
 
         if (step.Tu > _unit.Tu) return Interrupt(battle, "error.not_enough_tu");
+        if (!battle.PlayerReserve.Allows(battle, _unit, step.Tu)) return Interrupt(battle, "error.tu_reserved");
         if (step.Energy > _unit.Energy) return Interrupt(battle, "error.not_enough_energy");
 
         _unit.Tu -= step.Tu;
