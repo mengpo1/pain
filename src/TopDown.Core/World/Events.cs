@@ -44,7 +44,9 @@ public sealed record ActorKnockedDown(Actor Target, Actor? Source, HitMethod Met
 /// <summary>A hit that would have killed left the target wounded, crawling on the floor.</summary>
 public sealed record ActorWounded(Actor Target, Actor? Source, Vector2 Direction, HitMethod Method) : GameEvent;
 
-public sealed record ActorKilled(Actor Victim, Actor? Killer, Vector2 Direction, HitMethod Method, string DamageType) : GameEvent;
+/// <param name="Severed">Indices (in the victim's sprite parts) of the body parts the blow cut off.</param>
+public sealed record ActorKilled(Actor Victim, Actor? Killer, Vector2 Direction, HitMethod Method, string DamageType,
+    WeaponDefinition? Weapon = null, IReadOnlyList<int>? Severed = null) : GameEvent;
 
 public sealed record WeaponPickedUp(Actor Actor, WeaponDefinition Weapon) : GameEvent;
 

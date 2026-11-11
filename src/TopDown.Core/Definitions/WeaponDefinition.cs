@@ -71,6 +71,9 @@ public sealed class WeaponDefinition
     /// </summary>
     public float WoundChance { get; set; }
 
+    /// <summary>Kills with this weapon may sever body parts (see <see cref="DismemberDefinition"/>). Null: never.</summary>
+    public DismemberDefinition? Dismember { get; set; }
+
     /// <summary>Speed (units/s) given to the target when hit.</summary>
     public float Knockback { get; set; } = 140f;
 
@@ -156,6 +159,25 @@ public sealed class ExecutionDefinition
     public Dictionary<string, ExecutionVariant> Against { get; set; } = new();
 }
 
+/// <summary>
+/// Body parts a kill can sever (characters whose sprites list <c>parts</c>): a blade takes off a
+/// head or a limb, a shotgun at close range blows limbs away.
+/// </summary>
+public sealed class DismemberDefinition
+{
+    /// <summary>Chance (0 to 1) that a kill severs something.</summary>
+    public float Chance { get; set; }
+
+    /// <summary>Kinds of parts that can come off ("head", "arm", "leg").</summary>
+    public List<string> Parts { get; set; } = new();
+
+    /// <summary>Parts severed at most by one kill.</summary>
+    public int Count { get; set; } = 1;
+
+    /// <summary>Only when the killer is this close (0 = any distance).</summary>
+    public float MaxDistance { get; set; }
+}
+
 /// <summary>Execution settings that replace the weapon's own against one kind of victim.</summary>
 public sealed class ExecutionVariant
 {
@@ -181,10 +203,12 @@ public enum ExecutionAnimation
     Shoot,
     /// <summary>An animal bites from above the head.</summary>
     Bite,
-    /// <summary>Kneeling on a beast, tears a leg off with each blow.</summary>
+    /// <summary>Astride a beast, tears a leg off with each blow.</summary>
     TearLegs,
     /// <summary>Astride a beast, pulls its head until it comes off.</summary>
     TearHead,
+    /// <summary>Beside the head, a blade chops it off on the last blow.</summary>
+    Behead,
 }
 
 public sealed class ThrowDefinition

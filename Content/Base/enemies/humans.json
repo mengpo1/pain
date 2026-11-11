@@ -14,7 +14,14 @@
     "friction": 5000,
     "weaponId": "pistol",
     "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead",
-                 "mount": "actor.guard.mount", "kick": "actor.legs.kick", "crawl": "actor.guard.crawl" },
+                 "mount": "actor.guard.mount", "kick": "actor.legs.kick", "crawl": "actor.guard.crawl",
+                 // Pieces that blades and close shotgun blasts can sever (same-size images).
+                 "torso": "actor.guard.torso",
+                 "parts": [
+                   { "id": "head", "sprite": "actor.guard.head", "over": true },
+                   { "id": "arm", "sprite": "actor.guard.arm1" }, { "id": "arm", "sprite": "actor.guard.arm2" },
+                   { "id": "leg", "sprite": "actor.guard.leg1" }, { "id": "leg", "sprite": "actor.guard.leg2" }
+                 ] },
     "sounds": { "death": "sound.death", "hurt": "sound.groan" },
     "ai": {
       "behavior": "guard",
@@ -42,7 +49,14 @@
     "friction": 5000,
     "weaponId": "bat",
     "sprites": { "body": "actor.thug", "legs": "actor.legs", "down": "actor.thug.down", "dead": "actor.thug.dead",
-                 "mount": "actor.thug.mount", "kick": "actor.legs.kick", "crawl": "actor.thug.crawl" },
+                 "mount": "actor.thug.mount", "kick": "actor.legs.kick", "crawl": "actor.thug.crawl",
+                 // Pieces that blades and close shotgun blasts can sever (same-size images).
+                 "torso": "actor.thug.torso",
+                 "parts": [
+                   { "id": "head", "sprite": "actor.thug.head", "over": true },
+                   { "id": "arm", "sprite": "actor.thug.arm1" }, { "id": "arm", "sprite": "actor.thug.arm2" },
+                   { "id": "leg", "sprite": "actor.thug.leg1" }, { "id": "leg", "sprite": "actor.thug.leg2" }
+                 ] },
     "sounds": { "death": "sound.death", "hurt": "sound.groan" },
     "ai": {
       "behavior": "patrol",
@@ -70,7 +84,14 @@
     "hitStunDuration": 0.25,
     "damageMultipliers": { "blunt": 0, "unarmed": 0, "thrown": 0, "sharp": 0.5 },
     "sprites": { "body": "actor.brute", "legs": "actor.legs", "down": "actor.brute.down", "dead": "actor.brute.dead",
-                 "mount": "actor.brute.mount", "kick": "actor.legs.kick", "crawl": "actor.brute.crawl" },
+                 "mount": "actor.brute.mount", "kick": "actor.legs.kick", "crawl": "actor.brute.crawl",
+                 // Pieces that blades and close shotgun blasts can sever (same-size images).
+                 "torso": "actor.brute.torso",
+                 "parts": [
+                   { "id": "head", "sprite": "actor.brute.head", "over": true },
+                   { "id": "arm", "sprite": "actor.brute.arm1" }, { "id": "arm", "sprite": "actor.brute.arm2" },
+                   { "id": "leg", "sprite": "actor.brute.leg1" }, { "id": "leg", "sprite": "actor.brute.leg2" }
+                 ] },
     "sounds": { "death": "sound.death", "hurt": "sound.groan" },
     "ai": {
       "behavior": "guard",

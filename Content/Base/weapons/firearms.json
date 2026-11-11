@@ -60,6 +60,8 @@
     "noiseRadius": 850,
     "muzzleDistance": 22,
     "holdOffset": [12, 3],
+    // Point-blank blasts tear limbs off.
+    "dismember": { "chance": 0.7, "parts": ["arm", "leg", "head"], "count": 2, "maxDistance": 130 },
     "woundChance": 0.2,
     "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
     "sounds": { "attack": "sound.shotgun", "empty": "sound.empty", "pickup": "sound.pickup" }

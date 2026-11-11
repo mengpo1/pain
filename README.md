@@ -8,7 +8,7 @@ Deux expériences tournent déjà sur le même exécutable :
 
 | Profil | Contenu | Style |
 |---|---|---|
-| `action` | `Content/Base` | « Néon brutal » : action nerveuse, un coup = un mort (ou un blessé qui rampe), score et combos |
+| `action` | `Content/Base` | « Néon brutal » : action nerveuse, un coup = un mort (ou un blessé qui rampe, ou un corps démembré), score et combos |
 | `noct` | `Content/Base` + `Mods/NoctInspired` | « Signal mort » : horreur de surveillance thermique, obscurité, créatures qui chassent au bruit, sans score |
 
 | Action (`action`) | Horreur (`noct`) | Mode debug |

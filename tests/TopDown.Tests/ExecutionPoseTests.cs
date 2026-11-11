@@ -95,8 +95,8 @@ public class ExecutionPoseTests
         Run(world, 0.02f, Interact);
         Assert.Equal(ExecutionAnimation.TearLegs, Assert.Single(world.Events.OfType<ExecutionStarted>()).Animation);
         Run(world, 0.08f);
-        // Kneeling on the beast, turned towards its legs (its right side).
-        Assert.True(MathF.Abs(Geo.AngleDifference(world.Player.Facing, victim.Facing + MathF.PI / 2f)) < 0.05f);
+        // Astride the beast like every kneeling pose: shoulders across its body, facing its head.
+        Assert.True(MathF.Abs(Geo.AngleDifference(world.Player.Facing, victim.Facing)) < 0.05f);
         Run(world, 2f);
 
         Assert.False(victim.IsAlive);
@@ -118,6 +118,25 @@ public class ExecutionPoseTests
         }
 
         Assert.Equal([ExecutionAnimation.HeadBash, ExecutionAnimation.Stomp], seen.Order());
+    }
+
+    [Theory]
+    [InlineData(ExecutionAnimation.HeadBash)]
+    [InlineData(ExecutionAnimation.Stab)]
+    [InlineData(ExecutionAnimation.TearHead)]
+    [InlineData(ExecutionAnimation.TearLegs)]
+    public void Every_astride_pose_faces_along_the_body(ExecutionAnimation animation)
+    {
+        // Whatever the body's orientation and the side the executioner comes from.
+        foreach (float bodyFacing in new[] { 0f, 90f, 200f, 300f })
+        {
+            var (world, victim) = Downed(FistsWith(animation), bodyFacing);
+            Run(world, 0.02f, Interact);
+            Run(world, 0.1f);
+
+            Assert.True(ExecutionPose.IsAstride(world.Player.ExecutionAnimation));
+            Assert.True(MathF.Abs(Geo.AngleDifference(world.Player.Facing, victim.Facing)) < 0.05f, $"{animation} on a body at {bodyFacing}°");
+        }
     }
 
     [Fact]

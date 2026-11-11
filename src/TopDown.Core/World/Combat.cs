@@ -356,6 +356,7 @@ public sealed class CombatSystem
 
     private void Kill(Actor victim, in Hit hit)
     {
+        IReadOnlyList<int> severed = ChooseSevered(victim, hit);
         // An executed body is already on the floor: it keeps its position and orientation.
         bool alreadyDown = victim.IsDown;
         victim.Kill();
@@ -370,8 +371,32 @@ public sealed class CombatSystem
         }
 
         if (Rules.DropWeaponOnDeath) DropWeapon(victim, hit.Direction * 80f);
-        _world.AddEvent(new ActorKilled(victim, hit.Source, hit.Direction, hit.Method, hit.DamageType));
+        _world.AddEvent(new ActorKilled(victim, hit.Source, hit.Direction, hit.Method, hit.DamageType, hit.Weapon, severed));
         _world.OnActorKilled(victim, hit);
+    }
+
+    /// <summary>
+    /// Body parts a killing blow cuts off, following the weapon's <see cref="DismemberDefinition"/>.
+    /// Not for executions (their animation decides) nor for crawlers lying face down.
+    /// </summary>
+    private IReadOnlyList<int> ChooseSevered(Actor victim, in Hit hit)
+    {
+        if (hit.Weapon?.Dismember is not { Chance: > 0f } dismember || hit.Method == HitMethod.Execution || victim.IsWounded) return [];
+        List<BodyPart> parts = victim.Definition.Sprites.Parts;
+        if (parts.Count == 0 || victim.Definition.Sprites.Torso is null) return [];
+        if (dismember.MaxDistance > 0f && hit.Source is { } source && Vector2.Distance(source.Position, victim.Position) > dismember.MaxDistance) return [];
+        if (_world.Random.NextDouble() >= dismember.Chance) return [];
+
+        var candidates = Enumerable.Range(0, parts.Count).Where(i => dismember.Parts.Contains(parts[i].Id)).ToList();
+        var severed = new List<int>();
+        for (int n = 0; n < dismember.Count && candidates.Count > 0; n++)
+        {
+            int pick = _world.Random.Next(candidates.Count);
+            severed.Add(candidates[pick]);
+            candidates.RemoveAt(pick);
+        }
+
+        return severed;
     }
 
     /// <summary>A body on the floor lies in the direction it was hit.</summary>

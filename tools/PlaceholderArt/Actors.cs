@@ -132,56 +132,77 @@ public static class Actors
 
     // ------------------------------------------------------------------ lying human (knocked out / dead)
 
+    /// <summary>Parts of a body lying on its back that can be drawn separately (severed, torn off).</summary>
+    public enum HumanPart { Leg1, Leg2, Arm1, Arm2, Torso, Head }
+
     /// <summary>Human lying on its back, body along X with the head towards +X.</summary>
     public static void HumanDown(Canvas c, HumanLook l, float cx, float cy)
+    {
+        foreach (HumanPart part in Enum.GetValues<HumanPart>()) HumanDownPart(c, l, cx, cy, part);
+    }
+
+    /// <summary>One part of <see cref="HumanDown"/>, at the same place as in the whole body.</summary>
+    public static void HumanDownPart(Canvas c, HumanLook l, float cx, float cy, HumanPart part)
     {
         var f = new Frame(cx, cy, l.Scale, l.Bulk);
         float limb = l.BareArms ? 1.2f : 1f;
         Rgba pantsShade = l.Pants.Shade(0.72f);
         Rgba arm = l.BareArms ? l.Skin : l.Body, armShade = l.BareArms ? l.SkinShade : l.BodyShade;
+        float hr = f.R(2.05f) * (l.BareArms ? 1.15f : 1f);
 
-        // legs: one straight, one bent outwards
-        Limb(c, f, (-4f, -3.1f), (-10.8f, -4.7f), 2.9f, 2.6f, pantsShade, l.Pants);
-        Limb(c, f, (-10.8f, -4.7f), (-16.6f, -6.1f), 2.6f, 2.3f, pantsShade, l.Pants);
-        Limb(c, f, (-4f, 3.1f), (-9.6f, 7.9f), 2.9f, 2.6f, pantsShade, l.Pants);
-        Limb(c, f, (-9.6f, 7.9f), (-16.2f, 6.7f), 2.6f, 2.3f, pantsShade, l.Pants);
-        foreach (var (x, y) in new[] { (-17.8f, -6.4f), (-17.4f, 7.0f) })
+        void Shoe(float x, float y)
         {
             c.Fill(Shape.Ellipse(f.X(x), f.Y(y), f.R(1.9f), f.R(2.3f)), l.Shoes);
             c.Fill(Shape.Ellipse(f.X(x) - 0.3f, f.Y(y) - 0.6f, f.R(0.9f), f.R(1.0f)), l.Shoes.Tone(1.25f));
         }
 
-        // pelvis
-        c.Fill(Shape.RoundRect(f.X(-4.3f), cy, f.R(7.5f), f.R(12.4f) * l.Bulk, f.R(3.5f)), pantsShade);
-        c.Fill(Shape.RoundRect(f.X(-4.5f), cy - 0.4f, f.R(6.3f), f.R(11.2f) * l.Bulk, f.R(3f)), l.Pants);
-
-        // arms: one flung out above the head, one lying along the side
-        Limb(c, f, (6.8f, -8.2f), (2.4f, -13.6f), 2.5f * limb, 2.3f * limb, armShade, arm);
-        Limb(c, f, (2.4f, -13.6f), (6.9f, -17.3f), 2.3f * limb, 2.0f * limb, armShade, arm);
-        Limb(c, f, (6.8f, 8.2f), (0.6f, 11.6f), 2.5f * limb, 2.3f * limb, armShade, arm);
-        Limb(c, f, (0.6f, 11.6f), (-5.6f, 12.4f), 2.3f * limb, 2.0f * limb, armShade, arm);
-        float hr = f.R(2.05f) * (l.BareArms ? 1.15f : 1f);
-        Hand(c, l, f.X(7.5f), f.Y(-17.9f), hr);
-        Hand(c, l, f.X(-6.3f), f.Y(12.6f), hr);
-
-        // torso
-        if (l.BareArms)
+        switch (part)
         {
-            c.Fill(Shape.RoundRect(f.X(2f), cy, f.R(14.5f), f.R(18.6f) * l.Bulk, f.R(6.5f)), l.SkinShade);
-            c.Fill(Shape.RoundRect(f.X(1.8f), cy - 0.45f, f.R(13.1f), f.R(17.2f) * l.Bulk, f.R(5.8f)), l.Skin);
-            c.Fill(Shape.RoundRect(f.X(1.2f), cy, f.R(13f), f.R(13.4f) * l.Bulk, f.R(5f)), l.BodyShade);
-            c.Fill(Shape.RoundRect(f.X(1.0f), cy - 0.45f, f.R(11.8f), f.R(12.2f) * l.Bulk, f.R(4.5f)), l.Body);
+            case HumanPart.Leg1: // straight
+                Limb(c, f, (-4f, -3.1f), (-10.8f, -4.7f), 2.9f, 2.6f, pantsShade, l.Pants);
+                Limb(c, f, (-10.8f, -4.7f), (-16.6f, -6.1f), 2.6f, 2.3f, pantsShade, l.Pants);
+                Shoe(-17.8f, -6.4f);
+                break;
+            case HumanPart.Leg2: // bent outwards
+                Limb(c, f, (-4f, 3.1f), (-9.6f, 7.9f), 2.9f, 2.6f, pantsShade, l.Pants);
+                Limb(c, f, (-9.6f, 7.9f), (-16.2f, 6.7f), 2.6f, 2.3f, pantsShade, l.Pants);
+                Shoe(-17.4f, 7.0f);
+                break;
+            case HumanPart.Arm1: // flung out above the head
+                Limb(c, f, (6.8f, -8.2f), (2.4f, -13.6f), 2.5f * limb, 2.3f * limb, armShade, arm);
+                Limb(c, f, (2.4f, -13.6f), (6.9f, -17.3f), 2.3f * limb, 2.0f * limb, armShade, arm);
+                Hand(c, l, f.X(7.5f), f.Y(-17.9f), hr);
+                break;
+            case HumanPart.Arm2: // lying along the side
+                Limb(c, f, (6.8f, 8.2f), (0.6f, 11.6f), 2.5f * limb, 2.3f * limb, armShade, arm);
+                Limb(c, f, (0.6f, 11.6f), (-5.6f, 12.4f), 2.3f * limb, 2.0f * limb, armShade, arm);
+                Hand(c, l, f.X(-6.3f), f.Y(12.6f), hr);
+                break;
+            case HumanPart.Torso:
+                // pelvis
+                c.Fill(Shape.RoundRect(f.X(-4.3f), cy, f.R(7.5f), f.R(12.4f) * l.Bulk, f.R(3.5f)), pantsShade);
+                c.Fill(Shape.RoundRect(f.X(-4.5f), cy - 0.4f, f.R(6.3f), f.R(11.2f) * l.Bulk, f.R(3f)), l.Pants);
+                // chest
+                if (l.BareArms)
+                {
+                    c.Fill(Shape.RoundRect(f.X(2f), cy, f.R(14.5f), f.R(18.6f) * l.Bulk, f.R(6.5f)), l.SkinShade);
+                    c.Fill(Shape.RoundRect(f.X(1.8f), cy - 0.45f, f.R(13.1f), f.R(17.2f) * l.Bulk, f.R(5.8f)), l.Skin);
+                    c.Fill(Shape.RoundRect(f.X(1.2f), cy, f.R(13f), f.R(13.4f) * l.Bulk, f.R(5f)), l.BodyShade);
+                    c.Fill(Shape.RoundRect(f.X(1.0f), cy - 0.45f, f.R(11.8f), f.R(12.2f) * l.Bulk, f.R(4.5f)), l.Body);
+                }
+                else
+                {
+                    c.Fill(Shape.RoundRect(f.X(2f), cy, f.R(14.5f), f.R(18.6f) * l.Bulk, f.R(6.5f)), l.BodyShade);
+                    c.Fill(Shape.RoundRect(f.X(1.8f), cy - 0.45f, f.R(13.1f), f.R(17.2f) * l.Bulk, f.R(5.8f)), l.Body);
+                }
+                c.Fill(Shape.Ellipse(f.X(3.2f), f.Y(-4.2f), f.R(4f), f.R(3f) * l.Bulk), l.BodyLight.Fade(0.45f));
+                if (l.Collar is { } collar)
+                    c.Fill(Shape.Ellipse(f.X(8.4f), cy + f.R(0.4f), f.R(3f), f.R(5.6f)), collar);
+                break;
+            case HumanPart.Head:
+                HeadFaceUp(c, l, f.X(13.2f), cy + f.R(0.7f), HeadRadius(l));
+                break;
         }
-        else
-        {
-            c.Fill(Shape.RoundRect(f.X(2f), cy, f.R(14.5f), f.R(18.6f) * l.Bulk, f.R(6.5f)), l.BodyShade);
-            c.Fill(Shape.RoundRect(f.X(1.8f), cy - 0.45f, f.R(13.1f), f.R(17.2f) * l.Bulk, f.R(5.8f)), l.Body);
-        }
-        c.Fill(Shape.Ellipse(f.X(3.2f), f.Y(-4.2f), f.R(4f), f.R(3f) * l.Bulk), l.BodyLight.Fade(0.45f));
-        if (l.Collar is { } collar)
-            c.Fill(Shape.Ellipse(f.X(8.4f), cy + f.R(0.4f), f.R(3f), f.R(5.6f)), collar);
-
-        HeadFaceUp(c, l, f.X(13.2f), cy + f.R(0.7f), HeadRadius(l));
     }
 
     /// <summary>Head lying face-up with the top of the head towards +X.</summary>
@@ -291,47 +312,44 @@ public static class Actors
         float limb = l.BareArms ? 1.12f : 1f;
         Rgba pantsShade = l.Pants.Shade(0.72f);
         Rgba arm = l.BareArms ? l.Skin : l.Body, armShade = l.BareArms ? l.SkinShade : l.BodyShade;
+        Rgba top = l.BareArms ? l.Skin : l.Body, topShade = l.BareArms ? l.SkinShade : l.BodyShade;
 
         foreach (int s in Sides)
         {
-            // shin flat on the floor behind the knee, sole of the shoe facing up
-            Limb(c, f, (2.6f, 10.6f * s), (-8.4f, 10.2f * s), 2.6f, 2.3f, pantsShade, l.Pants);
-            c.Fill(Shape.Ellipse(f.X(-10.6f), f.Y(9.8f * s), f.R(2.6f), f.R(1.9f)), l.Shoes);
-            c.Fill(Shape.Ellipse(f.X(-11.3f), f.Y(9.8f * s) - 0.3f, f.R(1.1f), f.R(1.1f)), l.Shoes.Tone(1.3f));
-            // thigh from the hip to the knee, outside the victim's torso
-            Limb(c, f, (-4.2f, 4.4f * s), (2.6f, 10.6f * s), 3.2f, 2.9f, pantsShade, l.Pants);
+            // knees spread on both sides of the body, shins folded back under the thighs
+            Limb(c, f, (-1f, 11.6f * s), (-9f, 10.4f * s), 2.5f, 2.2f, pantsShade, l.Pants);
+            c.Fill(Shape.Ellipse(f.X(-10.2f), f.Y(10f * s), f.R(2.2f), f.R(1.8f)), l.Shoes);
+            Limb(c, f, (-5.4f, 4.6f * s), (-1f, 11.6f * s), 3.3f, 3f, pantsShade, l.Pants);
         }
 
-        // hips
-        c.Fill(Shape.Ellipse(f.X(-4.6f), cy, f.R(4.2f), f.R(6.2f) * l.Bulk), pantsShade);
-        c.Fill(Shape.Ellipse(f.X(-4.8f), cy - 0.4f, f.R(3.5f), f.R(5.4f) * l.Bulk), l.Pants);
+        // hips, then the back leaning forward
+        c.Fill(Shape.Ellipse(f.X(-5.4f), cy, f.R(3.8f), f.R(6.4f) * l.Bulk), pantsShade);
+        c.Fill(Shape.Ellipse(f.X(-5.6f), cy - 0.4f, f.R(3.1f), f.R(5.6f) * l.Bulk), l.Pants);
+        c.Fill(Shape.Ellipse(f.X(-1.6f), cy, f.R(5.4f), f.R(7.4f) * l.Bulk), topShade);
+        c.Fill(Shape.Ellipse(f.X(-1.8f), cy - 0.4f, f.R(4.6f), f.R(6.6f) * l.Bulk), top);
 
-        // arms reaching down and forward to the head
+        // arms from the ends of the shoulders, reaching down and forward to the head
         foreach (int s in Sides)
         {
-            (float, float) shoulder = (2.6f, 7.4f * s), elbow = (7.4f, 8.2f * s), hand = (10.6f, 4.1f * s);
+            (float, float) shoulder = (2.2f, 9.8f * s), elbow = (7.2f, 9.6f * s), hand = (11f, 4.4f * s);
             Limb(c, f, shoulder, elbow, 2.6f * limb, 2.35f * limb, armShade, arm);
             Limb(c, f, elbow, hand, 2.35f * limb, 2.0f * limb, armShade, arm);
         }
 
-        // torso leaning forward: shoulders ahead of the hips, foreshortened
-        c.Fill(Shape.Ellipse(f.X(0.8f), cy, f.R(6.8f), f.R(9.4f) * l.Bulk), l.BareArms ? l.SkinShade : l.BodyShade);
+        // shoulders: a wide bar across the body
+        c.Fill(Shape.Ellipse(f.X(2f), cy, f.R(4.4f), f.R(11.6f) * l.Bulk), topShade);
+        c.Fill(Shape.Ellipse(f.X(1.8f), cy - 0.45f, f.R(3.7f), f.R(10.8f) * l.Bulk), top);
         if (l.BareArms)
         {
-            c.Fill(Shape.Ellipse(f.X(0.6f), cy - 0.4f, f.R(5.9f), f.R(8.6f) * l.Bulk), l.Skin);
-            c.Fill(Shape.Ellipse(f.X(0.2f), cy, f.R(5.8f), f.R(6.8f) * l.Bulk), l.BodyShade);
-            c.Fill(Shape.Ellipse(f.X(0f), cy - 0.4f, f.R(5.1f), f.R(6.1f) * l.Bulk), l.Body);
+            c.Fill(Shape.Ellipse(f.X(1.2f), cy, f.R(3.4f), f.R(7f) * l.Bulk), l.BodyShade);
+            c.Fill(Shape.Ellipse(f.X(1f), cy - 0.4f, f.R(2.8f), f.R(6.3f) * l.Bulk), l.Body);
         }
-        else
-        {
-            c.Fill(Shape.Ellipse(f.X(0.5f), cy - 0.45f, f.R(6f), f.R(8.5f) * l.Bulk), l.Body);
-        }
-        c.Fill(Shape.Ellipse(f.X(-1.6f), f.Y(-3.4f), f.R(2.6f), f.R(3.4f) * l.Bulk), l.BodyLight.Fade(0.5f));
+        c.Fill(Shape.Ellipse(f.X(0.6f), f.Y(-5.4f), f.R(1.8f), f.R(3.6f) * l.Bulk), l.BodyLight.Fade(0.5f));
         if (l.Collar is { } collar)
-            c.Fill(Shape.Ellipse(f.X(3.4f), cy, f.R(4f), f.R(5.8f)), collar);
+            c.Fill(Shape.Ellipse(f.X(3.4f), cy, f.R(2.6f), f.R(5.2f)), collar);
 
-        foreach (int s in Sides) Hand(c, l, f.X(10.6f), f.Y(4.1f * s), f.R(2.1f) * (l.BareArms ? 1.1f : 1f));
-        HeadFromAbove(c, l, f.X(4.6f), cy, HeadRadius(l) * 0.96f);
+        foreach (int s in Sides) Hand(c, l, f.X(11f), f.Y(4.4f * s), f.R(2.1f) * (l.BareArms ? 1.1f : 1f));
+        HeadFromAbove(c, l, f.X(5.4f), cy, HeadRadius(l) * 0.92f);
     }
 
     // ------------------------------------------------------------------ dog

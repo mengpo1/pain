@@ -30,6 +30,16 @@ internal static class ContentValidator
 
             if (weapon.FireRate <= 0f) d.Error(source, "'fireRate' must be > 0.");
             if (weapon.Execution.Strikes < 1) d.Error(source, "'execution.strikes' must be at least 1.");
+            if (weapon.Dismember is { } dismember)
+            {
+                if (dismember.Chance is < 0f or > 1f) d.Error(source, "'dismember.chance' must be between 0 and 1.");
+                if (dismember.Count < 1) d.Error(source, "'dismember.count' must be at least 1.");
+                foreach (string part in dismember.Parts)
+                    if (!defs.Actors.Values.Any(a => a.Sprites.Parts.Any(p => p.Id == part)))
+                        d.Warning(source, $"'dismember.parts': no character has a part '{part}'.");
+            }
+
+            if (weapon.WoundChance is < 0f or > 1f) d.Error(source, "'woundChance' must be between 0 and 1.");
             foreach (var (anatomy, variant) in weapon.Execution.Against)
             {
                 if (variant.Strikes is < 1) d.Error(source, $"'execution.against.{anatomy}.strikes' must be at least 1.");

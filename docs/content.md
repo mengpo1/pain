@@ -77,6 +77,7 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 | `knockdown`, `knockdownDuration`, `knockback` | renversement et recul de la cible |
 | `stunDuration` | étourdit une cible debout (0 = non) |
 | `woundChance` | probabilité (0 à 1) qu'un coup, une balle ou un lancer mortel laisse la cible **blessée** au lieu de morte, si elle peut l'être (`wound`) |
+| `dismember` | un coup mortel peut trancher des morceaux du corps : `chance`, `parts` (sortes : `head`, `arm`, `leg`), `count` (morceaux au plus), `maxDistance` (0 = toute distance ; le fusil à pompe seulement de près) |
 | `noiseRadius` | rayon dans lequel les ennemis entendent (0 = silencieux) |
 | `magazineSize`, `pellets`, `spreadDegrees` | munitions, plombs par tir, dispersion |
 | `projectileSpeed` | vitesse des balles ; `0` = tir instantané |
@@ -115,6 +116,9 @@ orientation.
 | `bite` | au-dessus de la tête | morsure (animaux) |
 | `tearLegs` | à genoux sur la bête, face aux pattes | une patte arrachée par coup (`sprites.parts` d'id `leg`) |
 | `tearHead` | à cheval sur la bête | tire la tête jusqu'à l'arracher (part d'id `head`) |
+| `behead` | debout à côté de la tête | coup de lame qui tranche la tête (machette) |
+
+Toutes les poses à cheval regardent vers la tête : les épaules du bourreau sont en travers du corps.
 
 ```json
 "execution": {
@@ -167,7 +171,7 @@ orientation.
 - Images : `down` (au sol, tête vers la droite), `dead`, `mount` (à genoux à cheval sur un corps, pour
   les achèvements ; sinon `body`), `kick` (jambes en train de frapper ; sinon `legs`), `crawl`
   (blessé face contre terre, animation qui avance avec la distance rampée ; sinon `down`).
-- Corps démontable (`torso` + `parts`) : le corps au sol sans ses morceaux, puis chaque morceau, chacun
+- Corps démontable (`torso` + `parts`, humains et chien) : le corps au sol sans ses morceaux, puis chaque morceau, chacun
   sur une image **de même taille**, à sa place. Le moteur calcule seul le centre et l'articulation de
   chaque morceau à partir des pixels. `over: true` dessine le morceau au-dessus du torse (une tête).
   Les morceaux sont arrachés dans l'ordre de la liste.

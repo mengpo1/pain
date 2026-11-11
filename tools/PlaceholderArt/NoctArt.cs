@@ -170,6 +170,14 @@ public static class NoctArt
         var crawl = new Canvas(downSize * 4, downSize);
         for (int frame = 0; frame < 4; frame++) Actors.HumanCrawl(crawl, look, downSize * (frame + 0.5f), downSize / 2f, frame);
         pack.Png($"sprites/actors/{name}_crawl.png", Warm(crawl, seed + 5));
+
+        int partSeed = seed + 6;
+        foreach (Actors.HumanPart part in Enum.GetValues<Actors.HumanPart>())
+        {
+            var piece = new Canvas(downSize, downSize);
+            Actors.HumanDownPart(piece, look, downSize / 2f, downSize / 2f, part);
+            pack.Png($"sprites/actors/{name}_{part.ToString().ToLowerInvariant()}.png", Warm(piece, partSeed++, 0.35f));
+        }
     }
 
     static void Creatures(Pack pack)

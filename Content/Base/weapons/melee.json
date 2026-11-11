@@ -77,7 +77,9 @@
     "noiseRadius": 30,
     "holdOffset": [13, 7],
     "woundChance": 0.25,
-    "execution": { "strikes": 1, "windUp": 0.14, "recovery": 0.12 },
+    // Takes off heads and limbs; finishing off with it beheads.
+    "dismember": { "chance": 0.55, "parts": ["head", "arm", "leg"] },
+    "execution": { "strikes": 1, "windUp": 0.14, "recovery": 0.12, "animations": ["behead"] },
     "throw": { "speed": 760, "damage": 100, "damageType": "sharp", "knockdown": false },
     "sounds": { "attack": "sound.swing", "hit": "sound.hit_sharp" }
   }

@@ -110,6 +110,15 @@ public static class BaseArt
         for (int frame = 0; frame < 4; frame++) Actors.HumanCrawl(crawl, look, downSize * (frame + 0.5f), downSize / 2f, frame);
         crawl.Outline(Ink);
         pack.Png($"sprites/actors/{name}_crawl.png", crawl);
+
+        // The body on its back in pieces (severed limbs), each at its place on a same-size canvas.
+        foreach (Actors.HumanPart part in Enum.GetValues<Actors.HumanPart>())
+        {
+            var piece = new Canvas(downSize, downSize);
+            Actors.HumanDownPart(piece, look, downSize / 2f, downSize / 2f, part);
+            piece.Outline(Ink);
+            pack.Png($"sprites/actors/{name}_{part.ToString().ToLowerInvariant()}.png", piece);
+        }
     }
 
     static void Dogs(Pack pack)

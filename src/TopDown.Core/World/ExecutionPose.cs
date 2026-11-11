@@ -42,8 +42,9 @@ public static class ExecutionPose
             case ExecutionAnimation.TearHead:
                 return (victim.Position, victim.Facing);
             case ExecutionAnimation.TearLegs:
-                // Legs stick out on the right side of a beast lying on its flank.
-                return (victim.Position - right * (radius * 0.25f), victim.Facing + MathF.PI / 2f);
+                // Astride like every kneeling pose (shoulders across the body), further back so the
+                // hands reach the legs.
+                return (victim.Position - forward * (radius * 0.45f), victim.Facing);
             case ExecutionAnimation.Bite:
             {
                 Vector2 above = head + forward * (executioner.Radius + 2f);

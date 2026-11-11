@@ -273,6 +273,7 @@ public sealed class PlayScreen : Screen
                 Audio.Play(killed.Victim.Definition.Sounds.Death, killed.Victim.Position);
                 _effects.BloodSpray(WorldRenderer.ToXna(killed.Victim.Position), WorldRenderer.ToXna(killed.Direction), 18, Blood(killed.Victim));
                 _effects.BloodPool(WorldRenderer.ToXna(killed.Victim.Position + killed.Direction * 8f), Blood(killed.Victim), killed.Victim.Radius / 11f);
+                if (_gore.Killed(killed, _effects, Session.Assets, Blood(killed.Victim), colors.Actor)) Audio.Play(Sounds.Tear, killed.Victim.Position);
                 if (killed.Method != HitMethod.Execution) Impact(Feel.Kill, killed.Killer, killed.Victim, killed.Direction);
                 if (killed.Victim == _lockTarget) _lockTarget = null;
                 break;

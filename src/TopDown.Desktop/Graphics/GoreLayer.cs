@@ -79,11 +79,12 @@ public sealed class GoreLayer
         string? kind = animation switch
         {
             ExecutionAnimation.TearLegs => "leg",
-            ExecutionAnimation.TearHead => "head",
+            ExecutionAnimation.TearHead or ExecutionAnimation.Behead => "head",
             _ => null,
         };
-        if (kind is null || victim.Definition.Sprites.Torso is null) return -1;
         BodyDamage? damage = Damage(victim);
+        // The pieces are drawn lying on the back: not for a body face down.
+        if (kind is null || victim.Definition.Sprites.Torso is null || damage?.FaceDown == true) return -1;
         List<BodyPart> parts = victim.Definition.Sprites.Parts;
         for (int i = 0; i < parts.Count; i++)
         {
@@ -91,6 +92,31 @@ public sealed class GoreLayer
         }
 
         return -1;
+    }
+
+    /// <summary>
+    /// A kill that severed body parts (see <c>ActorKilled.Severed</c>): each flies off in the
+    /// direction of the blow. Returns true if something came off.
+    /// </summary>
+    public bool Killed(ActorKilled killed, EffectsLayer effects, AssetCache assets, Color blood, Color bodyTint)
+    {
+        if (killed.Severed is not { Count: > 0 } severed || killed.Victim.Definition.Sprites.Torso is null) return false;
+        BodyDamage damage = GetOrAdd(killed.Victim);
+        Vector2 direction = SafeNormalize(ToXna(killed.Direction));
+        foreach (int part in severed)
+        {
+            if (part < 0 || part >= killed.Victim.Definition.Sprites.Parts.Count || !damage.Torn.Add(part)) continue;
+            PartPlacement placement = Place(killed.Victim, part, assets, NVector2.Zero);
+            Vector2 outward = SafeNormalize(placement.Center - placement.Joint);
+            Vector2 throwDirection = SafeNormalize(direction * 1.5f + outward);
+            effects.FlyingPart(placement.Center, throwDirection * 230f, killed.Victim.Facing, killed.Victim.Definition.Sprites.Parts[part].Sprite,
+                placement.Origin, bodyTint);
+            effects.BloodSpray(placement.Joint, throwDirection, 12, blood);
+            effects.Chunks(placement.Joint, throwDirection, 2, blood);
+            effects.BloodPool(placement.Joint, blood, 0.5f);
+        }
+
+        return true;
     }
 
     /// <summary>Applies one execution blow: blood, gore, parts flying off. Returns the extra sound to play.</summary>

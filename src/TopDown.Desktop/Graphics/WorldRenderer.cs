@@ -267,8 +267,8 @@ public sealed class WorldRenderer
             if (damage is not null) DrawStumps(batch, actor, damage, position, rotation, scale);
         }
 
-        // A head beaten in: more and more gore, burst on the last blow.
-        if (damage is { HeadWounds: > 0f })
+        // A head beaten in: more and more gore, burst on the last blow (unless it came off).
+        if (damage is { HeadWounds: > 0f } && !damage.Torn.Any(i => sprites.Parts[i].Id == "head"))
         {
             SpriteFrame frame = _assets.Sprite(EffectSprites.Gore);
             Vector2 head = position + Rotate(new Vector2(actor.Radius * ExecutionPose.HeadDistance * scale, 0f), rotation);
