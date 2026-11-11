@@ -15,6 +15,13 @@ internal sealed class ImpactAction(BattleUnit attacker, BattleItem weapon, Damag
         battle.Emit(new ProjectileHit(weapon.Id, hit.Voxel, hit.Unit?.Id));
         if (!battle.Rules.DamageTypes.TryGetValue(damage.Type, out DamageTypeDefinition? type)) return true;
 
+        if (Explosions.IsExplosive(damage, type))
+        {
+            // Explosive rounds (rockets, bolts of fire) burst where they hit instead of hitting one target.
+            battle.Push(new ExplosionAction(Throwing.Settle(battle, hit.Tile), damage, attacker, null));
+            return true;
+        }
+
         int power = damage.Power;
         int unitDamage = DamageRules.RandomDamage(battle.Rules.Battle, type, power, battle.Random);
         switch (hit.Kind)

@@ -167,7 +167,7 @@ public sealed class Battle
         if (IsBusy) return CommandResult.Refused("error.busy");
         if (command is EndTurnCommand)
         {
-            EndTurn();
+            _actions.Add(new EndTurnAction());
             return CommandResult.Ok;
         }
 
@@ -183,6 +183,9 @@ public sealed class Battle
             KneelCommand => TurnRules.ToggleKneel(this, unit),
             AttackCommand attack => Queue(AttackAction.Create(this, unit, attack)),
             ReloadCommand reload => Inventory.Reload(this, unit, reload.WeaponId),
+            ThrowCommand thrown => Queue(ThrowAction.Create(this, unit, thrown)),
+            PrimeCommand prime => Inventory.Prime(this, unit, prime.ItemId, prime.Fuse),
+            MoveItemCommand move => Inventory.Move(this, unit, move.ItemId, move.Slot),
             _ => CommandResult.Refused("error.unknown_command"),
         };
     }
@@ -220,7 +223,8 @@ public sealed class Battle
 
     // ------------------------------------------------------------------ turns
 
-    private void EndTurn()
+    /// <summary>Hands the turn to the next side (called once the end-of-turn explosions are resolved).</summary>
+    internal void SwitchToNextFaction()
     {
         TurnRules.EndFactionTurn(this, CurrentFaction);
         if (CurrentFaction == Faction.Player)

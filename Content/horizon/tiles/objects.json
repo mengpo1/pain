@@ -3,7 +3,7 @@
 [
   { "id": "crate", "sprite": "tile.crate", "shape": "crate", "tuWalk": 255, "armor": 25, "destroyedInto": "debris" },
   { "id": "barrel", "sprite": "tile.barrel", "shape": "barrel", "tuWalk": 255, "armor": 15, "destroyedInto": "debris" },
-  { "id": "tree", "sprite": "tile.tree", "shape": "tree", "tuWalk": 255, "blocksSight": true, "armor": 60 },
+  { "id": "tree", "sprite": "tile.tree", "shape": "tree", "tuWalk": 255, "blocksSight": true, "armor": 60, "explosionBlock": 10 },
   { "id": "bush", "sprite": "tile.bush", "shape": "bush", "tuWalk": 2, "armor": 10 },
   { "id": "rock", "sprite": "tile.rock", "shape": "rock", "tuWalk": 255 },
   { "id": "table", "sprite": "tile.table", "shape": "table", "tuWalk": 255, "armor": 15, "destroyedInto": "debris" },

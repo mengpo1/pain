@@ -3,5 +3,6 @@
 [
   { "id": "pierce", "nameKey": "damage.pierce" },
   { "id": "slash", "nameKey": "damage.slash", "toStun": 0.1 },
-  { "id": "crush", "nameKey": "damage.crush", "toStun": 0.5, "toArmor": 0.2 }
+  { "id": "crush", "nameKey": "damage.crush", "toStun": 0.5, "toArmor": 0.2 },
+  { "id": "blast", "nameKey": "damage.blast", "random": "explosion", "radiusEffectiveness": 0.05, "toItem": 1.0, "tileDamageMethod": 2 }
 ]

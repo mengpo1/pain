@@ -44,7 +44,10 @@
     "path_cost": "{cost} TU",
     "level": "Level {level}",
     "visible_enemies": "Enemies in sight",
-    "wounds": "{count} fatal wound(s)",
+    "wounds": {
+      "one": "{count} fatal wound",
+      "other": "{count} fatal wounds"
+    },
     "resume": "Resume",
     "save": "Save",
     "load": "Load",
@@ -55,14 +58,18 @@
     "survive": "Hold until the end of turn {turns}",
     "kneeling": "kneeling",
     "unconscious": "unconscious",
-    "dead": "dead"
+    "dead": "dead",
+    "primed": "primed ({fuse})",
+    "inventory": "Inventory"
   },
   "mode": {
     "snap": "Snap shot",
     "aimed": "Aimed shot",
     "auto": "Auto shot",
     "melee": "Strike",
-    "throw": "Throw"
+    "throw": "Throw",
+    "prime": "Prime (end of turn)",
+    "prime_later": "Prime (one more turn)"
   },
   "debrief": {
     "title_victory": "Mission accomplished",
@@ -133,10 +140,18 @@
     "cannot_reload": "This weapon is not reloaded.",
     "already_loaded": "The weapon is already loaded.",
     "save_failed": "Saving failed: {message}",
-    "load_failed": "Loading failed: {message}"
+    "load_failed": "Loading failed: {message}",
+    "not_a_grenade": "This item cannot be primed.",
+    "already_primed": "Already primed.",
+    "cannot_throw_there": "Cannot throw there.",
+    "item_out_of_reach": "The item is out of reach.",
+    "item_too_heavy": "Bodies cannot be carried yet.",
+    "cannot_move_there": "The item cannot go there.",
+    "no_room": "No room there."
   },
   "info": {
-    "enemy_spotted": "Enemy spotted!"
+    "enemy_spotted": "Enemy spotted!",
+    "grenade_primed": "Grenade primed: throw it before the end of the turn."
   },
   "stat": {
     "tu": "Time units",
@@ -168,7 +183,8 @@
     "combat_knife": "Combat knife",
     "corpse_operative": "Operative's body",
     "corpse_gaunt": "Gaunt corpse",
-    "corpse_warden": "Warden corpse"
+    "corpse_warden": "Warden corpse",
+    "frag_grenade": "Frag grenade"
   },
   "armor": {
     "field_vest": "Field vest",

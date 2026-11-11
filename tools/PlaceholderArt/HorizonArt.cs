@@ -76,6 +76,7 @@ public static class HorizonArt
         p.Png("items/corpse_warden.png", Corpse(warden));
 
         p.Png("fx/bullet.png", ItemArt.Projectile(Rgba.Hex("#fff0b0"), Rgba.Hex("#ffb040")));
+        p.Png("fx/grenade.png", ItemArt.SmallGrenade(Rgba.Hex("#506040"), Rgba.Hex("#c0c0c0")));
         p.Png("fx/pulse.png", ItemArt.Projectile(Rgba.Hex("#f0d0ff"), Rgba.Hex("#b040ff"), 8f));
         p.Png("fx/explosion.png", ItemArt.Explosion(Rgba.Hex("#ffe080"), Rgba.Hex("#603020")));
 

@@ -19,6 +19,7 @@ internal static class TestWorld
         {
             ["ap"] = new() { Id = "ap" },
             ["flat"] = new() { Id = "flat", Random = DamageRandom.Flat, ToStun = 0, ToWound = 0, ToArmor = 0 },
+            ["he"] = new() { Id = "he", Random = DamageRandom.Explosion, RadiusEffectiveness = 0.05, ToItem = 1.0, TileDamageMethod = 2 },
         },
         Shapes = new Dictionary<string, ShapeDefinition>
         {
@@ -44,6 +45,8 @@ internal static class TestWorld
             ["step8"] = new() { Id = "step8", Shape = "step8", StandHeight = 8 },
             ["step16"] = new() { Id = "step16", Shape = "step16", StandHeight = 16 },
             ["lamp"] = new() { Id = "lamp", Light = 15 },
+            ["hullW"] = new() { Id = "hullW", Shape = "westWall", BlocksSight = true, ExplosionBlock = 255 },
+            ["fenceW"] = new() { Id = "fenceW", Shape = "crate", ExplosionBlock = 2 },
         },
         Items = new Dictionary<string, ItemDefinition>
         {
@@ -67,6 +70,8 @@ internal static class TestWorld
                 Damage = new DamageDefinition { Power = 1000, Type = "flat" },
             },
             ["corpse"] = new() { Id = "corpse", Kind = ItemKind.Corpse },
+            ["grenade"] = new() { Id = "grenade", Kind = ItemKind.Grenade, Weight = 3, Damage = new DamageDefinition { Power = 70, Type = "he", Radius = 4 } },
+            ["anvil"] = new() { Id = "anvil", Kind = ItemKind.None, Weight = 40 },
         },
         Armors = new Dictionary<string, ArmorDefinition>
         {

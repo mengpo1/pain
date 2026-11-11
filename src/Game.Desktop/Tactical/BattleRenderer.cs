@@ -146,6 +146,15 @@ public sealed class BattleRenderer
             batch.Draw(sprite.Texture, position, sprite.Source, Color.White, angle, new Vector2(sprite.Source.Width / 2f, sprite.Source.Height / 2f), 1f, SpriteEffects.None, 0f);
         }
 
+        if (playback.Explosion is { } blast)
+        {
+            int frames = _session.Assets.FrameCount("fx.explosion");
+            int frame = Math.Clamp((int)(playback.Progress * frames), 0, frames - 1);
+            SpriteFrame boom = _session.Assets.Sprite("fx.explosion", frame);
+            float scale = 0.6f + blast.Radius * 0.45f;
+            batch.Draw(boom.Texture, blast.Position, boom.Source, Color.White, 0f, boom.Anchor, scale, SpriteEffects.None, 0f);
+        }
+
         if (playback.Flash is { } flash)
         {
             int frames = _session.Assets.FrameCount("fx.explosion");

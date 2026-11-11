@@ -70,8 +70,11 @@ public sealed class TilePartDefinition : Definition
     /// <summary>Stops lines of sight through the tile edge or the tile (OpenXcom stopLOS).</summary>
     public bool BlocksSight { get; init; }
 
-    /// <summary>Stops smoke and explosions from spreading through it.</summary>
-    public bool BlocksExplosions { get; init; }
+    /// <summary>
+    /// Power an explosion loses crossing this part, counted twice as in OXCE (HE_Block); 255 or
+    /// more stops it. Also stops smoke when positive.
+    /// </summary>
+    public int ExplosionBlock { get; init; }
 
     /// <summary>Height in voxels (0–24) of the surface a unit stands on (stairs, crates).</summary>
     public int StandHeight { get; init; }

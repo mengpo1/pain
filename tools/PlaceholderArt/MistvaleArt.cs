@@ -69,6 +69,7 @@ public static class MistvaleArt
         p.Png("items/corpse_revenant.png", HorizonArt.Corpse(revenant));
 
         p.Png("fx/bolt.png", ItemArt.Projectile(Rgba.Hex("#e0d0b0"), Rgba.Hex("#806040"), 9f));
+        p.Png("fx/firepot.png", ItemArt.SmallGrenade(Rgba.Hex("#a05a30"), Rgba.Hex("#f0d070")));
         p.Png("fx/arrow.png", ItemArt.Projectile(Rgba.Hex("#e0e0d0"), Rgba.Hex("#60a0ff"), 10f));
         p.Png("fx/explosion.png", ItemArt.Explosion(Rgba.Hex("#ffc040"), Rgba.Hex("#402010"), seed: 9));
 

@@ -58,6 +58,8 @@ public static class LineTracer
     {
         Position tilePosition = voxel.Tile;
         BattleMap map = battle.Map;
+        // Above the top level is open sky (arcs of thrown items, shots fired upwards).
+        if (tilePosition.Z >= map.Height && map.InBounds(tilePosition.X, tilePosition.Y, 0)) return new TraceHit(HitKind.Nothing, voxel, tilePosition, null);
         if (!map.InBounds(tilePosition)) return new TraceHit(HitKind.OutOfMap, voxel, tilePosition, null);
         Tile tile = map[tilePosition]!;
         int lx = voxel.X - tilePosition.X * Voxel.TileWidth;

@@ -41,6 +41,11 @@
     "damage": { "power": 38, "type": "crush" },
     "floorSprite": "item.sword", "inventorySprite": "item.sword", "fireSound": "sfx.sword", "hitSound": "sfx.sword"
   },
+  {
+    "id": "firepot", "nameKey": "item.firepot", "kind": "grenade", "weight": 4,
+    "damage": { "power": 50, "type": "blast", "radius": 3 },
+    "floorSprite": "item.firepot", "inventorySprite": "item.firepot", "projectileSprite": "fx.firepot"
+  },
   { "id": "corpse_warden", "nameKey": "item.corpse_warden", "kind": "corpse", "weight": 20, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_warden" },
   { "id": "corpse_raider", "nameKey": "item.corpse_raider", "kind": "corpse", "weight": 20, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_raider" },
   { "id": "corpse_revenant", "nameKey": "item.corpse_revenant", "kind": "corpse", "weight": 12, "inventoryWidth": 2, "inventoryHeight": 3, "floorSprite": "item.corpse_revenant" }

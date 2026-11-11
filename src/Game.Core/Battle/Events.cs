@@ -42,6 +42,14 @@ public sealed record EnemySpotted(Faction Faction, int SpotterId, int UnitId) : 
 
 public sealed record ReactionTriggered(int ReactorId, int TargetId) : BattleEvent;
 
+public sealed record ItemThrown(int UnitId, int ItemId, Voxel Origin, Voxel Landing) : BattleEvent;
+
+public sealed record ItemLanded(int ItemId, Position Tile) : BattleEvent;
+
+public sealed record GrenadePrimed(int UnitId, int ItemId, int Fuse) : BattleEvent;
+
+public sealed record ItemMoved(int UnitId, int ItemId, string Slot) : BattleEvent;
+
 public sealed record WeaponReloaded(int UnitId, int WeaponId, int AmmoId) : BattleEvent;
 
 /// <summary>A queued action stopped before its end (TU exhausted, path blocked, enemy spotted).</summary>

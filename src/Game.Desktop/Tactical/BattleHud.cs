@@ -21,6 +21,9 @@ public sealed record OpenPauseMenu : HudAction;
 public sealed record OpenActionMenu(BattleItem Item) : HudAction;
 public sealed record ChooseAttack(BattleItem Weapon, AttackMode Mode) : HudAction;
 public sealed record FocusUnit(BattleUnit Unit) : HudAction;
+public sealed record PrimeGrenade(BattleItem Grenade, int Fuse) : HudAction;
+public sealed record ToggleInventory : HudAction;
+public sealed record MoveItem(BattleItem Item, string Slot) : HudAction;
 
 /// <summary>
 /// Battlescape interface: selected unit gauges, the two hands with their attack modes, command
@@ -77,6 +80,8 @@ public sealed class BattleHud
         action ??= DrawButtons(batch, view, ui, texts, panel, playerCanAct);
         if (view.ActionMenu is { } menuItem && view.Selected is { } owner && menuItem.Owner == owner)
             action ??= DrawActionMenu(batch, battle, owner, menuItem, ui, texts, panel);
+        if (view.InventoryOpen && view.Selected is { IsActive: true } carrier)
+            action ??= DrawInventory(batch, battle, carrier, ui, texts, screen, panel, playerCanAct);
 
         if (Message is { } message)
         {
@@ -150,7 +155,7 @@ public sealed class BattleHud
         ui.Text(batch, UnitNames.Of(unit, texts), new Vector2(x, y), 17f, ui.Colors.Accent);
         string status = unit.Kneeling ? texts.Get("ui.kneeling") : "";
         if (unit.TotalWounds > 0) status += (status.Length > 0 ? " · " : "") + texts.Format("ui.wounds", ("count", unit.TotalWounds));
-        if (status.Length > 0) ui.Text(batch, status, new Vector2(x + ui.S(170), y + ui.S(3)), 12f, ui.Colors.Bad);
+        if (status.Length > 0) ui.Text(batch, status, new Vector2(x + ui.S(256), y + ui.S(4)), 11f, ui.Colors.Bad, Align.Right);
 
         int barWidth = ui.S(256), barHeight = ui.S(18), gap = ui.S(23);
         float by = y + ui.S(30);
@@ -183,7 +188,9 @@ public sealed class BattleHud
         float scale = Math.Min(box.Width / (float)source.Width, (box.Height - ui.S(40)) / (float)source.Height) * 1.6f;
         batch.Draw(sprite.Texture, new Vector2(box.Center.X, box.Y + ui.S(46)), source, Color.White, 0f, new Vector2(source.Width / 2f, source.Height * 0.7f), scale, SpriteEffects.None, 0f);
         ui.Text(batch, texts.Get(item.Definition.NameKey), new Vector2(box.X + ui.S(6), box.Y + ui.S(4)), 12f, ui.Colors.Text);
-        if (item.AmmoSource is { } ammo && item.IsFirearm && !(item.SelfPowered && item.Definition.Rounds == 0))
+        if (item.Fuse is { } fuse)
+            ui.Text(batch, texts.Format("ui.primed", ("fuse", fuse)), new Vector2(box.Right - ui.S(6), box.Bottom - ui.S(20)), 13f, ui.Colors.Bad, Align.Right);
+        else if (item.AmmoSource is { } ammo && item.IsFirearm && !(item.SelfPowered && item.Definition.Rounds == 0))
         {
             int max = ammo.Definition.Rounds;
             ui.Text(batch, texts.Format("ui.rounds", ("rounds", ammo.Rounds), ("max", max)), new Vector2(box.Right - ui.S(6), box.Bottom - ui.S(20)), 13f,
@@ -228,30 +235,90 @@ public sealed class BattleHud
         Rectangle screen = batch.GraphicsDevice.Viewport.Bounds;
         var menu = new Rectangle(screen.Width - ui.S(96), ui.S(4), ui.S(90), ui.S(26));
         if (ui.Button(batch, menu, texts.Get("ui.menu"), size: 12f)) action = new OpenPauseMenu();
+        var inventory = new Rectangle(screen.Width - ui.S(222), ui.S(4), ui.S(120), ui.S(26));
+        if (ui.Button(batch, inventory, texts.Get("ui.inventory"), unit is not null, view.InventoryOpen, size: 12f)) action = new ToggleInventory();
         return action;
     }
+
+    /// <summary>
+    /// Inventory panel: every item carried or lying on the unit's tile, with one button per slot
+    /// it can be moved to and the TU it costs (OXCE inventory costs). A list rather than OXCE's grid.
+    /// </summary>
+    private static HudAction? DrawInventory(SpriteBatch batch, Battle battle, BattleUnit unit, UiContext ui, Localizer texts, Rectangle screen, Rectangle panel, bool enabled)
+    {
+        IReadOnlyDictionary<string, InventorySlotDefinition> slots = battle.Rules.InventorySlots;
+        List<string> order = slots.Values.OrderBy(s => s.Kind == InventorySlotKind.Ground ? 1 : 0).ThenBy(s => s.FillOrder).Select(s => s.Id).ToList();
+        var rows = new List<(BattleItem Item, string Slot)>();
+        foreach (string slot in order)
+        {
+            IEnumerable<BattleItem> items = slot == Inventory.Ground
+                ? battle.Map[unit.Position]!.Items.Where(i => i.Body is null)
+                : unit.Inventory.Where(i => i.Slot == slot);
+            rows.AddRange(items.Select(i => (i, slot)));
+        }
+
+        int rowHeight = ui.S(30), width = Math.Min(screen.Width - ui.S(40), ui.S(820));
+        var area = new Rectangle(screen.Width - width - ui.S(10), ui.S(76), width, ui.S(40) + Math.Max(1, rows.Count) * rowHeight);
+        area.Height = Math.Min(area.Height, panel.Y - area.Y - ui.S(8));
+        ui.Panel(batch, area);
+        ui.Text(batch, $"{texts.Get("ui.inventory")} — {UnitNames.Of(unit, texts)}", new Vector2(area.X + ui.S(12), area.Y + ui.S(8)), 15f, ui.Colors.Accent);
+        HudAction? action = null;
+        int y = area.Y + ui.S(36);
+        foreach ((BattleItem item, string from) in rows)
+        {
+            if (y + rowHeight > area.Bottom) break;
+            string slotName = texts.Get(slots[from].NameKey);
+            ui.Text(batch, $"{slotName} : {texts.Get(item.Definition.NameKey)}", new Vector2(area.X + ui.S(12), y + ui.S(6)), 13f, ui.Colors.Text);
+            int x = area.X + ui.S(330);
+            foreach (string target in order)
+            {
+                if (target == from || Inventory.MoveCost(battle, from, target) is not { } cost) continue;
+                var button = new Rectangle(x, y + ui.S(2), ui.S(118), rowHeight - ui.S(4));
+                string label = $"{texts.Get(slots[target].NameKey)} {cost}";
+                if (ui.Button(batch, button, label, enabled && cost <= unit.Tu, size: 11f)) action = new MoveItem(item, target);
+                x += ui.S(122);
+            }
+
+            y += rowHeight;
+        }
+
+        return action;
+    }
+
+    private static string Row(Localizer texts, string modeKey, int accuracy, int cost) =>
+        $"{texts.Get(modeKey)}   {texts.Format("ui.accuracy", ("value", accuracy))}   {texts.Format("ui.cost", ("value", cost))}";
 
     /// <summary>OXCE action menu: each available attack with its accuracy (before distance) and TU cost.</summary>
     private static HudAction? DrawActionMenu(SpriteBatch batch, Battle battle, BattleUnit unit, BattleItem item, UiContext ui, Localizer texts, Rectangle panel)
     {
-        var rows = new List<(AttackMode Mode, int Accuracy, int Cost)>();
+        var rows = new List<(string Label, int Cost, HudAction Action)>();
         foreach (AttackMode mode in Modes)
         {
             int cost = CombatRules.AttackTu(unit, item.Definition, mode);
             if (cost <= 0) continue;
-            rows.Add((mode, CombatRules.Accuracy(battle, unit, item, mode), cost));
+            int accuracy = CombatRules.Accuracy(battle, unit, item, mode);
+            rows.Add((Row(texts, $"mode.{mode.ToString().ToLowerInvariant()}", accuracy, cost), cost, new ChooseAttack(item, mode)));
         }
 
-        if (rows.Count == 0) return null;
+        // Any item in hand can be thrown (25 % TU); grenades are primed first (50 % TU).
+        BattleRules rules = battle.Rules.Battle;
+        if (item.Definition.Kind == ItemKind.Grenade && item.Fuse is null)
+        {
+            int prime = CombatRules.Percent(unit.MaxTu, rules.PrimeTuPercent);
+            rows.Add(($"{texts.Get("mode.prime")}   {texts.Format("ui.cost", ("value", prime))}", prime, new PrimeGrenade(item, 0)));
+            rows.Add(($"{texts.Get("mode.prime_later")}   {texts.Format("ui.cost", ("value", prime))}", prime, new PrimeGrenade(item, 1)));
+        }
+
+        int throwCost = CombatRules.Percent(unit.MaxTu, rules.ThrowTuPercent);
+        rows.Add((Row(texts, "mode.throw", CombatRules.Accuracy(battle, unit, item, AttackMode.Throw), throwCost), throwCost, new ChooseAttack(item, AttackMode.Throw)));
+
         int width = ui.S(330), height = ui.S(40);
         int x = panel.X + ui.S(290), y = panel.Y - rows.Count * (height + ui.S(4)) - ui.S(8);
         HudAction? action = null;
         for (int i = 0; i < rows.Count; i++)
         {
-            (AttackMode mode, int accuracy, int cost) = rows[i];
             var area = new Rectangle(x, y + i * (height + ui.S(4)), width, height);
-            string label = $"{texts.Get($"mode.{mode.ToString().ToLowerInvariant()}")}   {texts.Format("ui.accuracy", ("value", accuracy))}   {texts.Format("ui.cost", ("value", cost))}";
-            if (ui.Button(batch, area, label, enabled: cost <= unit.Tu, size: 14f)) action = new ChooseAttack(item, mode);
+            if (ui.Button(batch, area, rows[i].Label, enabled: rows[i].Cost <= unit.Tu, size: 14f)) action = rows[i].Action;
         }
 
         return action;

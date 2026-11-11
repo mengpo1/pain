@@ -67,6 +67,16 @@ public static class ItemArt
         return c;
     }
 
+    /// <summary>A thrown grenade in flight (16 × 16, anchor at its centre).</summary>
+    public static Canvas SmallGrenade(Rgba body, Rgba cap)
+    {
+        var c = new Canvas(16, 16);
+        c.Fill(Shape.Circle(8f, 9f, 4.5f), (x, y) => body.Tone(1.15f - (x + y - 16f) * 0.04f));
+        c.Fill(Shape.Rect(6.5f, 2.5f, 3f, 3f), cap);
+        c.Outline(Rgba.Black.WithAlpha(0.7f), 0.8f);
+        return c;
+    }
+
     /// <summary>Small glowing dot or streak used for projectiles (anchor at its centre).</summary>
     public static Canvas Projectile(Rgba core, Rgba glow, float length = 6f)
     {

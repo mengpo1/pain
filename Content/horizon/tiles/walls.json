@@ -1,24 +1,24 @@
 // Walls stand on the west or north edge of their tile. "walkable" walls can be crossed.
 // A hit stronger than "armor" replaces the part by "destroyedInto" (or removes it).
 [
-  { "id": "brick_w", "sprite": "tile.wall_brick_w", "shape": "wallW", "blocksSight": true, "blocksExplosions": true, "armor": 40, "destroyedInto": "brick_ruin_w" },
-  { "id": "brick_n", "sprite": "tile.wall_brick_n", "shape": "wallN", "blocksSight": true, "blocksExplosions": true, "armor": 40, "destroyedInto": "brick_ruin_n" },
+  { "id": "brick_w", "sprite": "tile.wall_brick_w", "shape": "wallW", "blocksSight": true, "explosionBlock": 30, "armor": 40, "destroyedInto": "brick_ruin_w" },
+  { "id": "brick_n", "sprite": "tile.wall_brick_n", "shape": "wallN", "blocksSight": true, "explosionBlock": 30, "armor": 40, "destroyedInto": "brick_ruin_n" },
   { "id": "brick_ruin_w", "sprite": "tile.wall_brick_ruin_w", "shape": "ruinW", "walkable": true, "tuWalk": 2 },
   { "id": "brick_ruin_n", "sprite": "tile.wall_brick_ruin_n", "shape": "ruinN", "walkable": true, "tuWalk": 2 },
   { "id": "window_w", "sprite": "tile.window_w", "shape": "windowW", "armor": 8, "destroyedInto": "window_broken_w" },
   { "id": "window_n", "sprite": "tile.window_n", "shape": "windowN", "armor": 8, "destroyedInto": "window_broken_n" },
   { "id": "window_broken_w", "sprite": "tile.window_broken_w", "shape": "brokenWindowW", "armor": 30, "destroyedInto": "brick_ruin_w" },
   { "id": "window_broken_n", "sprite": "tile.window_broken_n", "shape": "brokenWindowN", "armor": 30, "destroyedInto": "brick_ruin_n" },
-  { "id": "door_w", "sprite": "tile.door_w", "shape": "wallW", "blocksSight": true, "door": "swing", "openInto": "door_open_w", "armor": 20, "destroyedInto": "door_open_w" },
-  { "id": "door_n", "sprite": "tile.door_n", "shape": "wallN", "blocksSight": true, "door": "swing", "openInto": "door_open_n", "armor": 20, "destroyedInto": "door_open_n" },
+  { "id": "door_w", "sprite": "tile.door_w", "shape": "wallW", "blocksSight": true, "door": "swing", "openInto": "door_open_w", "armor": 20, "explosionBlock": 10, "destroyedInto": "door_open_w" },
+  { "id": "door_n", "sprite": "tile.door_n", "shape": "wallN", "blocksSight": true, "door": "swing", "openInto": "door_open_n", "armor": 20, "explosionBlock": 10, "destroyedInto": "door_open_n" },
   { "id": "door_open_w", "sprite": "tile.door_open_w", "shape": "doorFrameW", "walkable": true, "closedInto": "door_w" },
   { "id": "door_open_n", "sprite": "tile.door_open_n", "shape": "doorFrameN", "walkable": true, "closedInto": "door_n" },
   { "id": "fence_w", "sprite": "tile.fence_w", "shape": "fenceW", "armor": 15 },
   { "id": "fence_n", "sprite": "tile.fence_n", "shape": "fenceN", "armor": 15 },
-  { "id": "hull_w", "sprite": "tile.hull_w", "shape": "wallW", "blocksSight": true, "blocksExplosions": true },
-  { "id": "hull_n", "sprite": "tile.hull_n", "shape": "wallN", "blocksSight": true, "blocksExplosions": true },
-  { "id": "hatch_w", "sprite": "tile.hatch_w", "shape": "wallW", "blocksSight": true, "door": "sliding", "openInto": "hatch_open_w" },
-  { "id": "hatch_n", "sprite": "tile.hatch_n", "shape": "wallN", "blocksSight": true, "door": "sliding", "openInto": "hatch_open_n" },
+  { "id": "hull_w", "sprite": "tile.hull_w", "shape": "wallW", "blocksSight": true, "explosionBlock": 255 },
+  { "id": "hull_n", "sprite": "tile.hull_n", "shape": "wallN", "blocksSight": true, "explosionBlock": 255 },
+  { "id": "hatch_w", "sprite": "tile.hatch_w", "shape": "wallW", "blocksSight": true, "door": "sliding", "openInto": "hatch_open_w", "explosionBlock": 255 },
+  { "id": "hatch_n", "sprite": "tile.hatch_n", "shape": "wallN", "blocksSight": true, "door": "sliding", "openInto": "hatch_open_n", "explosionBlock": 255 },
   { "id": "hatch_open_w", "sprite": "tile.hatch_open_w", "shape": "doorFrameW", "walkable": true, "closedInto": "hatch_w" },
   { "id": "hatch_open_n", "sprite": "tile.hatch_open_n", "shape": "doorFrameN", "walkable": true, "closedInto": "hatch_n" }
 ]

@@ -49,6 +49,7 @@
     "item.sword": "assets/items/sword.png",
     "fx.arrow": "assets/fx/arrow.png",
     "fx.bolt": "assets/fx/bolt.png",
+    "fx.firepot": "assets/fx/firepot.png",
     "ui.arrow": "assets/ui/arrow.png",
     "ui.cursor": "assets/ui/cursor.png",
     "ui.cursor_blocked": "assets/ui/cursor_blocked.png",

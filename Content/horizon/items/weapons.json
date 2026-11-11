@@ -47,5 +47,11 @@
     "melee": { "accuracy": 100, "tu": 12 },
     "damage": { "power": 25, "type": "blade" },
     "floorSprite": "item.knife", "inventorySprite": "item.knife"
+  },
+  {
+    // Primed, it explodes at the end of the turn its fuse reaches 0 (OXCE grenade rules).
+    "id": "frag_grenade", "nameKey": "item.frag_grenade", "kind": "grenade", "weight": 3,
+    "damage": { "power": 60, "type": "explosive", "radius": 4 },
+    "floorSprite": "item.grenade", "inventorySprite": "item.grenade", "projectileSprite": "fx.grenade"
   }
 ]

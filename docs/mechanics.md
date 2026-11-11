@@ -25,7 +25,8 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 | Portes battantes et coulissantes | ✅ | Ouverture en traversant (variante « ouverte » d'une partie, `Alt_MCD`) ; les coulissantes se referment en fin de tour si l'embrasure est libre. |
 | Destruction par tir direct | ✅ | `TileEngine::hit` méthode 1 : la tuile reçoit 50–150 % de la puissance × `toTile` (0,5) et perd une couche si ce total atteint son armure. Remplacement par `destroyedInto` (`Die_MCD`). |
 | Armure 255 « indestructible » | 🟡 | Ici, `armor: 0` signifie indestructible. |
-| Explosions, feu, fumée sur le terrain | ❌ | Lot 2. La fumée est déjà prise en compte par la vision si une case en contient. |
+| Explosions sur le terrain | ✅ | Voir « Grenades et explosions ». |
+| Feu et fumée | ❌ | La fumée est déjà prise en compte par la vision si une case en contient ; ni création ni propagation pour l'instant. |
 | Chute (gravité) | ❌ | Les sols sont indestructibles dans les packs de démonstration. |
 
 ### Déplacements (`Pathfinding::getTUCost`, `UnitWalkBState`)
@@ -56,7 +57,7 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 | Point visé | 🟡 | Quelques points du corps de la cible (centre puis décalages), au lieu de l'échantillonnage complet de `canTargetUnit`. |
 | Mêlée | 🟡 | Vrai jet de pourcentage (mêlée × précision de l'arme, malus de santé) sur une case adjacente, après rotation payante. Esquive (`meleeDodge`) non reprise. |
 | Rechargement | ✅ | 15 UT par défaut (`reloadTu`), chargeur porté par l'unité ; chargeur vide jeté. |
-| Lancer, grenades, amorçage | ❌ | Lot 2. |
+| Lancer, grenades, amorçage | 🟡 | Voir « Grenades et explosions ». |
 
 ### Tirs de réaction (`TileEngine::checkReactionFire`)
 
@@ -115,7 +116,7 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 | Patrouille | 🟡 | Entre les points de patrouille de la carte, en gardant des UT pour la réaction (agressivité 0 : 50 %, 1 : 40 %, 2+ : 33 % des UT max). Les nœuds RMP (rangs, liens, priorités) ne sont pas repris. |
 | Repli | 🟡 | Sous `retreatHealthPercent` de santé, vers la case vue par le moins d'ennemis connus puis la plus éloignée. |
 | Modes pondérés (patrouille/embuscade/combat/fuite) | ❌ | Remplacés par les priorités ci-dessus. |
-| Grenades, psi, mode « triche » des derniers tours | ❌ | |
+| Grenades, psi, mode « triche » des derniers tours | ❌ | L'IA ne lance pas encore de grenades. |
 
 ### Tours et missions
 
@@ -135,12 +136,27 @@ Les noms des fonctions OXCE sont cités pour permettre la vérification.
 | Cartes assemblées par blocs | 🟡 | Grille de blocs (10 × 10 ou multiples) d'un terrain : blocs obligatoires d'abord, puis tirage pondéré avec maximum par bloc, reproductible par la graine. Pas encore de scripts de carte (routes, bâtiments imposés à un endroit). |
 | Déploiement | 🟡 | Marqueurs de départ par camp dans les blocs, puis cases libres voisines. |
 
+### Grenades et explosions (`TileEngine::explode`, `detonate`, `BattlescapeGame::endTurn`)
+
+| Mécanique | État | Détails |
+|---|---|---|
+| Amorçage et minuterie | ✅ | Amorcer coûte 50 % des UT max, lancer 25 %. Une grenade au sol dont la minuterie vaut 0 explose à la fin du tour du joueur ou des hostiles (jamais du tour neutre), puis les minuteries diminuent. Une grenade restée en main n'explose pas (réglage OXCE par défaut). |
+| Portée du lancer | ✅ | Simulation d'OXCE (`getMaxThrowDistance`) : vitesse verticale qui baisse tous les 8 voxels de (50 × poids / force) / 100 ; portée horizontale ≤ (distance + 8) / 16 cases. |
+| Trajectoire du lancer | 🟡 | Parabole d'une des trois hauteurs (25 %, 50 %, 90 % de la distance) qui atteint la case ; OXCE augmente la courbure par pas de 0,5. Précision : lancer × modificateur de santé, déviation `applyAccuracy` sans prolongement. Le ciel au-dessus du dernier niveau est libre ; un plafond bloque. |
+| Propagation | ✅ | Explosions « plates » (réglage par défaut d'OXCE) : rayons tous les 3°, −10 de puissance par case, − 2 × blocage des murs et objets traversés (`explosionBlock`, comme `HE_Block`, règle des deux chemins en diagonale). |
+| Dégâts aux unités | ✅ | Une fois par case : dégâts aléatoires (50–150 % pour le type explosif) ; dessous de l'armure sur la case centrale et ses voisines, sinon la face tournée vers l'explosion. Les corps inconscients au sol sont touchés. |
+| Objets au sol | ✅ | Détruits si dégâts × `toItem` > 20. |
+| Terrain | ✅ | Chaque case garde la plus forte puissance reçue × `toTile` ; chaque partie (objet, murs, murs est/sud, plafond) perd des couches tant que l'énergie couvre son armure. |
+| Munitions explosives | ✅ | Une munition dont le type a un rayon explose à l'impact. |
+| Explosions en hauteur, chaînes d'explosions du terrain, fumée et feu | ❌ | |
+| Grenades de proximité, choix libre de la minuterie | ❌ | Minuterie 0 ou 1 dans l'interface. |
+
 ## Lots suivants
 
 | Domaine | État |
 |---|---|
-| Inventaire (écran, déplacements, coûts par emplacement, sol) | 🟡 Données et règles de placement présentes, coûts d'inventaire en données ; pas encore d'écran ni de commande de déplacement. |
-| Grenades, explosions (rayons de `TileEngine::explode`), feu, fumée | ❌ Algorithmes relevés dans les sources, à implémenter. |
+| Inventaire | 🟡 Déplacement d'objets entre mains, ceinture, sac et sol avec les coûts en UT des emplacements (`RuleInventory::getCost`) ; panneau en liste, pas encore la grille d'OXCE ; poids et encombrement non appliqués. |
+| Feu, fumée (création, propagation, dégâts) | ❌ Algorithmes relevés dans les sources (`prepareNewTurn`). |
 | Panique, berserk, états particuliers | ❌ |
 | Expérience et progression | ❌ |
 | Sauvegarde de bataille et de campagne | ❌ |

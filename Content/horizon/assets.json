@@ -54,6 +54,7 @@
     "item.pulse_carbine": "assets/items/pulse_carbine.png",
     "item.rifle": "assets/items/rifle.png",
     "fx.bullet": "assets/fx/bullet.png",
+    "fx.grenade": "assets/fx/grenade.png",
     "fx.pulse": "assets/fx/pulse.png",
     "ui.arrow": "assets/ui/arrow.png",
     "ui.cursor": "assets/ui/cursor.png",

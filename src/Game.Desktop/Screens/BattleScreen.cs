@@ -85,7 +85,7 @@ public sealed class BattleScreen : Screen
         if (Idle && PlayerControls)
         {
             // Leave aiming once the unit can no longer pay for another shot of that mode.
-            if (_view.Targeting is { } targeting && (_view.Selected is not { IsActive: true } shooter
+            if (_view.Targeting is { Mode: not AttackMode.Throw } targeting && (_view.Selected is not { IsActive: true } shooter
                 || shooter.Tu < Core.Battle.Combat.CombatRules.AttackTu(shooter, targeting.Weapon.Definition, targeting.Mode)))
                 _view.Targeting = null;
             HandlePlayerInput();
@@ -164,6 +164,21 @@ public sealed class BattleScreen : Screen
                 if (down == _view.Selected) SelectNext(previous: false);
                 _playback.Wait(0.25f);
                 break;
+            case ItemThrown thrown when IsVisible(thrown.Origin.Tile) || IsVisible(thrown.Landing.Tile):
+            {
+                Vector2 from = Iso.VoxelToWorld(thrown.Origin), to = Iso.VoxelToWorld(thrown.Landing);
+                float seconds = Math.Clamp(Vector2.Distance(from, to) / 500f, 0.25f, 0.9f);
+                _playback.PlayProjectile(new ProjectileAnimation(_battle.GetItem(thrown.ItemId)?.Definition.ProjectileSprite, from, to, Vector2.Distance(from, to) * 0.35f), seconds);
+                break;
+            }
+            case ExplosionStarted explosion:
+                if (IsVisible(explosion.Center.Tile)) _playback.PlayExplosion(Iso.VoxelToWorld(explosion.Center), explosion.Radius);
+                Session.Audio.Play(sounds.Explosion, Pan(explosion.Center.Tile));
+                if (IsVisible(explosion.Center.Tile)) Follow(explosion.Center.Tile);
+                break;
+            case GrenadePrimed:
+                _hud.Show(Texts.Get("info.grenade_primed"), 2f);
+                break;
             case DoorOpened opened when IsVisible(opened.Tile):
                 Session.Audio.Play(sounds.Door, Pan(opened.Tile));
                 break;
@@ -228,6 +243,7 @@ public sealed class BattleScreen : Screen
         if (input.Pressed(GameAction.Reload) && _view.Selected is { } shooter && Inventory.MainWeapon(shooter) is { } weapon) HandleHud(new ReloadAction(weapon));
         if (input.Pressed(GameAction.EndTurn)) HandleHud(new EndTurnAction());
         if (input.Pressed(GameAction.CenterOnUnit)) HandleHud(new CenterOnSelected());
+        if (input.Pressed(GameAction.Inventory)) HandleHud(new ToggleInventory());
         if (input.Pressed(GameAction.Cancel))
         {
             if (_view.Targeting is not null || _view.ActionMenu is not null)
@@ -248,7 +264,15 @@ public sealed class BattleScreen : Screen
             _view.ActionMenu = null;
             if (_view.Targeting is { } targeting && selected is not null)
             {
-                Execute(new AttackCommand(selected.Id, targeting.Weapon.Id, targeting.Mode, tile));
+                if (targeting.Mode == AttackMode.Throw)
+                {
+                    Execute(new ThrowCommand(selected.Id, targeting.Weapon.Id, tile));
+                    _view.Targeting = null;
+                }
+                else
+                {
+                    Execute(new AttackCommand(selected.Id, targeting.Weapon.Id, targeting.Mode, tile));
+                }
             }
             else if (_battle.UnitAt(tile) is { Faction: Faction.Player, IsActive: true } clicked)
             {
@@ -311,6 +335,17 @@ public sealed class BattleScreen : Screen
                 break;
             case FocusUnit focus:
                 CenterOn(focus.Unit.Position);
+                break;
+            case ToggleInventory:
+                _view.InventoryOpen = !_view.InventoryOpen;
+                _view.ActionMenu = null;
+                break;
+            case MoveItem move when unit is not null && PlayerControls && Idle:
+                Execute(new MoveItemCommand(unit.Id, move.Item.Id, move.Slot));
+                break;
+            case PrimeGrenade prime when unit is not null && PlayerControls && Idle:
+                _view.ActionMenu = null;
+                Execute(new PrimeCommand(unit.Id, prime.Grenade.Id, prime.Fuse));
                 break;
         }
     }

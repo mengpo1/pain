@@ -70,6 +70,52 @@ public static class Inventory
         unit.Inventory.Add(item);
     }
 
+    /// <summary>
+    /// TU to move an item from one slot to another (OXCE RuleInventory::getCost): the source
+    /// slot's cost towards the target, 0 within the same slot, unknown pairs refused.
+    /// </summary>
+    public static int? MoveCost(Battle battle, string from, string to)
+    {
+        if (from == to) return 0;
+        return battle.Rules.InventorySlots.TryGetValue(from, out InventorySlotDefinition? slot) && slot.Costs.TryGetValue(to, out int cost) ? cost : null;
+    }
+
+    /// <summary>Moves a carried item (or one lying on the unit's tile) to a slot, paying the slot cost.</summary>
+    public static CommandResult Move(Battle battle, BattleUnit unit, int itemId, string target)
+    {
+        BattleItem? item = battle.GetItem(itemId);
+        bool onGround = item?.GroundPosition == unit.Position;
+        if (item is null || (item.Owner != unit && !onGround)) return CommandResult.Refused("error.item_out_of_reach");
+        if (item.Body is not null) return CommandResult.Refused("error.item_too_heavy");
+        string from = onGround ? Ground : item.Slot!;
+        if (MoveCost(battle, from, target) is not { } cost) return CommandResult.Refused("error.cannot_move_there");
+        if (unit.Tu < cost) return CommandResult.Refused("error.not_enough_tu", cost);
+
+        if (target == Ground)
+        {
+            unit.Tu -= cost;
+            battle.DropItem(item, unit.Position);
+        }
+        else
+        {
+            if (onGround) battle.Map[unit.Position]!.Items.Remove(item);
+            else unit.Inventory.Remove(item);
+            item.GroundPosition = null;
+            if (!TryPlace(battle, unit, item, target))
+            {
+                // No room: put it back where it was.
+                if (onGround) battle.DropItem(item, unit.Position);
+                else Assign(unit, item, from, item.SlotX, item.SlotY);
+                return CommandResult.Refused("error.no_room");
+            }
+
+            unit.Tu -= cost;
+        }
+
+        battle.Emit(new ItemMoved(unit.Id, item.Id, target));
+        return CommandResult.Ok;
+    }
+
     /// <summary>A clip the unit carries (not already loaded) that fits the weapon.</summary>
     public static BattleItem? FindAmmo(BattleUnit unit, BattleItem weapon) =>
         unit.Inventory.FirstOrDefault(i => i != weapon && i.Definition.Kind == ItemKind.Ammo && weapon.Definition.Ammo.Contains(i.Definition.Id) && i.Rounds > 0);
@@ -93,6 +139,25 @@ public static class Inventory
         if (weapon.LoadedAmmo is { } empty) battle.DestroyItem(empty);
         Load(unit, weapon, clip);
         battle.Emit(new WeaponReloaded(unit.Id, weapon.Id, clip.Id));
+        return CommandResult.Ok;
+    }
+
+    /// <summary>
+    /// Primes a grenade held in hand (OXCE: 50 % of the unit's maximum TU). Fuse 0 explodes at the
+    /// end of the current turn, n at the end of the n-th following turn of the player or hostiles.
+    /// </summary>
+    public static CommandResult Prime(Battle battle, BattleUnit unit, int itemId, int fuse)
+    {
+        BattleItem? item = battle.GetItem(itemId);
+        if (item is null || item.Owner != unit || !Hands.Contains(item.Slot)) return CommandResult.Refused("error.not_in_hand");
+        if (item.Definition.Kind != ItemKind.Grenade) return CommandResult.Refused("error.not_a_grenade");
+        if (item.Fuse is not null) return CommandResult.Refused("error.already_primed");
+        int cost = Combat.CombatRules.Percent(unit.MaxTu, battle.Rules.Battle.PrimeTuPercent);
+        if (unit.Tu < cost) return CommandResult.Refused("error.not_enough_tu", cost);
+        unit.Tu -= cost;
+        item.Fuse = Math.Max(0, fuse);
+        item.PrimedBy = unit;
+        battle.Emit(new GrenadePrimed(unit.Id, item.Id, item.Fuse.Value));
         return CommandResult.Ok;
     }
 

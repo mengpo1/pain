@@ -8,8 +8,8 @@ namespace Game.Desktop.Tactical;
 /// <summary>A unit sliding from one tile to the next.</summary>
 public sealed record WalkAnimation(int UnitId, Vector2 From, Vector2 To);
 
-/// <summary>A projectile (or blow) travelling between two world pixels.</summary>
-public sealed record ProjectileAnimation(string? Sprite, Vector2 From, Vector2 To);
+/// <summary>A projectile travelling between two world pixels, on a curve <see cref="Arc"/> pixels high.</summary>
+public sealed record ProjectileAnimation(string? Sprite, Vector2 From, Vector2 To, float Arc = 0f);
 
 /// <summary>
 /// Plays the events of the simulation one at a time, so the screen can show each step before
@@ -26,6 +26,9 @@ public sealed class BattlePlayback
 
     /// <summary>Impact flash position and remaining time.</summary>
     public (Vector2 Position, float Time)? Flash { get; private set; }
+
+    /// <summary>Explosion centre, radius in tiles, and progress (0–1).</summary>
+    public (Vector2 Position, int Radius)? Explosion { get; private set; }
 
     /// <summary>Big centred text (turn start) and remaining time.</summary>
     public (string Text, Color Color, float Time)? Banner { get; set; }
@@ -54,6 +57,13 @@ public sealed class BattlePlayback
         _duration = 0f;
         Walk = null;
         Projectile = null;
+        Explosion = null;
+    }
+
+    public void PlayExplosion(Vector2 position, int radius)
+    {
+        Explosion = (position, radius);
+        Start(0.7f);
     }
 
     public void PlayWalk(WalkAnimation walk, float seconds)
@@ -84,7 +94,9 @@ public sealed class BattlePlayback
         Walk is { } walk && walk.UnitId == unitId ? Vector2.Lerp(walk.From, walk.To, Progress) : null;
 
     public Vector2? ProjectilePosition =>
-        Projectile is { } projectile ? Vector2.Lerp(projectile.From, projectile.To, Progress) : null;
+        Projectile is { } projectile
+            ? Vector2.Lerp(projectile.From, projectile.To, Progress) - new Vector2(0, projectile.Arc * 4f * Progress * (1f - Progress))
+            : null;
 
     public static Vector2 FeetWorld(Battle battle, Position p) =>
         Iso.TileCenter(p, battle.Map.StandElevation(p));

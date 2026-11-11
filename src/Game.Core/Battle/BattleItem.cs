@@ -41,6 +41,9 @@ public sealed class BattleItem
     /// <summary>Primed grenade: turns before it explodes (0 = at the end of this turn); null = not primed.</summary>
     public int? Fuse { get; internal set; }
 
+    /// <summary>Unit that primed this grenade (credited with what the explosion does).</summary>
+    public BattleUnit? PrimedBy { get; internal set; }
+
     /// <summary>Corpses and unconscious bodies: the unit they come from.</summary>
     public BattleUnit? Body { get; internal set; }
 

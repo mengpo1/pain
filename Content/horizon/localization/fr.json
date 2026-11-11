@@ -44,7 +44,10 @@
     "path_cost": "{cost} UT",
     "level": "Niveau {level}",
     "visible_enemies": "Ennemis en vue",
-    "wounds": "{count} blessure(s) mortelle(s)",
+    "wounds": {
+      "one": "{count} blessure mortelle",
+      "other": "{count} blessures mortelles"
+    },
     "resume": "Reprendre",
     "save": "Sauvegarder",
     "load": "Charger",
@@ -55,14 +58,18 @@
     "survive": "Tenir jusqu'à la fin du tour {turns}",
     "kneeling": "à genou",
     "unconscious": "inconscient",
-    "dead": "mort"
+    "dead": "mort",
+    "primed": "amorcée ({fuse})",
+    "inventory": "Inventaire"
   },
   "mode": {
     "snap": "Tir rapide",
     "aimed": "Tir visé",
     "auto": "Tir automatique",
     "melee": "Frapper",
-    "throw": "Lancer"
+    "throw": "Lancer",
+    "prime": "Amorcer (fin du tour)",
+    "prime_later": "Amorcer (un tour de plus)"
   },
   "debrief": {
     "title_victory": "Mission accomplie",
@@ -133,10 +140,18 @@
     "cannot_reload": "Cette arme ne se recharge pas.",
     "already_loaded": "L'arme est déjà chargée.",
     "save_failed": "Échec de la sauvegarde : {message}",
-    "load_failed": "Échec du chargement : {message}"
+    "load_failed": "Échec du chargement : {message}",
+    "not_a_grenade": "Cet objet ne s'amorce pas.",
+    "already_primed": "Déjà amorcée.",
+    "cannot_throw_there": "Impossible de lancer ici.",
+    "item_out_of_reach": "L'objet est hors de portée.",
+    "item_too_heavy": "Les corps ne se portent pas encore.",
+    "cannot_move_there": "L'objet ne peut pas aller là.",
+    "no_room": "Plus de place."
   },
   "info": {
-    "enemy_spotted": "Ennemi repéré !"
+    "enemy_spotted": "Ennemi repéré !",
+    "grenade_primed": "Grenade amorcée : lancez-la avant la fin du tour."
   },
   "stat": {
     "tu": "Unités de temps",
@@ -168,7 +183,8 @@
     "combat_knife": "Couteau de combat",
     "corpse_operative": "Corps d'un agent",
     "corpse_gaunt": "Cadavre de Gaunt",
-    "corpse_warden": "Cadavre de Gardien"
+    "corpse_warden": "Cadavre de Gardien",
+    "frag_grenade": "Grenade à fragmentation"
   },
   "armor": {
     "field_vest": "Gilet de terrain",

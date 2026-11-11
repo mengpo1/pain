@@ -7,7 +7,8 @@
       { "item": "k7_rifle", "slot": "rightHand", "ammo": "k7_clip" },
       { "item": "k7_clip", "slot": "belt" },
       { "item": "k7_clip", "slot": "belt" },
-      { "item": "combat_knife", "slot": "belt" }
+      { "item": "combat_knife", "slot": "belt" },
+      { "item": "frag_grenade", "slot": "belt" }
     ]
   },
   {
@@ -16,7 +17,8 @@
     "loadout": [
       { "item": "k7_rifle", "slot": "rightHand", "ammo": "k7_clip" },
       { "item": "p9_pistol", "slot": "belt", "ammo": "p9_clip" },
-      { "item": "k7_clip", "slot": "backpack" }
+      { "item": "k7_clip", "slot": "backpack" },
+      { "item": "frag_grenade", "slot": "backpack" }
     ]
   },
   {

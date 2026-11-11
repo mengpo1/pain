@@ -91,6 +91,8 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler. 
 | Tirer | clic sur l'arme en main → mode (précision et UT affichées) → clic sur la cible ; clic droit ou `Échap` annule |
 | Genou à terre / debout | `K` |
 | Recharger | `R` |
+| Inventaire (prendre une grenade en main, ramasser, poser) | `I` |
+| Grenade | en main : clic sur elle → « Amorcer » puis « Lancer » → case ; elle explose en fin de tour |
 | Fin du tour | `E` |
 | Caméra | flèches, ZQSD/WASD, bords de l'écran, clic molette maintenu ; zoom à la molette ; `C` centre |
 | Niveaux | `Page préc.` / `Page suiv.` |
@@ -134,13 +136,17 @@ mort ; tirs de réaction ; vision, lumière et brouillard de guerre ; moral ; IA
 (élimination, tenir N tours, atteindre une zone, limite de tours) ; cartes fixes ou générées par
 blocs ; deux univers ; mods ; FR/EN.
 
-**Pas encore fait** : grenades et explosions, écran d'inventaire, réserve d'UT, panique,
-sauvegarde, expérience, et toute la couche stratégique (Geoscape). Le détail est dans
+Grenades (amorçage, lancer en cloche, explosion en fin de tour, destruction du décor) et
+inventaire (déplacement d'objets avec les coûts en UT) sont aussi en place.
+
+**Pas encore fait** : feu et fumée, réserve d'UT, panique, sauvegarde, expérience, inventaire en
+grille, grenades pour l'IA, et toute la couche stratégique (Geoscape). Le détail est dans
 [docs/mechanics.md](docs/mechanics.md).
 
-**Vérifié** : compilation sans avertissement et 85 tests sous Linux ; le jeu réel lancé sous Linux
+**Vérifié** : compilation sans avertissement et 96 tests sous Linux ; le jeu réel lancé sous Linux
 (Xvfb, OpenGL logiciel), joué à la souris et au clavier (sélection, déplacement, menu de tir, tir,
-fin de tour) et en pilotage automatique sur les deux packs. L'intégration continue
+fin de tour, inventaire, grenade amorcée, lancée et explosant en fin de tour) et en pilotage
+automatique sur les deux packs. L'intégration continue
 (`.github/workflows/ci.yml`) compile et teste sous Linux, Windows et macOS. **Non vérifié** : une
 vraie session sur un Mac, et le son (pas de carte son dans l'environnement de développement).
 

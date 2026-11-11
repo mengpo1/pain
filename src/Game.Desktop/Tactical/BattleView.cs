@@ -28,6 +28,9 @@ public sealed class BattleView
     /// <summary>Hand whose action menu is open, if any.</summary>
     public BattleItem? ActionMenu { get; set; }
 
+    /// <summary>The inventory panel of the selected unit is open.</summary>
+    public bool InventoryOpen { get; set; }
+
     /// <summary>Shows every unit and tile (debug, F1).</summary>
     public bool RevealAll { get; set; }
 }

@@ -21,6 +21,18 @@ public sealed record KneelCommand(int UnitId) : BattleCommand(UnitId);
 /// <summary>Attack a tile with a weapon held in hand, in a given mode (snap, aimed, auto, melee).</summary>
 public sealed record AttackCommand(int UnitId, int WeaponId, AttackMode Mode, Position Target) : BattleCommand(UnitId);
 
+/// <summary>Throw an item held in hand onto a tile.</summary>
+public sealed record ThrowCommand(int UnitId, int ItemId, Position Target) : BattleCommand(UnitId);
+
+/// <summary>Prime a grenade held in hand: it explodes at the end of the turn its fuse reaches 0.</summary>
+public sealed record PrimeCommand(int UnitId, int ItemId, int Fuse) : BattleCommand(UnitId);
+
+/// <summary>
+/// Move an item between inventory slots, or between the unit's tile and a slot (slot "ground"
+/// drops it). Costs come from the content's inventory slots (OXCE "invs").
+/// </summary>
+public sealed record MoveItemCommand(int UnitId, int ItemId, string Slot) : BattleCommand(UnitId);
+
 /// <summary>Load a clip carried by the unit into a weapon held in hand.</summary>
 public sealed record ReloadCommand(int UnitId, int WeaponId) : BattleCommand(UnitId);
 
