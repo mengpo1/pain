@@ -13,9 +13,16 @@ avec `--profile` :
 | `noct` | `Content/Base` + `Mods/NoctPrototype` | « Le dernier signal » : survival horror vu par une caméra thermique de surveillance, trois créatures, une mission |
 | `signal` | `Content/Base` + `Mods/NoctInspired` | « Signal mort » : ancienne démo de mod (horreur thermique, deux niveaux) |
 
-| Action (`action`) | Horreur (`noct`) | Mode debug |
+| Action (`action`, scène `demo`) | Horreur (`noct`, scène `noct_demo`) | Mode debug |
 |---|---|---|
-| ![Combat dans l'entrepôt](docs/images/action.jpg) | ![Installation vue par la caméra thermique](docs/images/noct.jpg) | ![Hitboxes, collisions et IA](docs/images/debug.jpg) |
+| ![Combat dans la cuisine de l'immeuble de démonstration](docs/images/action.jpg) | ![Le survivant et un veilleur réveillé, vus par la caméra thermique](docs/images/noct.jpg) | ![Hitboxes, collisions et IA](docs/images/debug.jpg) |
+
+Personnages et créatures sont animés (marche, coups, tirs, chutes, morts selon les dégâts, achèvements ;
+bond en trois phases, réveil du veilleur) par un système piloté par les données
+([animation.md](docs/animation.md)) :
+
+![Quelques animations du joueur](docs/images/sprites_action.png)
+![Animations des créatures en thermique](docs/images/sprites_noct.png)
 
 Tout le contenu (graphismes, sons, niveaux, textes) est original. Les graphismes et sons de
 remplacement sont générés par `tools/PlaceholderArt` (CC0).
@@ -64,6 +71,17 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler.
 | `--content <dir>` / `--mods <dir>` | autres dossiers de contenu ou de mods |
 | `--size 1600x900`, `--mute` | taille de fenêtre, sans son |
 | `--autopilot --frames N --screenshot f.png` | le jeu joue seul, s'arrête après N images et enregistre la dernière (tests de fumée) |
+| `--modifier <id>` | joue avec ce modificateur (remplace le choix enregistré) |
+
+Scènes de démonstration (aussi dans le menu des niveaux) :
+
+```bash
+dotnet run --project src/TopDown.Desktop -- --profile action --level demo
+```
+
+```bash
+dotnet run --project src/TopDown.Desktop -- --profile noct --level noct_demo
+```
 
 ## Commandes
 
@@ -126,9 +144,10 @@ src/TopDown.Core      règles du jeu, sans rendu ni fichiers (testable sans fen�
 src/TopDown.Content   chargement et validation des packs, mods, ressources, traductions
 src/TopDown.Desktop   MonoGame : fenêtre, rendu, audio, entrées, menus, HUD
 tests/TopDown.Tests   tests xUnit (logique, contenu, mods, traductions)
-tools/PlaceholderArt  générateur des graphismes et sons de remplacement
+tools/PlaceholderArt  générateur des graphismes et sons (squelette d'animation dans Rig/)
 Content/Base          contenu de démonstration (jeu d'action)
 Content/profiles.json profils = ensembles de mods
+Mods/NoctPrototype    « Le dernier signal » (horreur thermique)
 Mods/NoctInspired     conversion horreur (exemple de mod complet)
 docs/                 formats et guides
 ```
@@ -139,6 +158,9 @@ docs/                 formats et guides
 - [Format du contenu (armes, personnages, tuiles, thèmes, ressources)](docs/content.md)
 - [Format des niveaux](docs/levels.md)
 - [Créer un mod](docs/modding.md)
+- [Animations des personnages](docs/animation.md)
+- Chartes graphiques : [pack action](docs/art/action.md), [pack thermique](docs/art/thermal.md)
+- [Revue visuelle et comparaison aux références](docs/art/visual-review.md)
 - [Traductions](docs/localization.md)
 
 ## État et limites
@@ -161,3 +183,7 @@ docs/                 formats et guides
   le thème du pack.
 - Pas de manette, pas d'éditeur de niveaux, pas de scripts dans les mods (choix volontaires pour cette
   première version), les ennemis ne ramassent pas les armes.
+- Graphismes : tous générés par le dépôt (squelette d'animation, meubles et structures en volume, tuiles) ;
+  le chien du pack action et les créatures de `NoctInspired` gardent leurs anciens sprites fixes. Les
+  vidéos de référence n'ont pas pu être visionnées et aucun service externe de génération n'a été
+  utilisé : voir la [revue visuelle](docs/art/visual-review.md).

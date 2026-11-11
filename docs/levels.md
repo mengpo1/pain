@@ -30,6 +30,7 @@ le bord entre deux tuiles). L'axe Y descend.
   "props":   [ { "sprite": "prop.crate", "position": [3, 3], "size": [1, 1], "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true } ],
   "decor":   [ { "sprite": "prop.car", "position": [1, 1], "rotationDegrees": 0, "scale": 1, "layer": "floor" } ],
   "lights":  [ { "position": [4, 2], "radius": 4, "color": "#ffffff", "intensity": 1, "flicker": 0.3 } ],
+  "roofs":   [ { "x": 1, "y": 1, "width": 4, "height": 3, "sprite": "roof.metal", "insideOpacity": 0 } ],
   "items":   [ { "id": "briefcase", "sprite": "prop.crate", "nameKey": "item.briefcase.name", "position": [8, 1] } ],
   "interactables": [ { "id": "switch", "sprite": "prop.generator", "promptKey": "prompt.switch", "position": [1, 3], "once": true } ],
   "zones":   { "exit": { "x": 1, "y": 1, "width": 2, "height": 2 } },
@@ -45,6 +46,14 @@ le bord entre deux tuiles). L'axe Y descend.
   "ambience": null
 }
 ```
+
+## Toits
+
+`roofs` couvre des bâtiments vus de haut : la texture `sprite` est répétée sur la zone (`x`, `y`, `width`,
+`height` en tuiles) au-dessus de tout ce qui s'y trouve. Quand le joueur entre dans la zone, le toit
+s'efface en douceur (jusqu'à `insideOpacity`) puis revient quand il sort ; ce qui est dessous reste caché
+depuis l'extérieur. Un décor de calque `"layer": "roof"` est posé sur le toit qui le contient et s'efface
+avec lui (bouches d'aération, antennes). Purement visuel : rien ne change pour les collisions ni l'IA.
 
 ## Carte
 

@@ -45,6 +45,11 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 ```
 
 - Un identifiant de sprite peut désigner une texture ou une animation.
+- Après `assets.json`, les fichiers `assets.*.json` posés à côté sont lus dans l'ordre des noms (le
+  générateur écrit `assets.rig.json` : planches, durées, événements, points d'attache). Une entrée de même
+  identifiant remplace la précédente.
+- Le détail des animations (durées par image, événements, points d'attache de l'arme) est dans
+  [animation.md](animation.md).
 - Les sprites regardent vers la **droite** (+X) et tournent autour de leur centre (ou de `origin`).
 - Images PNG, sons WAV (PCM), polices TTF/OTF.
 - Fichier manquant : avertissement au chargement et damier magenta à l'écran (ou silence) ; le jeu reste jouable.
@@ -82,7 +87,9 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 | `magazineSize`, `pellets`, `spreadDegrees` | munitions, plombs par tir, dispersion |
 | `ammoType`, `reloadTime` | munitions de réserve (`"9mm"`, `"shells"`…) : l'arme se recharge depuis l'inventaire du joueur (R, ou en tirant sur un chargeur vide). Sans `ammoType`, une arme vide ne fait que cliquer ou être lancée |
 | `projectileSpeed` | vitesse des balles ; `0` = tir instantané |
-| `muzzleDistance`, `holdOffset` | position du canon et de l'arme dans les mains (avant, droite) |
+| `muzzleDistance`, `holdOffset` | position du canon et de l'arme dans les mains (avant, droite) ; `holdOffset` sert aux personnages sans animations |
+| `pose` | famille de gestes pour les animations : `unarmed`, `club`, `blade`, `pistol`, `long`, `heavy`… (clés `idle.club`, `attack.club`, `fire.long`) |
+| `heldSprite`, `grip` | image de l'arme **en main**, vue de dessus, et point tenu par la main (pixels depuis le centre de l'image) ; `spriteId` reste l'image posée au sol |
 | `whenEmpty` | `click`, `throw` (lancée automatiquement) ou `drop` |
 | `execution` | achèvement avec cette arme (voir ci-dessous) |
 | `throw` | comportement une fois lancée (`damage` > 0 : létale, comme un couteau) |
@@ -142,7 +149,8 @@ Toutes les poses à cheval regardent vers la tête : les épaules du bourreau so
   "anatomy": "human",
   "wound": { "crawlSpeed": 30, "bleedOutTime": 0 },
   "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead",
-               "mount": "actor.guard.mount", "kick": "actor.legs.kick", "crawl": "actor.guard.crawl", "bloodTint": "#ffffff" },
+               "mount": "actor.guard.mount", "kick": "actor.legs.kick", "crawl": "actor.guard.crawl", "bloodTint": "#ffffff",
+               "animationSet": "actor.guard", "animations": { "attack.club": "actor.guard.attack.club" } },
   "sounds": { "death": "sound.death", "hurt": "sound.groan", "alert": null },
   "ai": {
     "behavior": "guard", "visionRange": 430, "visionAngleDegrees": 120, "closeDetectionRadius": 36,
@@ -298,12 +306,17 @@ quand un morceau est arraché.
 }
 ```
 
-Couleurs `#rrggbb` ou `#rrggbbaa`. `hudStyle` : `default` ou `surveillance`. `hideUnseenActors` cache les
+Couleurs `#rrggbb` ou `#rrggbbaa`. `hudStyle` : `default` ou `surveillance` (cadre de caméra, horloge,
+position en grille, liaison montante, crochets sur les créatures qui chassent). `post.pixelArt: true` dessine
+le monde à un pixel par unité puis l'agrandit d'un facteur entier sans lissage (pixels nets ; la hauteur
+visible est arrondie à ce facteur). `walls` : biseau des murs et des toits (`rim`, `rimWidth` côté lumière,
+`shade`, `shadeWidth` de l'autre côté ; largeurs en unités, 0 = rien). `hideUnseenActors` cache les
 personnages hors du champ de vision du joueur. `heatGlow` (halo autour des corps chauds, selon leur
 `sprites.heat`) et `rollingBar` (bande qui défile, vieille vidéo) complètent l'effet caméra thermique
 (`Mods/NoctPrototype/themes/thermal_cam.json`). Le thème ne change jamais les règles.
 
-Dans `game.json`, `"restartWhileAlive": false` réserve la touche de relance à l'après-mort (et à la pause),
+Dans `game.json`, `camera.sway` (unités) et `camera.swayPeriod` (secondes) font dériver lentement la vue,
+comme une caméra en vol stationnaire. `"restartWhileAlive": false` réserve la touche de relance à l'après-mort (et à la pause),
 pour qu'elle serve aussi à recharger ; `"hud": { "survival": true }` affiche vie, endurance, munitions de
 réserve, trousses et objets de mission ; `rules.medkitHeal` règle le soin d'une trousse ; `sounds`
 accepte `transmission`, `reload`, `heal`.
