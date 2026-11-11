@@ -115,8 +115,9 @@ public sealed class Physics
     /// <summary>Accelerates the actor toward its intent, moves it and resolves collisions.</summary>
     internal void MoveActor(Actor actor, float dt)
     {
-        Vector2 target = actor.CanMove
-            ? Geo.ClampLength(actor.MoveIntent, 1f) * actor.MoveSpeed * actor.SpeedMultiplier
+        bool crawling = actor.State == ActorState.Wounded;
+        Vector2 target = actor.CanMove || crawling
+            ? Geo.ClampLength(actor.MoveIntent, 1f) * actor.MoveSpeed * (crawling ? 1f : actor.SpeedMultiplier)
             : Vector2.Zero;
         Vector2 velocity = actor.Velocity;
         float rate = target == Vector2.Zero ? actor.Definition.Friction : actor.Definition.Acceleration;

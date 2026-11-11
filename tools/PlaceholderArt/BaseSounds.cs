@@ -17,6 +17,7 @@ public static class BaseSounds
         p.Wav("audio/hit_sharp.wav", HitSharp());
         p.Wav("audio/punch.wav", Punch());
         p.Wav("audio/crush.wav", Crush());
+        p.Wav("audio/groan.wav", Groan());
         p.Wav("audio/tear.wav", Tear());
         p.Wav("audio/throw.wav", Whoosh(0.24, 0.07, 600, 2800, 12, flutter: 0.6));
         p.Wav("audio/clank.wav", Clank());
@@ -150,6 +151,25 @@ public static class BaseSounds
             .Mix(Dsp.Noise(n, rng).BandPass(900, 1.2).Env(Dsp.Perc(0.001, 0.03)), 0, 0.9)
             .Mix(Dsp.Noise(n, rng).HighPass(2000).Env(Dsp.Perc(0.0003, 0.008)), 0, 0.6)
             .SoftClip(2.2);
+    }
+
+    /// <summary>
+    /// Wounded moan: a breathy, falling voice (sawtooth through two vowel formants) with a wet,
+    /// shaky catch in the middle.
+    /// </summary>
+    static float[] Groan()
+    {
+        var rng = new Random(16);
+        double n = 1.1;
+        Func<double, double> pitch = t => 118 * Math.Pow(2, -0.35 * t) * (1 + 0.025 * Math.Sin(t * 37) + 0.04 * Math.Sin(t * 5.3));
+        var voice = Dsp.Osc(n, pitch, Wave.Saw).Mix(Dsp.Noise(n, rng).LowPass(2500), 0, 0.35);
+        var vowel = ((float[])voice.Clone()).BandPass(t => 650 - 180 * t / n, 5)
+            .Mix(((float[])voice.Clone()).BandPass(t => 1050 - 250 * t / n, 6), 0, 0.7)
+            .Mix(((float[])voice.Clone()).BandPass(2600, 8), 0, 0.15);
+        return Dsp.Silence(n)
+            .Mix(vowel.Env(t => Math.Min(1, t / 0.12) * Math.Exp(-Math.Max(0, t - 0.5) / 0.25) * (1 - 0.5 * Math.Exp(-Math.Pow((t - 0.42) / 0.05, 2)))), 0, 1)
+            .Mix(Dsp.Noise(0.5, rng).BandPass(1400, 1.2).Env(Dsp.Ahr(0.05, 0.2, 0.25)), 0.55, 0.25)
+            .SoftClip(1.6);
     }
 
     /// <summary>Skull giving way: heavy thud, a burst of cracks, then a wet squelch.</summary>

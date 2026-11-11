@@ -166,6 +166,10 @@ public static class NoctArt
         var mount = new Canvas(mountSize, mountSize);
         Actors.HumanMount(mount, look, mountSize / 2f, mountSize / 2f);
         pack.Png($"sprites/actors/{name}_mount.png", Warm(mount, seed + 4));
+
+        var crawl = new Canvas(downSize * 4, downSize);
+        for (int frame = 0; frame < 4; frame++) Actors.HumanCrawl(crawl, look, downSize * (frame + 0.5f), downSize / 2f, frame);
+        pack.Png($"sprites/actors/{name}_crawl.png", Warm(crawl, seed + 5));
     }
 
     static void Creatures(Pack pack)

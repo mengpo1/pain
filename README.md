@@ -8,7 +8,7 @@ Deux expériences tournent déjà sur le même exécutable :
 
 | Profil | Contenu | Style |
 |---|---|---|
-| `action` | `Content/Base` | « Néon brutal » : action nerveuse, un coup = un mort, score et combos |
+| `action` | `Content/Base` | « Néon brutal » : action nerveuse, un coup = un mort (ou un blessé qui rampe), score et combos |
 | `noct` | `Content/Base` + `Mods/NoctInspired` | « Signal mort » : horreur de surveillance thermique, obscurité, créatures qui chassent au bruit, sans score |
 
 | Action (`action`) | Horreur (`noct`) | Mode debug |
@@ -71,7 +71,7 @@ sont copiés à côté de l'exécutable et restent modifiables sans recompiler.
 | Viser | souris |
 | Attaquer | clic gauche (maintenu pour les armes automatiques) |
 | Ramasser / lancer l'arme | clic droit (échange si une arme est au sol) |
-| Achever un ennemi à terre ou qui se relève / interagir | Espace (aux poings, puis clic gauche pour chaque coup : à cheval, la tête cognée au sol, ou coups de pied ; un chien y laisse ses pattes ou sa tête) |
+| Achever un ennemi à terre, qui se relève ou qui rampe blessé / interagir | Espace (aux poings, puis clic gauche pour chaque coup : à cheval, la tête cognée au sol, ou coups de pied ; un chien y laisse ses pattes ou sa tête) |
 | Verrouiller une cible | clic molette ou E |
 | Regarder plus loin | Maj |
 | Recommencer | R |

@@ -1,4 +1,5 @@
 using TopDown.Content;
+using TopDown.Core.Definitions;
 using TopDown.Core.World;
 
 namespace TopDown.Tests;
@@ -133,6 +134,20 @@ public class ShippedContentTests
 
         world.Combat.ResolveMelee(player, database.Definitions.Weapon(weaponId));
         Assert.Contains(world.Events.OfType<ActorHit>(), hit => hit.Target == dummy);
+    }
+
+    [Fact]
+    public void Guns_and_blades_can_leave_men_crawling_but_not_dogs()
+    {
+        ContentDatabase database = Load();
+        DefinitionSet definitions = database.Definitions;
+
+        Assert.All(new[] { "guard", "thug", "brute" }, id => Assert.NotNull(definitions.Actor(id).Wound));
+        Assert.All(new[] { "guard", "thug", "brute" }, id => Assert.NotNull(definitions.Actor(id).Sprites.Crawl));
+        Assert.Null(definitions.Actor("dog").Wound);
+        Assert.Null(definitions.Actor("player").Wound);
+        Assert.All(new[] { "pistol", "smg", "knife" }, id => Assert.InRange(definitions.Weapon(id).WoundChance, 0.1f, 0.5f));
+        Assert.Equal(0f, definitions.Weapon("bat").WoundChance);
     }
 
     [Fact]

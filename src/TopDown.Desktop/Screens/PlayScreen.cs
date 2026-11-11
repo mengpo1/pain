@@ -150,6 +150,12 @@ public sealed class PlayScreen : Screen
         _camera.Update(frame, WorldRenderer.ToXna(playerPosition), _aimWorld, Input.Held(GameAction.LookFar), Session.Content.Game.Camera, Host.Settings.ScreenShake);
         Audio.ListenerPosition = _camera.Position;
         _effects.Update(frame);
+        foreach (Actor actor in _world.Actors)
+        {
+            if (actor.State == ActorState.Wounded && _gore.Crawling(actor, _effects, Blood(actor), _time))
+                Audio.Play(actor.Definition.Sounds.Hurt, actor.Position, volume: 0.55f);
+        }
+
         _hud.Update(frame, _world);
         Host.Debug.Update(dt);
         Host.Debug.HandleInput(Input);
@@ -252,6 +258,12 @@ public sealed class PlayScreen : Screen
                 if (hit.Damage > 0f)
                     _effects.BloodSpray(WorldRenderer.ToXna(hit.Target.Position), WorldRenderer.ToXna(hit.Direction), 10, Blood(hit.Target));
                 if (hit.Method == HitMethod.Melee || hit.Method == HitMethod.Thrown) Impact(Feel.Hit, hit.Source, hit.Target, hit.Direction);
+                break;
+            case ActorWounded wounded:
+                Audio.Play(wounded.Target.Definition.Sounds.Hurt ?? wounded.Target.Definition.Sounds.Death, wounded.Target.Position);
+                _gore.Wounded(wounded, _effects, Blood(wounded.Target), _time);
+                Impact(Feel.Kill, wounded.Source, wounded.Target, wounded.Direction);
+                if (wounded.Target == _lockTarget) _lockTarget = null;
                 break;
             case ActorKnockedDown down:
                 _effects.Smoke(WorldRenderer.ToXna(down.Target.Position), colors.Fx * 0.25f, 2);

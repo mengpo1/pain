@@ -105,6 +105,11 @@ public static class BaseArt
         Actors.HumanMount(mount, look, mountSize / 2f, mountSize / 2f);
         mount.Outline(Ink);
         pack.Png($"sprites/actors/{name}_mount.png", mount);
+
+        var crawl = new Canvas(downSize * 4, downSize);
+        for (int frame = 0; frame < 4; frame++) Actors.HumanCrawl(crawl, look, downSize * (frame + 0.5f), downSize / 2f, frame);
+        crawl.Outline(Ink);
+        pack.Png($"sprites/actors/{name}_crawl.png", crawl);
     }
 
     static void Dogs(Pack pack)

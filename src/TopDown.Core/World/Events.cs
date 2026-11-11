@@ -41,6 +41,9 @@ public sealed record ActorHit(Actor Target, Actor? Source, Vector2 Direction, Hi
 
 public sealed record ActorKnockedDown(Actor Target, Actor? Source, HitMethod Method) : GameEvent;
 
+/// <summary>A hit that would have killed left the target wounded, crawling on the floor.</summary>
+public sealed record ActorWounded(Actor Target, Actor? Source, Vector2 Direction, HitMethod Method) : GameEvent;
+
 public sealed record ActorKilled(Actor Victim, Actor? Killer, Vector2 Direction, HitMethod Method, string DamageType) : GameEvent;
 
 public sealed record WeaponPickedUp(Actor Actor, WeaponDefinition Weapon) : GameEvent;

@@ -32,9 +32,11 @@ internal sealed class Autopilot
             return;
         }
 
+        // Standing enemies first, then the ones left crawling on the floor (to finish them off).
         Actor? enemy = world.Actors
-            .Where(a => a.IsAlive && !a.IsDown && player.IsHostileTo(a))
-            .OrderBy(a => NVector2.Distance(a.Position, player.Position))
+            .Where(a => a.IsAlive && player.IsHostileTo(a) && (!a.IsDown || a.IsWounded))
+            .OrderBy(a => a.IsDown)
+            .ThenBy(a => NVector2.Distance(a.Position, player.Position))
             .FirstOrDefault();
 
         NVector2 goal;

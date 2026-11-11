@@ -66,6 +66,12 @@ public sealed class EnemyBrain
     private Vector2 _pointOfInterest;
     private Vector2? _wanderGoal;
     private bool _wasIncapacitated;
+
+    // Wounded: crawling rhythm and way around obstacles.
+    private float _crawlTime;
+    private float _stuckTime;
+    private float _detourTime;
+    private int _detourSide = 1;
     private float _blockedShotTime;
 
     internal EnemyBrain(Actor self, GameWorld world, AiBehavior behavior, List<Vector2> patrol)
@@ -140,6 +146,12 @@ public sealed class EnemyBrain
             return;
         }
 
+        if (_self.State == ActorState.Wounded)
+        {
+            Crawl(dt);
+            return;
+        }
+
         if (!_self.CanAct)
         {
             _self.MoveIntent = Vector2.Zero;
@@ -177,6 +189,56 @@ public sealed class EnemyBrain
             case AiState.Return: UpdateReturn(dt); break;
         }
     }
+
+    /// <summary>
+    /// Wounded: drags itself head first away from the player, in painful pulls with pauses in
+    /// between, and turns along walls when stuck. It never attacks again.
+    /// </summary>
+    private void Crawl(float dt)
+    {
+        if (_self.Definition.Wound is not { } wound)
+        {
+            _self.MoveIntent = Vector2.Zero;
+            return;
+        }
+
+        _crawlTime += dt;
+        Vector2 away = _self.Position - _world.Player.Position;
+        float wanted = away.LengthSquared() > 1f && away.Length() < CrawlFleeDistance ? Geo.ToAngle(away) : _self.Facing;
+
+        float pull = MathF.Max(0f, MathF.Sin(_crawlTime * MathF.Tau / CrawlCycle));
+        bool pulling = pull > 0.3f;
+        if (_detourTime > 0f)
+        {
+            _detourTime -= dt;
+            wanted = Geo.ToAngle(away) + _detourSide * MathF.PI / 2f;
+        }
+        else if (pulling && _self.Velocity.Length() < wound.CrawlSpeed * 0.15f)
+        {
+            _stuckTime += dt;
+            if (_stuckTime > CrawlStuckTime)
+            {
+                _stuckTime = 0f;
+                _detourTime = CrawlDetourTime;
+                _detourSide = -_detourSide;
+            }
+        }
+        else if (pulling)
+        {
+            _stuckTime = 0f;
+        }
+
+        _self.Facing = Geo.RotateTowards(_self.Facing, wanted, CrawlTurnSpeed * dt);
+        _self.MoveIntent = Geo.FromAngle(_self.Facing);
+        _self.MoveSpeed = wound.CrawlSpeed * (0.25f + 0.75f * pull);
+    }
+
+    /// <summary>Beyond this distance from the player, a wounded character keeps crawling straight on.</summary>
+    private const float CrawlFleeDistance = 420f;
+    private const float CrawlCycle = 0.9f;
+    private const float CrawlTurnSpeed = 2.5f;
+    private const float CrawlStuckTime = 0.5f;
+    private const float CrawlDetourTime = 1.2f;
 
     /// <summary>Distance, field of view and line of sight (walls and closed doors block vision).</summary>
     public bool CanSee(Actor target)

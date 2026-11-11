@@ -200,6 +200,85 @@ public static class Actors
         c.Fill(Shape.Circle(hx - r * 0.42f, hy, 0.55f), mark);
     }
 
+    // ------------------------------------------------------------------ wounded, crawling face down
+
+    /// <summary>
+    /// Wounded human crawling face down, head towards +X, at the same place as <see cref="HumanDown"/>.
+    /// Four frames: one arm reaches ahead while the other pulls, then the other way round; a leg pushes.
+    /// </summary>
+    public static void HumanCrawl(Canvas c, HumanLook l, float cx, float cy, int frame)
+    {
+        var f = new Frame(cx, cy, l.Scale, l.Bulk);
+        float limb = l.BareArms ? 1.2f : 1f;
+        Rgba pantsShade = l.Pants.Shade(0.72f);
+        Rgba arm = l.BareArms ? l.Skin : l.Body, armShade = l.BareArms ? l.SkinShade : l.BodyShade;
+
+        // legs dragged behind, one knee bent outwards to push
+        foreach (int s in Sides)
+        {
+            bool pushing = (frame == 0 && s < 0) || (frame == 2 && s > 0);
+            (float, float) hip = (-4f, 3.2f * s), knee = pushing ? (-9.5f, 8.6f * s) : (-10.8f, 4.2f * s), foot = pushing ? (-15.8f, 7.4f * s) : (-17f, 4.6f * s);
+            Limb(c, f, hip, knee, 2.9f, 2.6f, pantsShade, l.Pants);
+            Limb(c, f, knee, foot, 2.6f, 2.3f, pantsShade, l.Pants);
+            c.Fill(Shape.Ellipse(f.X(foot.Item1 - 1.4f), f.Y(foot.Item2), f.R(2.1f), f.R(1.8f)), l.Shoes);
+        }
+
+        // pelvis
+        c.Fill(Shape.RoundRect(f.X(-4.3f), cy, f.R(7.5f), f.R(12.4f) * l.Bulk, f.R(3.5f)), pantsShade);
+        c.Fill(Shape.RoundRect(f.X(-4.5f), cy - 0.4f, f.R(6.3f), f.R(11.2f) * l.Bulk, f.R(3f)), l.Pants);
+
+        // arms: reach (far ahead of the head), pull (elbow out, hand beside the head) or in between
+        var hands = new List<(float X, float Y)>();
+        foreach (int s in Sides)
+        {
+            int pose = frame switch
+            {
+                0 => s < 0 ? 2 : 0,
+                2 => s < 0 ? 0 : 2,
+                _ => 1,
+            };
+            (float, float) shoulder = (7f, 7.6f * s);
+            (float X, float Y) elbow = pose switch { 2 => (12.5f, 9.6f * s), 1 => (9.5f, 12.4f * s), _ => (5.2f, 13.2f * s) };
+            (float X, float Y) hand = pose switch { 2 => (18.4f, 6.2f * s), 1 => (15.2f, 10.2f * s), _ => (11.4f, 11.6f * s) };
+            Limb(c, f, shoulder, elbow, 2.5f * limb, 2.3f * limb, armShade, arm);
+            Limb(c, f, elbow, hand, 2.3f * limb, 2.0f * limb, armShade, arm);
+            hands.Add(hand);
+        }
+
+        // back of the torso, a crease along the spine
+        c.Fill(Shape.RoundRect(f.X(2f), cy, f.R(14.5f), f.R(18.6f) * l.Bulk, f.R(6.5f)), l.BareArms ? l.SkinShade : l.BodyShade);
+        if (l.BareArms)
+        {
+            c.Fill(Shape.RoundRect(f.X(1.8f), cy - 0.45f, f.R(13.1f), f.R(17.2f) * l.Bulk, f.R(5.8f)), l.Skin);
+            c.Fill(Shape.RoundRect(f.X(1.2f), cy, f.R(13f), f.R(13.4f) * l.Bulk, f.R(5f)), l.BodyShade);
+            c.Fill(Shape.RoundRect(f.X(1.0f), cy - 0.45f, f.R(11.8f), f.R(12.2f) * l.Bulk, f.R(4.5f)), l.Body);
+        }
+        else
+        {
+            c.Fill(Shape.RoundRect(f.X(1.8f), cy - 0.45f, f.R(13.1f), f.R(17.2f) * l.Bulk, f.R(5.8f)), l.Body);
+        }
+        c.Fill(Shape.Capsule(f.X(-3.5f), cy, f.X(7f), cy, f.R(0.55f)), l.BodyShade.Fade(0.8f));
+        c.Fill(Shape.Ellipse(f.X(3f), f.Y(-4.4f), f.R(3.6f), f.R(2.6f) * l.Bulk), l.BodyLight.Fade(0.35f));
+
+        // back of the head: hair (or a bald scalp) and ears
+        float hx = f.X(13.2f), r = HeadRadius(l);
+        foreach (int s in Sides) c.Fill(Shape.Circle(hx - 0.3f, cy + s * r * 0.95f, r * 0.24f), l.SkinShade);
+        c.Fill(Shape.Circle(hx, cy, r), l.SkinShade);
+        c.Fill(Shape.Circle(hx - 0.25f, cy - 0.35f, r - 0.6f), l.Skin);
+        if (l.Hair is { } hair)
+        {
+            c.Fill(Shape.Circle(hx - 0.2f, cy, r * 0.97f), hair);
+            c.Fill(Shape.Ellipse(hx - r * 0.3f, cy - r * 0.35f, r * 0.4f, r * 0.24f, -0.4f), hair.Tone(1.35f).Fade(0.45f));
+        }
+        else
+        {
+            c.Fill(Shape.Ellipse(hx - r * 0.25f, cy - r * 0.3f, r * 0.38f, r * 0.26f, -0.4f), Rgba.White.Fade(0.3f));
+        }
+
+        float hr = f.R(2.05f) * (l.BareArms ? 1.15f : 1f);
+        foreach (var (x, y) in hands) Hand(c, l, f.X(x), f.Y(y), hr);
+    }
+
     // ------------------------------------------------------------------ kneeling astride (executions)
 
     /// <summary>

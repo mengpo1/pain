@@ -13,6 +13,7 @@
     "faction": "enemy",
     "health": 200,
     "radius": 11,
+    "wound": { "crawlSpeed": 26 },
     "speed": 45,
     "runSpeed": 170,
     "acceleration": 1800,
@@ -20,7 +21,7 @@
     "hitStunDuration": 0.3,
     "damageMultipliers": { "unarmed": 0.5 },
     "sprites": { "body": "actor.thug", "legs": "actor.legs", "down": "actor.thug.down", "dead": "actor.thug.dead",
-                 "mount": "actor.thug.mount", "kick": "actor.legs.kick" },
+                 "mount": "actor.thug.mount", "kick": "actor.legs.kick", "crawl": "actor.thug.crawl" },
     "sounds": { "death": "sound.creature_growl", "alert": "sound.creature_growl" },
     "ai": {
       "behavior": "wander",

@@ -110,6 +110,7 @@ public sealed class GameWorld
 
         Combat.UpdateMeleeAttacks();
         Combat.UpdateExecutions(dt);
+        Combat.UpdateWounds();
 
         foreach (Actor actor in _actors) Physics.MoveActor(actor, dt);
         Physics.SeparateActors();

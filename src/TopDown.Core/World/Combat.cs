@@ -293,7 +293,7 @@ public sealed class CombatSystem
         if (damage > 0f) target.Health -= damage;
         if (target.Health <= 0f)
         {
-            Kill(target, hit);
+            if (!TryWound(target, hit)) Kill(target, hit);
             return;
         }
 
@@ -303,7 +303,7 @@ public sealed class CombatSystem
         bool immune = target.Definition.KnockdownImmune;
         // A dazed character goes down from any further hit (configurable).
         bool knockdown = hit.Knockdown || (target.State == ActorState.Stunned && Rules.Combat.HitOnStunnedKnocksDown);
-        if (knockdown && !immune && target.State != ActorState.BeingExecuted)
+        if (knockdown && !immune && target.State != ActorState.BeingExecuted && !target.IsWounded)
         {
             target.KnockDown(MathF.Max(hit.KnockdownDuration, MinimumKnockdown));
             FallInDirection(target, hit.Direction);
@@ -322,6 +322,37 @@ public sealed class CombatSystem
 
     /// <summary>Shortest knock-down caused by hitting a dazed character.</summary>
     private const float MinimumKnockdown = 1.2f;
+
+    /// <summary>
+    /// A blow, bullet or thrown weapon that would kill may leave the target wounded instead (chance
+    /// given by the weapon, only for characters that can be wounded). It falls, drops its weapon and
+    /// crawls until finished off.
+    /// </summary>
+    private bool TryWound(Actor target, in Hit hit)
+    {
+        if (target.Definition.Wound is null || target.IsWounded || target.State == ActorState.BeingExecuted) return false;
+        if (hit.Method is not (HitMethod.Melee or HitMethod.Firearm or HitMethod.Thrown)) return false;
+        if (hit.Weapon is not { WoundChance: > 0f } weapon || _world.Random.NextDouble() >= weapon.WoundChance) return false;
+
+        bool wasDown = target.IsDown;
+        target.Wound(hit);
+        if (!wasDown) FallInDirection(target, hit.Direction);
+        target.Velocity = hit.Direction * hit.Knockback * 0.6f;
+        DropWeapon(target, hit.Direction * 60f);
+        _world.AddEvent(new ActorWounded(target, hit.Source, hit.Direction, hit.Method));
+        return true;
+    }
+
+    /// <summary>Wounded characters that can bleed out die after their time, credited to whoever wounded them.</summary>
+    internal void UpdateWounds()
+    {
+        foreach (Actor actor in _world.Actors)
+        {
+            if (actor.State != ActorState.Wounded || actor.Definition.Wound is not { BleedOutTime: > 0f } wound) continue;
+            if (actor.StateElapsed < wound.BleedOutTime || actor.WoundingHit is not { } hit) continue;
+            Kill(actor, hit);
+        }
+    }
 
     private void Kill(Actor victim, in Hit hit)
     {
@@ -597,7 +628,7 @@ public sealed class CombatSystem
     {
         if (target.Executioner is not null || !target.IsAlive) return false;
         if (target.Definition.DamageMultipliers.GetValueOrDefault("execution", 1f) <= 0f) return false;
-        return target.State is ActorState.KnockedDown or ActorState.GettingUp
+        return target.State is ActorState.KnockedDown or ActorState.GettingUp or ActorState.Wounded
             || (target.State == ActorState.Stunned && Rules.Execution.AllowOnStunned);
     }
 

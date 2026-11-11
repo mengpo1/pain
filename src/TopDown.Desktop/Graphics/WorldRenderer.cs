@@ -87,12 +87,12 @@ public sealed class WorldRenderer
 
         batch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearClamp, null, RasterizerState.CullNone, null, camera.Transform);
         effects.DrawAdditive(batch, _assets);
-        DrawHitFlashes(batch, world, alpha, isVisible, flash);
+        DrawHitFlashes(batch, world, gore, alpha, isVisible, flash);
         batch.End();
     }
 
     /// <summary>Characters just hit flash white for a few frames (additive pass).</summary>
-    private void DrawHitFlashes(SpriteBatch batch, GameWorld world, float alpha, Func<Actor, bool> isVisible, Func<Actor, float> flash)
+    private void DrawHitFlashes(SpriteBatch batch, GameWorld world, GoreLayer gore, float alpha, Func<Actor, bool> isVisible, Func<Actor, float> flash)
     {
         foreach (Actor actor in world.Actors)
         {
@@ -100,7 +100,7 @@ public sealed class WorldRenderer
             if (amount <= 0f || !isVisible(actor)) continue;
             Vector2 position = ToXna(NVector2.Lerp(actor.PreviousPosition, actor.Position, alpha));
             bool fallen = !actor.IsAlive || actor.IsDown;
-            SpriteFrame frame = _assets.Sprite(fallen ? FallenSprite(actor) : actor.Definition.Sprites.Body);
+            SpriteFrame frame = fallen ? FallenFrame(actor, gore) : _assets.Sprite(actor.Definition.Sprites.Body);
             batch.Draw(frame.Texture, position, frame.Source, Color.White * amount, actor.Facing, frame.Origin, fallen ? FallScale(actor) : 1f, SpriteEffects.None, 0f);
         }
     }
@@ -252,9 +252,10 @@ public sealed class WorldRenderer
         ActorSprites sprites = actor.Definition.Sprites;
         BodyDamage? damage = gore.Damage(actor);
         bool inPieces = sprites.Torso is not null && sprites.Parts.Count > 0 && (damage?.Torn.Count > 0 || pulled >= 0);
+        if (actor.State == ActorState.Wounded) rotation += MathF.Sin(actor.DistanceWalked * 0.35f) * 0.06f;
         if (!inPieces)
         {
-            SpriteFrame frame = _assets.Sprite(FallenSprite(actor));
+            SpriteFrame frame = FallenFrame(actor, gore);
             batch.Draw(frame.Texture, position, frame.Source, _colors.Actor, rotation, frame.Origin, scale, SpriteEffects.None, 0f);
         }
         else
@@ -312,6 +313,18 @@ public sealed class WorldRenderer
     }
 
     private Color Blood(Actor actor) => ColorParser.Parse(actor.Definition.Sprites.BloodTint, Color.White).MultiplyBy(_colors.Blood);
+
+    /// <summary>On the floor: face down and crawling if wounded, otherwise lying on its back.</summary>
+    private SpriteFrame FallenFrame(Actor actor, GoreLayer gore)
+    {
+        bool faceDown = actor.IsWounded || gore.Damage(actor)?.FaceDown == true;
+        if (faceDown && actor.Definition.Sprites.Crawl is { } crawl)
+            return _assets.Sprite(crawl, actor.DistanceWalked / CrawlDistancePerSecond);
+        return _assets.Sprite(FallenSprite(actor));
+    }
+
+    /// <summary>World units crawled per second of crawl animation time.</summary>
+    private const float CrawlDistancePerSecond = 20f;
 
     private static string FallenSprite(Actor actor) =>
         (actor.IsAlive ? actor.Definition.Sprites.Down : actor.Definition.Sprites.Dead)

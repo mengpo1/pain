@@ -65,6 +65,12 @@ public sealed class WeaponDefinition
     /// <summary>Leaves a standing target dazed for this long (0 = no stun).</summary>
     public float StunDuration { get; set; }
 
+    /// <summary>
+    /// Chance (0 to 1) that a blow or a bullet that would kill leaves the target wounded instead:
+    /// on the floor, crawling, waiting to be finished off. Only for characters that can be wounded.
+    /// </summary>
+    public float WoundChance { get; set; }
+
     /// <summary>Speed (units/s) given to the target when hit.</summary>
     public float Knockback { get; set; } = 140f;
 

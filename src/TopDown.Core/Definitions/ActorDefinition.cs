@@ -28,6 +28,9 @@ public sealed class ActorDefinition
     /// <summary>Body type ("human", "quadruped"…): weapons can execute each one differently.</summary>
     public string Anatomy { get; set; } = "human";
 
+    /// <summary>How this character crawls when wounded (see <see cref="WeaponDefinition.WoundChance"/>). Null: never wounded.</summary>
+    public WoundDefinition? Wound { get; set; }
+
     /// <summary>Walking speed (units/s).</summary>
     public float Speed { get; set; } = 120f;
 
@@ -63,6 +66,16 @@ public sealed class ActorDefinition
     public AiDefinition Ai { get; set; } = new();
 }
 
+/// <summary>A wounded character crawls away on the floor until it is finished off (or bleeds out).</summary>
+public sealed class WoundDefinition
+{
+    /// <summary>Crawling speed (units/s).</summary>
+    public float CrawlSpeed { get; set; } = 24f;
+
+    /// <summary>Time before dying of its wounds; 0 = never (it must be finished off).</summary>
+    public float BleedOutTime { get; set; }
+}
+
 public sealed class ActorSprites
 {
     public string Body { get; set; } = "";
@@ -75,6 +88,9 @@ public sealed class ActorSprites
 
     /// <summary>Legs while kicking (executions). Falls back to <see cref="Legs"/>.</summary>
     public string? Kick { get; set; }
+
+    /// <summary>Wounded, face down, crawling (animated with the distance crawled). Falls back to <see cref="Down"/>.</summary>
+    public string? Crawl { get; set; }
 
     /// <summary>
     /// Body on the floor without its <see cref="Parts"/>, for executions that tear them off. Each part

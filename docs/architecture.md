@@ -31,9 +31,9 @@ Le joueur et les ennemis sont la même classe `Actor` : seule la source des déc
 `Active` → `Attacking` (mêlée en cours, déplacement possible) → `Active` ; `Stunned` (étourdi debout,
 brièvement) ; `KnockedDown` → `GettingUp` → `Active` ; `Executing` (achève une cible) ;
 `BeingExecuted` (cible clouée au sol : c'est la **réservation**, personne d'autre ne peut l'achever et
-elle ne se relève pas) ; `Dead` (définitif). Les changements passent par des méthodes de `Actor` qui
+elle ne se relève pas) ; `Wounded` (blessé : rampe, ne se relève jamais, s'achève) ; `Dead` (définitif). Les changements passent par des méthodes de `Actor` qui
 empêchent les combinaisons impossibles : un achèvement interrompu (exécuteur touché, renversé ou tué)
-remet la cible au sol et libère la réservation.
+remet la cible au sol et libère la réservation (un blessé se remet à ramper).
 
 ### Combat et achèvement
 

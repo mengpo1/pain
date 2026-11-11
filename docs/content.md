@@ -59,7 +59,7 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
   "damage": 100, "damageType": "bullet", "range": 900, "fireRate": 4, "automatic": false,
   "magazineSize": 12, "pellets": 1, "spreadDegrees": 3, "projectileSpeed": 2300,
   "recoil": 3, "noiseRadius": 650, "muzzleDistance": 20, "holdOffset": [12, 3],
-  "whenEmpty": "click",
+  "whenEmpty": "click", "woundChance": 0.3,
   "execution": { "mode": "shot", "strikes": 2, "windUp": 0.14, "strikeInterval": 0.16, "recovery": 0.18 },
   "throw": { "speed": 700, "damage": 0, "knockdown": true, "knockdownDuration": 2 },
   "sounds": { "attack": "sound.pistol", "hit": null, "empty": "sound.empty", "pickup": "sound.pickup" }
@@ -76,6 +76,7 @@ Le jeu ne référence **jamais** un chemin de fichier, seulement des identifiant
 | `fireRate`, `automatic` | attaques par seconde, tir maintenu |
 | `knockdown`, `knockdownDuration`, `knockback` | renversement et recul de la cible |
 | `stunDuration` | étourdit une cible debout (0 = non) |
+| `woundChance` | probabilité (0 à 1) qu'un coup, une balle ou un lancer mortel laisse la cible **blessée** au lieu de morte, si elle peut l'être (`wound`) |
 | `noiseRadius` | rayon dans lequel les ennemis entendent (0 = silencieux) |
 | `magazineSize`, `pellets`, `spreadDegrees` | munitions, plombs par tir, dispersion |
 | `projectileSpeed` | vitesse des balles ; `0` = tir instantané |
@@ -134,9 +135,10 @@ orientation.
   "damageMultipliers": { "blunt": 0, "sharp": 0.5 },
   "countsForObjectives": true,
   "anatomy": "human",
+  "wound": { "crawlSpeed": 30, "bleedOutTime": 0 },
   "sprites": { "body": "actor.guard", "legs": "actor.legs", "down": "actor.guard.down", "dead": "actor.guard.dead",
-               "mount": "actor.guard.mount", "kick": "actor.legs.kick", "bloodTint": "#ffffff" },
-  "sounds": { "death": "sound.death", "hurt": null, "alert": null },
+               "mount": "actor.guard.mount", "kick": "actor.legs.kick", "crawl": "actor.guard.crawl", "bloodTint": "#ffffff" },
+  "sounds": { "death": "sound.death", "hurt": "sound.groan", "alert": null },
   "ai": {
     "behavior": "guard", "visionRange": 430, "visionAngleDegrees": 120, "closeDetectionRadius": 36,
     "hearingMultiplier": 1, "reactionTime": 0.32, "turnSpeedDegrees": 420, "aimErrorDegrees": 3,
@@ -156,8 +158,15 @@ orientation.
   `"execution": 0` empêche d'achever.
 - `anatomy` (`human` par défaut, `quadruped` pour le chien) : une arme peut achever chaque anatomie
   différemment (`execution.against`).
+- `wound` (absent = jamais blessé) : un coup mortel d'une arme qui a un `woundChance` peut laisser le
+  personnage **blessé** : à terre, face contre le sol, il lâche son arme et rampe en s'éloignant du
+  joueur (`crawlSpeed`), en laissant une traînée de sang et en gémissant (`sounds.hurt`). Il ne se
+  relève jamais, n'attaque plus, compte encore pour « éliminer tout le monde », et s'achève avec
+  Espace. Tout coup qui fait des dégâts le tue ; un coup de poing ne le relève pas.
+  `bleedOutTime` > 0 : il meurt seul après ce temps (le joueur qui l'a blessé est crédité).
 - Images : `down` (au sol, tête vers la droite), `dead`, `mount` (à genoux à cheval sur un corps, pour
-  les achèvements ; sinon `body`), `kick` (jambes en train de frapper ; sinon `legs`).
+  les achèvements ; sinon `body`), `kick` (jambes en train de frapper ; sinon `legs`), `crawl`
+  (blessé face contre terre, animation qui avance avec la distance rampée ; sinon `down`).
 - Corps démontable (`torso` + `parts`) : le corps au sol sans ses morceaux, puis chaque morceau, chacun
   sur une image **de même taille**, à sa place. Le moteur calcule seul le centre et l'articulation de
   chaque morceau à partir des pixels. `over: true` dessine le morceau au-dessus du torse (une tête).

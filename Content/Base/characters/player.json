@@ -14,6 +14,7 @@
     "down": "actor.player.down",
     "dead": "actor.player.dead",
     "mount": "actor.player.mount",
+    "crawl": "actor.player.crawl",
     "kick": "actor.legs.kick",
     "bloodTint": "#ffffff"
   },

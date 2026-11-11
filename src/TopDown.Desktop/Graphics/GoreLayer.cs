@@ -13,6 +13,15 @@ public sealed class BodyDamage
 
     /// <summary>0 = intact head, 1 = head burst.</summary>
     public float HeadWounds { get; set; }
+
+    /// <summary>Wounded: lies face down (crawling, then dead in that position).</summary>
+    public bool FaceDown { get; set; }
+
+    /// <summary>Distance crawled when the last blood smear was left.</summary>
+    public float TrailDistance { get; set; }
+
+    /// <summary>Time of the next moan of a crawler.</summary>
+    public float NextGroan { get; set; }
 }
 
 /// <summary>Kind of sound an execution blow makes, beyond the weapon's own hit sound.</summary>
@@ -29,6 +38,40 @@ public sealed class GoreLayer
     public BodyDamage? Damage(Actor actor) => _bodies.GetValueOrDefault(actor);
 
     public void Clear() => _bodies.Clear();
+
+    /// <summary>A lethal hit left the target wounded: it now lies face down and bleeds.</summary>
+    public void Wounded(ActorWounded wounded, EffectsLayer effects, Color blood, float time)
+    {
+        BodyDamage damage = GetOrAdd(wounded.Target);
+        damage.FaceDown = true;
+        damage.TrailDistance = wounded.Target.DistanceWalked;
+        damage.NextGroan = time + 1.6f;
+        Vector2 position = ToXna(wounded.Target.Position);
+        effects.BloodSpray(position, SafeNormalize(ToXna(wounded.Direction)), 14, blood);
+        effects.BloodPool(position, blood, 0.7f);
+    }
+
+    /// <summary>
+    /// A crawler leaves a smear of blood every few units and moans now and then. Returns true when
+    /// it is time to play its moan.
+    /// </summary>
+    public bool Crawling(Actor actor, EffectsLayer effects, Color blood, float time)
+    {
+        BodyDamage damage = GetOrAdd(actor);
+        damage.FaceDown = true;
+        if (actor.DistanceWalked - damage.TrailDistance >= TrailSpacing)
+        {
+            damage.TrailDistance = actor.DistanceWalked;
+            NVector2 back = -new NVector2(MathF.Cos(actor.Facing), MathF.Sin(actor.Facing)) * (actor.Radius * 0.4f);
+            effects.BloodPool(ToXna(actor.Position + back), blood, 0.3f);
+        }
+
+        if (time < damage.NextGroan) return false;
+        damage.NextGroan = time + 2.6f + (actor.Id % 5) * 0.35f;
+        return true;
+    }
+
+    private const float TrailSpacing = 6f;
 
     /// <summary>Index of the next part an execution of this kind tears off, or -1.</summary>
     public int NextPart(Actor victim, ExecutionAnimation animation)

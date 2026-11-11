@@ -20,6 +20,8 @@ public enum ActorState
     Executing,
     /// <summary>Pinned by an executioner: reserved, cannot get up.</summary>
     BeingExecuted,
+    /// <summary>Badly hurt on the floor: crawls, never gets up, waits to be finished off.</summary>
+    Wounded,
     /// <summary>Final: never acts or gets up again.</summary>
     Dead,
 }
@@ -124,7 +126,14 @@ public sealed class Actor
 
     public bool IsAlive => State != ActorState.Dead;
     /// <summary>On the floor (alive): knocked down, getting up or being executed.</summary>
-    public bool IsDown => State is ActorState.KnockedDown or ActorState.GettingUp or ActorState.BeingExecuted;
+    public bool IsDown => State is ActorState.KnockedDown or ActorState.GettingUp or ActorState.BeingExecuted or ActorState.Wounded;
+
+    /// <summary>Wounded, or pinned while wounded: will never get up again.</summary>
+    public bool IsWounded => State == ActorState.Wounded || (State == ActorState.BeingExecuted && _woundedBeforeExecution);
+
+    /// <summary>The hit that wounded this character (credited if it bleeds out).</summary>
+    internal Hit? WoundingHit { get; private set; }
+    private bool _woundedBeforeExecution;
     public bool CanAct => State is ActorState.Active or ActorState.Attacking;
     public bool CanMove => CanAct;
 
@@ -145,7 +154,7 @@ public sealed class Actor
 
     internal void KnockDown(float duration)
     {
-        if (!IsAlive) return;
+        if (!IsAlive || IsWounded) return;
         if (State == ActorState.BeingExecuted)
         {
             // Already pinned: the executioner decides when it ends.
@@ -171,6 +180,18 @@ public sealed class Actor
         CancelActions();
         SetState(ActorState.Stunned);
         StateTimer = duration;
+    }
+
+    /// <summary>On the floor for good, crawling. Any further damage kills.</summary>
+    internal void Wound(in Hit hit)
+    {
+        if (!IsAlive || IsWounded) return;
+        CancelActions();
+        Executioner = null;
+        WoundingHit = hit;
+        Health = 1f;
+        SetState(ActorState.Wounded);
+        StateTimer = 0f;
     }
 
     internal void Kill()
@@ -235,9 +256,10 @@ public sealed class Actor
     private bool BecomeExecuted(Actor executioner)
     {
         if (!IsAlive || Executioner is not null) return false;
-        if (State is not (ActorState.KnockedDown or ActorState.GettingUp or ActorState.Stunned)) return false;
+        if (State is not (ActorState.KnockedDown or ActorState.GettingUp or ActorState.Stunned or ActorState.Wounded)) return false;
         // A getting-up or dazed target ends on the floor for a while if the execution is interrupted.
         _downTimeBeforeExecution = State == ActorState.KnockedDown ? StateTimer : 0f;
+        _woundedBeforeExecution = State == ActorState.Wounded;
         Executioner = executioner;
         CancelActions();
         SetState(ActorState.BeingExecuted);
@@ -249,6 +271,12 @@ public sealed class Actor
     {
         if (State != ActorState.BeingExecuted) return;
         Executioner = null;
+        if (_woundedBeforeExecution)
+        {
+            SetState(ActorState.Wounded);
+            return;
+        }
+
         SetState(ActorState.KnockedDown);
         StateTimer = MathF.Max(_downTimeBeforeExecution, MinimumDownTimeAfterRelease);
     }
