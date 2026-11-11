@@ -104,6 +104,10 @@
       "name": "Salle d'essai",
       "intro": "En bas : un ennemi seul. En haut : un chien. À droite : deux ennemis. Espace pour achever, R pour tout remettre à zéro."
     },
+    "demo": {
+      "name": "Scène de démonstration",
+      "intro": "L'immeuble de Miami : salon, cuisine, billard, hall, bureaux et la rue. Huit ennemis."
+    },
     "offices": {
       "name": "Bureaux",
       "intro": "La mallette est quelque part dans les bureaux.",

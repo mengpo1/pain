@@ -23,6 +23,7 @@ public sealed class LaunchOptions
     public string? Screenshot { get; set; }
     public int? Frames { get; set; }
     public bool Autopilot { get; set; }
+    public string? Modifier { get; set; }
     public bool Mute { get; set; }
     public int? Width { get; set; }
     public int? Height { get; set; }
@@ -101,7 +102,7 @@ public sealed class GameHost : Game
             index = 0;
         }
 
-        content.Definitions.Modifiers.TryGetValue(Settings.Modifier ?? "", out ModifierDefinition? modifier);
+        content.Definitions.Modifiers.TryGetValue(_options.Modifier ?? Settings.Modifier ?? "", out ModifierDefinition? modifier);
         return new PlayScreen(this, playlist, index, modifier ?? ModifierDefinition.None, _options.Autopilot);
     }
 

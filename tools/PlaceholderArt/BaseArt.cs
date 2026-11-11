@@ -105,10 +105,20 @@ public static class BaseArt
         pack.Png("sprites/tiles/door_wood.png", Tiles.DoorWood());
         pack.Png("sprites/tiles/door_metal.png", Tiles.DoorMetal());
 
-        pack.Png("sprites/props/crate.png", Props.Crate());
-        pack.Png("sprites/props/table.png", Props.Table());
-        pack.Png("sprites/props/plant.png", Props.Plant());
-        pack.Png("sprites/props/car.png", Props.Car());
+        pack.Png("sprites/tiles/floor_checker.png", Tiles.FloorChecker());
+        pack.Png("sprites/tiles/floor_kitchen.png", Tiles.FloorKitchen());
+        pack.Png("sprites/tiles/floor_bath.png", Tiles.FloorBath());
+        pack.Png("sprites/tiles/floor_marble.png", Tiles.FloorMarble());
+        pack.Png("sprites/tiles/floor_parquet.png", Tiles.FloorParquet());
+        pack.Png("sprites/tiles/floor_carpet_red.png", Tiles.FloorCarpetRed());
+        pack.Png("sprites/tiles/floor_sidewalk.png", Tiles.FloorSidewalk());
+        pack.Png("sprites/tiles/floor_asphalt.png", Tiles.FloorAsphalt());
+        pack.Png("sprites/tiles/wall_white.png", Tiles.WallWhite());
+
+        // Furniture drawn by the rig renderer (same light, pixels and outline as the characters).
+        foreach (var (name, sprite) in Furniture.All()) pack.Png($"sprites/props/{name}.png", sprite);
+        pack.Png("sprites/props/rug.png", Rugs.Persian());
+        pack.Png("sprites/props/rug_round.png", Rugs.Round());
 
         pack.Png("sprites/ui/crosshair.png", Crosshair());
         pack.Png("sprites/ui/arrow.png", Arrow());

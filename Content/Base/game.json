@@ -5,7 +5,7 @@
   "fallbackLanguage": "en",
   "campaign": ["first_night", "warehouse", "offices"],
   // Listed in the level menu after the campaign.
-  "extraLevels": ["arena"],
+  "extraLevels": ["arena", "demo"],
   "theme": "neon",
   "menuMusic": "music.menu",
   "rules": {

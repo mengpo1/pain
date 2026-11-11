@@ -131,8 +131,21 @@ public sealed class ThemeDefinition
     public Dictionary<string, string> Tints { get; set; } = new();
 
     public ShadowStyle Shadow { get; set; } = new();
+    public WallStyle Walls { get; set; } = new();
     public UiStyle Ui { get; set; } = new();
     public PostEffects Post { get; set; } = new();
+}
+
+/// <summary>
+/// Bevel drawn on the edges of walls that border the floor, so walls read as solid blocks: a lit rim on
+/// the sides facing the light (top, left), a dark one on the others. Widths in world units (0 = none).
+/// </summary>
+public sealed class WallStyle
+{
+    public string Rim { get; set; } = "#ffffff40";
+    public float RimWidth { get; set; }
+    public string Shade { get; set; } = "#00000060";
+    public float ShadeWidth { get; set; }
 }
 
 public sealed class ShadowStyle

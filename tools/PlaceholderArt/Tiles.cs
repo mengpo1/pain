@@ -171,4 +171,103 @@ public static class Tiles
         }
         return c;
     }
+
+    // ------------------------------------------------------------------ more floors (pixel art, seamless)
+
+    /// <summary>Black and white checker, 8 px squares, worn sheen.</summary>
+    public static Canvas FloorChecker() => Tile((x, y) =>
+    {
+        bool white = (x / 8 + y / 8) % 2 == 0;
+        Rgba c = white ? Rgba.Hex("#e6e2da") : Rgba.Hex("#1e1c24");
+        int lx = x % 8, ly = y % 8;
+        float k = lx == 0 || ly == 0 ? 1.08f : lx == 7 || ly == 7 ? 0.9f : 1f;
+        if (Noise.Hash(x, y, 61) > 0.93f) k -= 0.06f;
+        return c.Tone(k);
+    });
+
+    /// <summary>Small cream kitchen tiles with grey grout.</summary>
+    public static Canvas FloorKitchen() => Tile((x, y) =>
+    {
+        int lx = x % 8, ly = y % 8;
+        if (lx == 0 || ly == 0) return Rgba.Hex("#8f8a80");
+        Rgba c = (x / 8 * 3 + y / 8) % 5 == 0 ? Rgba.Hex("#d9cfae") : Rgba.Hex("#ebe3c6");
+        return c.Tone(lx == 1 || ly == 1 ? 1.06f : 1f - (Noise.Hash(x / 8, y / 8, 62) - 0.5f) * 0.06f);
+    });
+
+    /// <summary>Tiny pale blue bathroom tiles.</summary>
+    public static Canvas FloorBath() => Tile((x, y) =>
+    {
+        int lx = x % 4, ly = y % 4;
+        if (lx == 0 || ly == 0) return Rgba.Hex("#5e8fa8");
+        Rgba c = Noise.Hash(x / 4, y / 4, 63) > 0.82f ? Rgba.Hex("#e8f4fb") : Rgba.Hex("#a9d6ec");
+        return c;
+    });
+
+    /// <summary>White marble slabs (16 px) with grey veins.</summary>
+    public static Canvas FloorMarble() => Tile((x, y) =>
+    {
+        int lx = x % 16, ly = y % 16;
+        if (lx == 0 || ly == 0) return Rgba.Hex("#b9b6b2");
+        float vein = MathF.Abs(Noise.Tile(U(x), U(y), 3, 3, 3, 64) - 0.5f);
+        Rgba c = Rgba.Hex("#efece6");
+        if (vein < 0.025f) c = Rgba.Hex("#a8a4a0");
+        else if (vein < 0.05f) c = Rgba.Hex("#d6d2cc");
+        return c;
+    });
+
+    /// <summary>Basket-weave parquet: 16 px squares of four planks, alternately horizontal and vertical.</summary>
+    public static Canvas FloorParquet()
+    {
+        Rgba[] tones = [Rgba.Hex("#7a4a26"), Rgba.Hex("#8a5630"), Rgba.Hex("#6c3f1f"), Rgba.Hex("#93603a")];
+        Rgba seam = Rgba.Hex("#3a2210");
+        return Tile((x, y) =>
+        {
+            int lx = x % 16, ly = y % 16;
+            bool horizontal = (x / 16 + y / 16) % 2 == 0;
+            int across = horizontal ? ly : lx, along = horizontal ? lx : ly;
+            if (lx == 0 || ly == 0 || across % 4 == 0) return seam;
+            int plank = across / 4 + (x / 16) * 4 + (y / 16) * 2;
+            float k = 1f + (Noise.Hash(x, y, 65) - 0.5f) * 0.06f + (along == 1 ? 0.06f : along == 15 ? -0.06f : 0f);
+            if (across % 4 == 1) k += 0.08f;
+            return tones[plank & 3].Tone(k);
+        });
+    }
+
+    /// <summary>Deep red carpet with a small gold motif.</summary>
+    public static Canvas FloorCarpetRed() => Tile((x, y) =>
+    {
+        int lx = x % 16, ly = y % 16;
+        bool motif = (lx == 8 && ly >= 6 && ly <= 10) || (ly == 8 && lx >= 6 && lx <= 10);
+        Rgba c = motif ? Rgba.Hex("#c8963a") : (lx + ly) % 16 == 0 || (lx - ly + 16) % 16 == 0 ? Rgba.Hex("#7e1626") : Rgba.Hex("#9a1e30");
+        return c.Tone(1f + (Noise.Hash(x, y, 66) - 0.5f) * 0.08f);
+    });
+
+    /// <summary>Concrete sidewalk slabs (32 px) with a crack here and there.</summary>
+    public static Canvas FloorSidewalk() => Tile((x, y) =>
+    {
+        if (x == 0 || y == 0) return Rgba.Hex("#6e6a66");
+        float n = Noise.Tile(U(x), U(y), 4, 4, 2, 67);
+        Rgba c = Rgba.Hex("#a7a29b").Tone(0.94f + n * 0.1f);
+        if (Noise.Hash(x, y, 68) > 0.97f) c = c.Tone(0.86f);
+        return c;
+    });
+
+    /// <summary>Dark asphalt with gravel specks.</summary>
+    public static Canvas FloorAsphalt() => Tile((x, y) =>
+    {
+        float n = Noise.Tile(U(x), U(y), 8, 8, 2, 69);
+        Rgba c = Rgba.Hex("#34333a").Tone(0.92f + n * 0.14f);
+        float h = Noise.Hash(x, y, 70);
+        if (h > 0.96f) c = Rgba.Hex("#55535c");
+        else if (h < 0.03f) c = Rgba.Hex("#24232a");
+        return c;
+    });
+
+    /// <summary>Interior partition seen from above: warm taupe plaster with a faint stipple.</summary>
+    public static Canvas WallWhite() => Tile((x, y) =>
+    {
+        float n = Noise.Tile(U(x), U(y), 4, 4, 2, 71);
+        Rgba c = Rgba.Hex("#7d6f6a").Tone(0.94f + n * 0.1f);
+        return Noise.Hash(x, y, 73) > 0.9f ? c.Tone(0.9f) : c;
+    });
 }

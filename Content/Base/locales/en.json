@@ -104,6 +104,10 @@
       "name": "Test room",
       "intro": "Below: a lone enemy. Up: a dog. Right: two enemies. Space to finish off, R to reset everything."
     },
+    "demo": {
+      "name": "Demo scene",
+      "intro": "The Miami building: living room, kitchen, pool room, lobby, offices and the street. Eight enemies."
+    },
     "offices": {
       "name": "Offices",
       "intro": "The briefcase is somewhere in the offices.",

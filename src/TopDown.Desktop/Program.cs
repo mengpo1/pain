@@ -34,6 +34,7 @@ static LaunchOptions ParseArguments(string[] args)
             case "--screenshot": options.Screenshot = Value(); break;
             case "--frames": options.Frames = int.Parse(Value(), CultureInfo.InvariantCulture); break;
             case "--autopilot": options.Autopilot = true; break;
+            case "--modifier": options.Modifier = Value(); break;
             case "--mute": options.Mute = true; break;
             case "--size":
                 string[] size = Value().Split('x');
@@ -63,6 +64,7 @@ static void PrintUsage() => Console.WriteLine("""
       --size <WxH>        window size
       --mute              no audio
       --autopilot         the game plays itself (testing)
+      --modifier <id>     play with this modifier (overrides the saved choice)
       --frames <n>        quit after n frames (testing)
       --screenshot <png>  with --frames: save the last frame
     """);

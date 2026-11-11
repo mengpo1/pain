@@ -1,0 +1,692 @@
+{
+ "id": "demo",
+ "nameKey": "level.demo.name",
+ "introKey": "level.demo.intro",
+ "tileSize": 32,
+ "legend": {
+  "B": "wall_brick",
+  "#": "wall_white",
+  ".": "floor_parquet",
+  "k": "floor_kitchen",
+  "r": "floor_carpet_red",
+  "c": "floor_checker",
+  "b": "floor_bath",
+  "m": "floor_marble",
+  "s": "floor_sidewalk",
+  "a": "floor_asphalt",
+  "=": "glass"
+ },
+ "doorSymbols": {
+  "D": {
+   "tile": "floor_parquet",
+   "door": "door_wood"
+  },
+  "E": {
+   "tile": "floor_checker",
+   "door": "door_metal"
+  }
+ },
+ "map": [
+  "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+  "B..............#kkkkkkkkkk#rrrrrrrrrrrrB",
+  "B..............#kkkkkkkkkk#rrrrrrrrrrrrB",
+  "B..............#kkkkkkkkkk#rrrrrrrrrrrrB",
+  "B..............#kkkkkkkkkkDrrrrrrrrrrrrB",
+  "B..............Dkkkkkkkkkk#rrrrrrrrrrrrB",
+  "B..............#kkkkkkkkkk#rrrrrrrrrrrrB",
+  "B..............#kkkkkkkkkk#rrrrrrrrrrrrB",
+  "B..............#kkkkkkkkkk#rrrrrrrrrrrrB",
+  "B..............#kkkkkkkkkk#rrrrrrrrrrrrB",
+  "B######D##########D#############D######B",
+  "Bcccccccccccccc#bbbbb#mmmmmmmmmmmmmmmmmB",
+  "Bcccccccccccccc#bbbbb#mmmmmmmmmmmmmmmmmB",
+  "Bcccccccccccccc#bbbbb#mmmmmmmmmmmmmmmmmB",
+  "Bcccccccccccccc#bbbbbDmmmmmmmmmmmmmmmmmB",
+  "Bcccccccccccccc#bbbbb#mmmmmmmmmmmmmmmmmB",
+  "Bcccccccccccccc#bbbbb#mmmmmmmmmmmmmmmmmB",
+  "Bcccccccccccccc#bbbbb#mmmmmmmmmmmmmmmmmB",
+  "BBBBBBBEBBBBBBBBBBBBBBBBBB========BBBBBB",
+  "BssssssssssssssssssssssssssssssssssssssB",
+  "BssssssssssssssssssssssssssssssssssssssB",
+  "BaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaB",
+  "BaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaB",
+  "BaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaB",
+  "BssssssssssssssssssssssssssssssssssssssB",
+  "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+ ],
+ "player": {
+  "definition": "player",
+  "position": [
+   4,
+   20
+  ],
+  "facingDegrees": -90,
+  "weaponId": "none"
+ },
+ "actors": [
+  {
+   "id": "living",
+   "definition": "guard",
+   "position": [
+    3,
+    6
+   ],
+   "weaponId": "pistol",
+   "behavior": "patrol",
+   "patrol": [
+    [
+     3,
+     6
+    ],
+    [
+     12,
+     6
+    ]
+   ]
+  },
+  {
+   "id": "kitchen",
+   "definition": "thug",
+   "position": [
+    17,
+    8
+   ],
+   "weaponId": "pipe",
+   "behavior": "patrol",
+   "patrol": [
+    [
+     17,
+     8
+    ],
+    [
+     24,
+     8
+    ]
+   ]
+  },
+  {
+   "id": "bar_brute",
+   "definition": "brute",
+   "position": [
+    28.5,
+    3
+   ],
+   "behavior": "patrol",
+   "patrol": [
+    [
+     28.5,
+     3
+    ],
+    [
+     28.5,
+     8.5
+    ],
+    [
+     35,
+     8.5
+    ]
+   ]
+  },
+  {
+   "id": "bar_gun",
+   "definition": "guard",
+   "position": [
+    35,
+    3
+   ],
+   "weaponId": "shotgun",
+   "behavior": "guard",
+   "facingDegrees": 90
+  },
+  {
+   "id": "lobby",
+   "definition": "thug",
+   "position": [
+    3,
+    14
+   ],
+   "weaponId": "bat",
+   "behavior": "patrol",
+   "patrol": [
+    [
+     3,
+     14
+    ],
+    [
+     12,
+     13
+    ]
+   ]
+  },
+  {
+   "id": "office_smg",
+   "definition": "guard",
+   "position": [
+    24,
+    15
+   ],
+   "weaponId": "smg",
+   "behavior": "patrol",
+   "patrol": [
+    [
+     24,
+     15
+    ],
+    [
+     37,
+     15
+    ]
+   ]
+  },
+  {
+   "id": "office_knife",
+   "definition": "thug",
+   "position": [
+    33,
+    16.5
+   ],
+   "weaponId": "knife",
+   "behavior": "wander"
+  },
+  {
+   "id": "street_dog",
+   "definition": "dog",
+   "position": [
+    20,
+    21.5
+   ],
+   "behavior": "patrol",
+   "patrol": [
+    [
+     16,
+     21.5
+    ],
+    [
+     26,
+     21.5
+    ]
+   ]
+  }
+ ],
+ "weapons": [
+  {
+   "definition": "bat",
+   "position": [
+    6,
+    19.6
+   ],
+   "rotationDegrees": 30
+  },
+  {
+   "definition": "pistol",
+   "position": [
+    9,
+    20.4
+   ],
+   "rotationDegrees": -15
+  }
+ ],
+ "props": [
+  {
+   "sprite": "prop.sofa",
+   "position": [
+    5.5,
+    2.6
+   ],
+   "size": [
+    1.8,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.armchair",
+   "position": [
+    9.6,
+    3.4
+   ],
+   "size": [
+    0.8,
+    0.8
+   ],
+   "rotationDegrees": -90
+  },
+  {
+   "sprite": "prop.tv",
+   "position": [
+    5.5,
+    7.9
+   ],
+   "size": [
+    1.1,
+    0.4
+   ],
+   "rotationDegrees": 180
+  },
+  {
+   "sprite": "prop.lamp",
+   "position": [
+    1.8,
+    1.8
+   ],
+   "size": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "sprite": "prop.plant",
+   "position": [
+    13.2,
+    1.8
+   ],
+   "size": [
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.sofa_blue",
+   "position": [
+    12.6,
+    6.5
+   ],
+   "size": [
+    1.8,
+    0.8
+   ],
+   "rotationDegrees": 90
+  },
+  {
+   "sprite": "prop.counter",
+   "position": [
+    18.6,
+    1.5
+   ],
+   "size": [
+    1.9,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.stove",
+   "position": [
+    21.6,
+    1.5
+   ],
+   "size": [
+    0.9,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.fridge",
+   "position": [
+    24.3,
+    1.6
+   ],
+   "size": [
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.table",
+   "position": [
+    20.5,
+    6.2
+   ],
+   "size": [
+    1.9,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    19.6,
+    7.4
+   ],
+   "size": [
+    0.5,
+    0.5
+   ],
+   "rotationDegrees": 180
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    21.4,
+    7.4
+   ],
+   "size": [
+    0.5,
+    0.5
+   ],
+   "rotationDegrees": 180
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    19.6,
+    5.0
+   ],
+   "size": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    21.4,
+    5.0
+   ],
+   "size": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "sprite": "prop.pool_table",
+   "position": [
+    31.5,
+    5.2
+   ],
+   "size": [
+    1.8,
+    3.3
+   ]
+  },
+  {
+   "sprite": "prop.bar",
+   "position": [
+    35.0,
+    1.5
+   ],
+   "size": [
+    3.0,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.arcade",
+   "position": [
+    37.8,
+    6.4
+   ],
+   "size": [
+    0.8,
+    0.8
+   ],
+   "rotationDegrees": -90
+  },
+  {
+   "sprite": "prop.arcade",
+   "position": [
+    37.8,
+    7.6
+   ],
+   "size": [
+    0.8,
+    0.8
+   ],
+   "rotationDegrees": -90
+  },
+  {
+   "sprite": "prop.plant",
+   "position": [
+    27.8,
+    8.4
+   ],
+   "size": [
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.desk",
+   "position": [
+    10.5,
+    15.4
+   ],
+   "size": [
+    1.9,
+    0.9
+   ],
+   "rotationDegrees": 180
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    10.5,
+    16.5
+   ],
+   "size": [
+    0.5,
+    0.5
+   ],
+   "rotationDegrees": 180
+  },
+  {
+   "sprite": "prop.plant",
+   "position": [
+    1.8,
+    11.8
+   ],
+   "size": [
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.plant",
+   "position": [
+    13.2,
+    11.8
+   ],
+   "size": [
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.cabinet",
+   "position": [
+    2.0,
+    16.5
+   ],
+   "size": [
+    0.8,
+    0.6
+   ],
+   "rotationDegrees": 90
+  },
+  {
+   "sprite": "prop.bathtub",
+   "position": [
+    19.4,
+    12.6
+   ],
+   "size": [
+    1.0,
+    2.0
+   ]
+  },
+  {
+   "sprite": "prop.toilet",
+   "position": [
+    16.8,
+    16.3
+   ],
+   "size": [
+    0.6,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.desk",
+   "position": [
+    25.5,
+    12.8
+   ],
+   "size": [
+    1.9,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.desk",
+   "position": [
+    30.5,
+    12.8
+   ],
+   "size": [
+    1.9,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.desk",
+   "position": [
+    35.5,
+    12.8
+   ],
+   "size": [
+    1.9,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    25.5,
+    11.8
+   ],
+   "size": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    30.5,
+    11.8
+   ],
+   "size": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "sprite": "prop.chair",
+   "position": [
+    35.5,
+    11.8
+   ],
+   "size": [
+    0.5,
+    0.5
+   ]
+  },
+  {
+   "sprite": "prop.cabinet",
+   "position": [
+    23.0,
+    16.6
+   ],
+   "size": [
+    0.8,
+    0.6
+   ]
+  },
+  {
+   "sprite": "prop.cabinet",
+   "position": [
+    24.0,
+    16.6
+   ],
+   "size": [
+    0.8,
+    0.6
+   ]
+  },
+  {
+   "sprite": "prop.plant",
+   "position": [
+    37.8,
+    16.6
+   ],
+   "size": [
+    0.8,
+    0.8
+   ]
+  },
+  {
+   "sprite": "prop.car",
+   "position": [
+    29.5,
+    22.4
+   ],
+   "size": [
+    3.5,
+    1.7
+   ]
+  },
+  {
+   "sprite": "prop.dumpster",
+   "position": [
+    36.6,
+    19.6
+   ],
+   "size": [
+    1.9,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.car",
+   "position": [
+    12.0,
+    22.6
+   ],
+   "size": [
+    3.5,
+    1.7
+   ],
+   "rotationDegrees": 180
+  }
+ ],
+ "decor": [
+  {
+   "sprite": "prop.rug",
+   "position": [
+    5.5,
+    5.0
+   ],
+   "rotationDegrees": 90
+  },
+  {
+   "sprite": "prop.rug_round",
+   "position": [
+    20.5,
+    6.2
+   ]
+  },
+  {
+   "sprite": "prop.rug",
+   "position": [
+    31.0,
+    15.2
+   ],
+   "rotationDegrees": 90
+  }
+ ],
+ "objectives": [
+  {
+   "type": "eliminateAll",
+   "textKey": "objective.eliminateAll"
+  }
+ ],
+ "music": "music.action"
+}

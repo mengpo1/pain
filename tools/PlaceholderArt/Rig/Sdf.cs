@@ -48,17 +48,17 @@ public readonly record struct Basis(Vector3 Origin, Vector3 Forward, Vector3 Rig
 public abstract class Prim
 {
     /// <summary>Parts of one group melt into each other; different groups keep a crisp edge (and a contact line).</summary>
-    public int Group { get; init; }
+    public int Group { get; set; }
 
     /// <summary>Body part, for drawing a subset (severed limbs).</summary>
-    public int Part { get; init; }
+    public int Part { get; set; }
 
-    public Mat Material { get; init; }
+    public Mat Material { get; set; }
 
     /// <summary>Optional surface detail: the material at a point given in <see cref="Frame"/> coordinates.</summary>
-    public Func<Vector3, Mat>? Paint { get; init; }
+    public Func<Vector3, Mat>? Paint { get; set; }
 
-    public Basis Frame { get; init; } = Basis.Identity;
+    public Basis Frame { get; set; } = Basis.Identity;
 
     public abstract float Distance(Vector3 p);
 
@@ -131,6 +131,31 @@ public sealed class Egg(Basis frame, Vector3 radii) : Prim
             return (new Vector2(_frame.Origin.X, _frame.Origin.Y), r, _frame.Origin.Z + r);
         }
     }
+}
+
+/// <summary>Box with rounded edges, half sizes along the axes of its frame.</summary>
+public sealed class Block(Basis frame, Vector3 half, float round) : Prim
+{
+    readonly Basis _frame = frame;
+
+    public override float Distance(Vector3 p)
+    {
+        Vector3 q = Vector3.Abs(_frame.Local(p)) - (half - new Vector3(round));
+        return Vector3.Max(q, Vector3.Zero).Length() + MathF.Min(MathF.Max(q.X, MathF.Max(q.Y, q.Z)), 0f) - round;
+    }
+
+    public override (Vector2, float, float) Bounds
+    {
+        get
+        {
+            float r = half.Length();
+            return (new Vector2(_frame.Origin.X, _frame.Origin.Y), r, _frame.Origin.Z + r);
+        }
+    }
+
+    /// <summary>An axis-aligned block standing on the floor: centre (x, y), size and height in pixels.</summary>
+    public static Block On(float x, float y, float width, float depth, float height, float round = 1f, float z0 = 0f) =>
+        new(Basis.Identity with { Origin = new Vector3(x, y, z0 + height / 2f) }, new Vector3(width / 2f, depth / 2f, height / 2f), round);
 }
 
 /// <summary>Light, colour bands and line rules shared by every model.</summary>
@@ -234,6 +259,7 @@ public sealed class Palette
 public enum Mat : byte
 {
     None, Skin, Hair, Top, Trim, Shirt, Pants, Belt, Shoes, Glove, Eye, Mouth, Dark, Metal, Fur, FurDark, Flesh, Bone, Claw, Glow,
+    Wood, WoodDark, Fabric, Fabric2, Screen, Felt, Ceramic, Leaf, Paper, Plastic, Chrome, Rubber, Light,
 }
 
 /// <summary>

@@ -21,6 +21,9 @@ public sealed class WorldRenderer
     private readonly AssetCache _assets;
     private readonly ThemeColors _colors;
     private readonly ShadowStyle _shadow;
+    private readonly WallStyle _walls;
+    private readonly Color _wallRim;
+    private readonly Color _wallShade;
     private readonly Color _shadowColor;
     private readonly float _fallDuration;
 
@@ -36,6 +39,9 @@ public sealed class WorldRenderer
         _fallDuration = feel.FallDuration;
         _colors = new ThemeColors(theme);
         _shadow = theme.Shadow;
+        _walls = theme.Walls;
+        _wallRim = ColorParser.Parse(theme.Walls.Rim, new Color(255, 255, 255, 64));
+        _wallShade = ColorParser.Parse(theme.Walls.Shade, new Color(0, 0, 0, 96));
         _shadowColor = ColorParser.Parse(theme.Shadow.Color, new Color(0, 0, 0, 100));
     }
 
@@ -214,7 +220,32 @@ public sealed class WorldRenderer
                 SpriteFrame frame = _assets.Sprite(tile.SpriteId);
                 var destination = new Rectangle((int)(x * size + offset.X), (int)(y * size + offset.Y), (int)size, (int)size);
                 batch.Draw(frame.Texture, destination, frame.Source, tint);
+                if (layer == TileLayer.Wall && overrideColor is null && tile.BlocksVision) DrawWallBevel(batch, map, x, y, destination);
             }
+        }
+    }
+
+    /// <summary>Lit and shaded rims on the sides of a wall that border something else than a wall.</summary>
+    private void DrawWallBevel(SpriteBatch batch, TileMap map, int x, int y, Rectangle tile)
+    {
+        int rim = (int)MathF.Round(_walls.RimWidth), shade = (int)MathF.Round(_walls.ShadeWidth);
+        if (rim <= 0 && shade <= 0) return;
+        bool Open(int dx, int dy)
+        {
+            int nx = x + dx, ny = y + dy;
+            return nx >= 0 && ny >= 0 && nx < map.Width && ny < map.Height && map.Get(nx, ny) is var t && !(t.Layer == TileLayer.Wall && t.BlocksVision);
+        }
+
+        Texture2D pixel = _assets.Pixel;
+        if (rim > 0)
+        {
+            if (Open(0, -1)) batch.Draw(pixel, new Rectangle(tile.X, tile.Y, tile.Width, rim), _wallRim);
+            if (Open(-1, 0)) batch.Draw(pixel, new Rectangle(tile.X, tile.Y, rim, tile.Height), _wallRim);
+        }
+        if (shade > 0)
+        {
+            if (Open(0, 1)) batch.Draw(pixel, new Rectangle(tile.X, tile.Bottom - shade, tile.Width, shade), _wallShade);
+            if (Open(1, 0)) batch.Draw(pixel, new Rectangle(tile.Right - shade, tile.Y, shade, tile.Height), _wallShade);
         }
     }
 
