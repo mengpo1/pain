@@ -184,6 +184,6 @@ docs/                 formats et guides
 - Pas de manette, pas d'éditeur de niveaux, pas de scripts dans les mods (choix volontaires pour cette
   première version), les ennemis ne ramassent pas les armes.
 - Graphismes : tous générés par le dépôt (squelette d'animation, meubles et structures en volume, tuiles) ;
-  le chien du pack action et les créatures de `NoctInspired` gardent leurs anciens sprites fixes. Les
+  les créatures de `NoctInspired` gardent leurs anciens sprites fixes. Les
   vidéos de référence n'ont pas pu être visionnées et aucun service externe de génération n'a été
   utilisé : voir la [revue visuelle](docs/art/visual-review.md).

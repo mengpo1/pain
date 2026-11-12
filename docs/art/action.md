@@ -33,6 +33,7 @@ Pixel art net, couleurs saturées, vue strictement de dessus. Tout est original 
 | garde | costume blanc, chemise noire, cheveux plaqués |
 | voyou | survêtement anthracite à bandes blanches, crâne rasé |
 | costaud | débardeur rouge, bras nus, coupe rase, ×1,3 |
+| chien | squelette à quatre pattes, pelage brun, museau clair, oreilles tombantes, queue ; image 48 × 48 |
 
 ## Règles d'animation
 
@@ -47,7 +48,12 @@ Pixel art net, couleurs saturées, vue strictement de dessus. Tout est original 
   l'image finale est celle du corps au sol et des morceaux démembrés.
 - Morts : `death.shot`, `death.cut`, `death.blunt`, la flaque s'étend sur les 4 dernières images.
 - Achèvements : `execute.headbash` (à cheval, tête frappée contre le sol), `execute.stomp`, `execute.stab`,
-  `execute.smash` (batte à deux mains), `execute.behead`, `execute.tearlegs`, `execute.tearhead`.
+  `execute.smash` (batte à deux mains), `execute.behead`, `execute.tearlegs`, `execute.tearhead` ; le chien
+  `execute.bite` (plonge sur la tête, mord, secoue).
+- Victime : `executed` (bras devant le visage, sursaut à chaque coup, spasme, inertie) et `executed.stab`
+  (le torse se cambre sous la lame) ; la tête reste en place pour que les blessures dessinées dessus suivent.
+- Chien : galop en 8 images, bond et morsure, recul, chute sur le flanc, relevé, mort, réaction à
+  l'achèvement ; corps au sol et morceaux arrachés rendus depuis la même pose.
 
 ## Ordre d'affichage
 

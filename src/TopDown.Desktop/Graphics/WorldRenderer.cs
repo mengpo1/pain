@@ -402,18 +402,20 @@ public sealed class WorldRenderer
         float wobble = actor.State switch
         {
             ActorState.GettingUp when !animated => MathF.Sin(actor.StateTimer * 30f) * 0.1f,
-            ActorState.BeingExecuted => MathF.Sin(actor.StateElapsed * 45f) * 0.04f,
+            ActorState.BeingExecuted when !animated => MathF.Sin(actor.StateElapsed * 45f) * 0.04f,
             _ => 0f,
         };
 
-        // Under an execution: the body jolts with each blow, the part being pulled stretches out.
+        // Under an execution: the body jolts with each blow (unless its own animation shows the reaction),
+        // and the part being pulled off stretches out.
         int pulled = -1;
         float tug = 0f;
         if (actor.State == ActorState.BeingExecuted && actor.Executioner is { } executioner)
         {
-            float jolt = Fade(SinceLastBlow(executioner), JoltTime);
-            position += SafeNormalize(ToXna(ExecutionPose.HeadOf(actor) - executioner.Position)) * (JoltDistance * jolt);
             pulled = gore.NextPart(actor, executioner.ExecutionAnimation);
+            float jolt = Fade(SinceLastBlow(executioner), JoltTime);
+            if (!animated || pulled >= 0)
+                position += SafeNormalize(ToXna(ExecutionPose.HeadOf(actor) - executioner.Position)) * (JoltDistance * jolt);
             tug = 1.2f + 2.8f * Fade(SinceLastBlow(executioner), 0.18f) + MathF.Sin(actor.StateElapsed * 40f) * 0.4f;
         }
 

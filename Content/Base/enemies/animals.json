@@ -12,7 +12,7 @@
     "acceleration": 2400,
     "naturalWeaponId": "bite",
     "sprites": {
-      "body": "actor.dog", "dead": "actor.dog.dead", "down": "actor.dog.dead",
+      "body": "actor.dog", "animationSet": "actor.dog", "dead": "actor.dog.dead", "down": "actor.dog.dead",
       // Pieces torn off by bare-handed executions, in the order they come off.
       "torso": "actor.dog.torso",
       "parts": [

@@ -168,6 +168,8 @@ public static class HumanClips
         yield return DeathCut();
         yield return DeathBlunt();
         yield return Crawl();
+        yield return Executed("executed", stab: false);
+        yield return Executed("executed.stab", stab: true);
 
         yield return ExecuteHeadBash();
         yield return ExecuteStab();
@@ -491,6 +493,39 @@ public static class HumanClips
         var frames = new List<RigFrame>();
         for (int i = 0; i < 4; i++) frames.Add(new RigFrame(Prone(i * Pi / 2f), 0.25f));
         return new RigClip("crawl", ClipKind.Full, true, frames);
+    }
+
+    /// <summary>
+    /// The victim of an execution, on its back (head towards +X, which the executioner works on): arms up to
+    /// shield the face, a jolt on each blow (the chest arches under a blade), a twitch, then limp. The head stays
+    /// where the lying body has it, so the wounds drawn on it stay in place.
+    /// </summary>
+    static RigClip Executed(string name, bool stab)
+    {
+        HumanPose guard = Lying.With(p =>
+        {
+            p.HeadTurn = 0.2f; p.HeadNod = 0.15f;
+            p.HandRight = V(2f, 4.5f, 13f); p.HandLeft = V(2f, -4.5f, 12f); p.OpenRight = p.OpenLeft = true;
+            p.FootLeft = V(-13.5f, 6f, 1.9f);
+        });
+        HumanPose push = guard.With(p => { p.HeadTurn = -0.25f; p.HandRight = V(3.5f, 6f, 14f); p.HandLeft = V(1f, -3f, 13f); p.FootRight = V(-17f, -5f, 1.9f); });
+        HumanPose jolt = Lying.With(p =>
+        {
+            p.Pelvis = V(-3.2f, 0f, 3.9f);
+            p.HeadTurn = stab ? 0.3f : 0.9f; p.HeadNod = stab ? -0.25f : 0.3f;
+            p.Bend = stab ? 0.3f : 0f;
+            p.HandRight = stab ? V(1f, 5f, 8f) : V(-1.6f, 12f, 10f); p.HandLeft = stab ? V(1f, -5f, 7f) : V(-1.6f, -12f, 9f);
+            p.FootRight = V(-17f, -5.5f, 1.9f); p.FootLeft = V(-15f, 8f, 1.9f);
+        });
+        HumanPose twitch = HumanPose.Lerp(jolt, Lying, 0.5f);
+        return new RigClip(name, ClipKind.Full, false,
+        [
+            new RigFrame(guard, 0.12f),
+            new RigFrame(push, 0.12f),
+            new RigFrame(jolt, 0.06f, Event: "impact"),
+            new RigFrame(twitch, 0.08f),
+            new RigFrame(Lying.With(p => p.HeadTurn = stab ? 0.5f : 0.75f), 0.3f),
+        ]);
     }
 
     // ------------------------------------------------------------------ executions

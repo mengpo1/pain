@@ -1,7 +1,5 @@
 namespace PlaceholderArt;
 
-public sealed record DogLook(Rgba Fur, Rgba FurDark, Rgba Belly, Rgba Nose);
-
 public sealed record CreatureLook
 {
     public required Rgba Body { get; init; }
@@ -32,66 +30,6 @@ public static class Actors
         public float X(float x) => Cx + x * S;
         public float Y(float y) => Cy + y * S * Bulk;
         public float R(float r) => r * S;
-    }
-
-    // ------------------------------------------------------------------ dog
-
-    public static void Dog(Canvas c, DogLook d, float cx, float cy)
-    {
-        c.Fill(Shape.Capsule(cx - 9.5f, cy + 0.3f, cx - 14f, cy + 1.8f, 1.4f, 0.7f), d.FurDark); // tail
-        foreach (float x in new[] { 5.2f, -6.4f })
-            foreach (int s in Sides)
-                c.Fill(Shape.Ellipse(cx + x, cy + 4.8f * s, 1.9f, 1.35f), d.FurDark);                // paws
-        c.Fill(Shape.Ellipse(cx - 1.5f, cy, 9.2f, 5.0f), d.FurDark);
-        c.Fill(Shape.Ellipse(cx - 1.6f, cy - 0.35f, 8.4f, 4.3f), d.Fur);
-        c.Fill(Shape.Ellipse(cx - 2.6f, cy - 0.1f, 6.6f, 1.7f), d.FurDark.Fade(0.5f));             // darker back
-        c.Fill(Shape.Ellipse(cx + 5f, cy, 3.6f, 3.9f), d.Fur);                                     // chest
-        foreach (int s in Sides)
-            c.Fill(Shape.Ellipse(cx + 6.4f, cy + 3.4f * s, 2.2f, 1.3f, 0.5f * s), d.FurDark);       // ears
-        c.Fill(Shape.Ellipse(cx + 8.4f, cy, 3.8f, 3.5f), d.FurDark);
-        c.Fill(Shape.Ellipse(cx + 8.3f, cy - 0.3f, 3.2f, 3.0f), d.Fur);
-        c.Fill(Shape.Ellipse(cx + 12f, cy, 2.7f, 2.0f), d.Belly);                                  // snout
-        c.Fill(Shape.Ellipse(cx + 14.2f, cy, 0.95f, 1.05f), d.Nose);
-        foreach (int s in Sides) c.Fill(Shape.Circle(cx + 10f, cy + 1.75f * s, 0.6f), d.Nose);       // eyes
-    }
-
-    /// <summary>Parts of a dead dog that can be drawn separately (torn off by executions).</summary>
-    public enum DogPart { Leg1, Leg2, Leg3, Leg4, Torso, Head }
-
-    static readonly (float X0, float Y0, float X1, float Y1)[] DogLegs =
-        [(3.4f, 3.4f, 5.0f, 11.0f), (-3.6f, 3.6f, -5.2f, 11.2f), (5.8f, 2.8f, 9.4f, 10.2f), (-5.8f, 3f, -9.8f, 10f)];
-
-    /// <summary>Dog lying on its side, legs sticking out towards +Y, head towards +X.</summary>
-    public static void DogDead(Canvas c, DogLook d, float cx, float cy)
-    {
-        foreach (DogPart part in Enum.GetValues<DogPart>()) DogDeadPart(c, d, cx, cy, part);
-    }
-
-    /// <summary>One part of <see cref="DogDead"/>, at the same place as in the whole body.</summary>
-    public static void DogDeadPart(Canvas c, DogLook d, float cx, float cy, DogPart part)
-    {
-        switch (part)
-        {
-            case DogPart.Torso:
-                c.Fill(Shape.Capsule(cx - 9.8f, cy + 0.6f, cx - 15.2f, cy + 3.8f, 1.4f, 0.7f), d.FurDark);
-                c.Fill(Shape.Ellipse(cx - 1f, cy, 9.6f, 5.6f), d.FurDark);
-                c.Fill(Shape.Ellipse(cx - 1.1f, cy - 0.4f, 8.8f, 4.9f), d.Fur);
-                c.Fill(Shape.Ellipse(cx - 1f, cy + 2.8f, 6.5f, 2.0f), d.Belly.Fade(0.8f));
-                break;
-            case DogPart.Head:
-                c.Fill(Shape.Ellipse(cx + 9.8f, cy - 0.6f, 4f, 3.4f, -0.15f), d.FurDark);
-                c.Fill(Shape.Ellipse(cx + 9.7f, cy - 0.9f, 3.4f, 2.8f, -0.15f), d.Fur);
-                c.Fill(Shape.Ellipse(cx + 13.6f, cy + 0.2f, 2.6f, 1.8f), d.Belly);
-                c.Fill(Shape.Ellipse(cx + 15.8f, cy + 0.4f, 0.9f, 1.0f), d.Nose);
-                c.Fill(Shape.Ellipse(cx + 8.2f, cy - 3.7f, 2.4f, 1.4f, 0.4f), d.FurDark);                   // ear flop
-                c.Fill(Shape.Capsule(cx + 10.4f, cy - 1.6f, cx + 11.6f, cy - 1.3f, 0.35f), d.Nose);          // closed eye
-                break;
-            default:
-                var (x0, y0, x1, y1) = DogLegs[(int)part];
-                c.Fill(Shape.Capsule(cx + x0, cy + y0, cx + x1, cy + y1, 1.6f, 1.2f), d.FurDark);
-                c.Fill(Shape.Ellipse(cx + x1, cy + y1 + 0.4f, 1.5f, 1.2f), d.FurDark.Shade(0.8f));
-                break;
-        }
     }
 
     // ------------------------------------------------------------------ creature

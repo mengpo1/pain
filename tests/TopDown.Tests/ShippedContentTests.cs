@@ -199,7 +199,7 @@ public class ShippedContentTests
     public void Every_attack_and_execution_marks_the_frame_of_its_blow(string mod)
     {
         ContentDatabase database = LoadWith(mod);
-        var blows = database.Assets.Animations.Where(a => a.Key.Contains(".attack") || a.Key.Contains(".execute.")).ToList();
+        var blows = database.Assets.Animations.Where(a => a.Key.Contains(".attack") || a.Key.Contains(".execute")).ToList();
 
         Assert.NotEmpty(blows);
         foreach ((string id, AnimationDefinition animation) in blows)
@@ -228,7 +228,9 @@ public class ShippedContentTests
     [Fact]
     public void Each_pack_ships_its_demo_scene()
     {
-        Assert.Contains(Load().PlayableExtraLevels, l => l.Id == "demo");
+        ContentDatabase action = Load();
+        Assert.Contains(action.PlayableExtraLevels, l => l.Id == "demo");
+        Assert.Equal("actor.dog", action.Definitions.Actors["dog"].Sprites.AnimationSet);
         ContentDatabase noct = Load("noct_prototype");
         LevelDefinition demo = Assert.Single(noct.PlayableExtraLevels, l => l.Id == "noct_demo");
         Assert.NotEmpty(demo.Roofs);

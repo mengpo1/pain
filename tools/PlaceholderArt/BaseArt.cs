@@ -9,8 +9,6 @@ public static class BaseArt
 
     public static readonly BloodColors Blood = new(Rgba.Hex("#5a0710"), Rgba.Hex("#870f1c"), Rgba.Hex("#d0404e"));
 
-    static readonly DogLook Dog = new(Rgba.Hex("#8a5530"), Rgba.Hex("#5a341a"), Rgba.Hex("#c49a6c"), Rgba.Hex("#161010"));
-
     static readonly CreatureLook Creature = new()
     {
         Body = Rgba.Hex("#4c2672"), BodyDark = Rgba.Hex("#2a1240"), Rim = Rgba.Hex("#9a5ad0"),
@@ -94,29 +92,29 @@ public static class BaseArt
         pack.Png("sprites/ui/arrow.png", Arrow());
     }
 
+    /// <summary>The dog, on the four-legged rig: animation strips, then the stills (standing, dead, torn pieces).</summary>
     static void Dogs(Pack pack)
     {
-        var dog = new Canvas(32, 32);
-        Actors.Dog(dog, Dog, 16f, 16f);
-        dog.Outline(Ink);
-        pack.Png("sprites/actors/dog.png", dog);
+        Palette fur = new Palette()
+            .Set(Mat.Flesh, Rgba.Hex("#8a5530")).Set(Mat.Fur, Rgba.Hex("#5e381c")).Set(Mat.Bone, Rgba.Hex("#6e4424"))
+            .Set(Mat.Claw, Rgba.Hex("#2a1a14")).Set(Mat.Skin, Rgba.Hex("#c49a6c")).Set(Mat.Mouth, Rgba.Hex("#b8384a"))
+            .Set(Mat.Dark, Rgba.Hex("#161010"), Rgba.Hex("#161010"), Rgba.Hex("#241a18"), Rgba.Hex("#3a2c28"));
+        var style = new RenderStyle();
+        const int size = 48;
+        RigBeasts.Generate(pack, "dog", CreatureClips.Dog(), CreatureClips.DogBuild, _ => fur, style, size, Blood, (_, _) => { }, 105);
 
-        var body = new Canvas(40, 40);
-        Actors.DogDead(body, Dog, 19f, 18f);
-        body.Outline(Ink);
-        var dead = new Canvas(40, 40);
-        Effects.BloodPool(dead, 24f, 20f, 11.5f, Blood, 105);
-        dead.Draw(body);
+        Canvas Draw(BeastPose pose, Func<Prim, bool>? only = null) =>
+            TopDownRenderer.Render(BeastModel.Build(pose, CreatureClips.DogBuild), fur, size, size, new System.Numerics.Vector2(size / 2f, size / 2f), style, only);
+        pack.Png("sprites/actors/dog.png", Draw(CreatureClips.Dog().First().Frames[0].Pose));
+        Canvas dead = RigHumans.Pool(size, size / 2f + 1f, size / 2f + 2f, 9.5f, Blood, 105);
+        dead.Draw(Draw(CreatureClips.DogDead));
         pack.Png("sprites/actors/dog_dead.png", dead);
-
-        // The same corpse in pieces, each at its place on a canvas of the same size.
-        foreach (Actors.DogPart part in Enum.GetValues<Actors.DogPart>())
-        {
-            var piece = new Canvas(40, 40);
-            Actors.DogDeadPart(piece, Dog, 19f, 18f, part);
-            piece.Outline(Ink);
-            pack.Png($"sprites/actors/dog_{part.ToString().ToLowerInvariant()}.png", piece);
-        }
+        (string Name, int Part)[] pieces =
+        [
+            ("leg1", BeastPart.FrontRight), ("leg2", BeastPart.FrontLeft), ("leg3", BeastPart.HindRight), ("leg4", BeastPart.HindLeft),
+            ("torso", BeastPart.Torso), ("head", BeastPart.Head),
+        ];
+        foreach (var (name, part) in pieces) pack.Png($"sprites/actors/dog_{name}.png", Draw(CreatureClips.DogDead, p => p.Part == part));
     }
 
     static void Creatures(Pack pack)

@@ -136,6 +136,32 @@ public class AnimationTests
     }
 
     [Fact]
+    public void The_victim_of_an_execution_reacts_on_its_executioners_blows()
+    {
+        LevelDefinition level = new LevelDefinitionBuilder(TestContent.Room(14, 7), new Vector2(3, 3)).With(Enemy("dummy", 3.8f, 3)).Build();
+        GameWorld world = World(level);
+        Actor victim = world.Actors[1];
+        victim.KnockDown(3f);
+
+        Run(world, 0.02f, new PlayerCommands { InteractPressed = true, AimTarget = TileCenter(10, 3) });
+        Actor executioner = world.Player;
+        Assert.Equal(ActorState.BeingExecuted, victim.State);
+        Pose before = ActorPose.Of(victim, world);
+        string animation = executioner.ExecutionAnimation.ToString().ToLowerInvariant();
+
+        // Before the first blow: counted down to it, like the executioner's own animation.
+        Assert.Equal([$"executed.{animation}", "executed"], before.Keys);
+        Assert.True(before.FromImpact);
+        Assert.Equal(executioner.ExecutionElapsed - executioner.ExecutionWeapon!.Execution.WindUp, before.Time, 4);
+        Assert.Equal(ActorPose.Of(executioner, world).Time, before.Time, 4);
+
+        // After a blow: counted from it.
+        Run(world, 0.2f, new PlayerCommands { AttackPressed = true, AimTarget = TileCenter(10, 3) });
+        Assert.True(executioner.ExecutionStrikesDone > 0);
+        Assert.Equal(executioner.ExecutionElapsed - executioner.LastStrikeAt, ActorPose.Of(victim, world).Time, 4);
+    }
+
+    [Fact]
     public void Asking_for_poses_never_changes_the_game()
     {
         static GameWorld Fight()

@@ -42,7 +42,7 @@ public static class ActorPose
             case ActorState.KnockedDown:
                 return new Pose(["knockdown"], actor.StateElapsed);
             case ActorState.BeingExecuted:
-                return new Pose(["knockdown"], Settled);
+                return VictimPose(actor);
             case ActorState.GettingUp:
                 return new Pose(["getup", "knockdown"], actor.StateElapsed);
             case ActorState.Wounded:
@@ -99,6 +99,20 @@ public static class ActorPose
         float windUp = actor.ExecutionWeapon?.Execution.WindUp ?? 0f;
         float time = since < 0f ? actor.ExecutionElapsed - windUp : since;
         return new Pose([$"execute.{actor.ExecutionAnimation.ToString().ToLowerInvariant()}", $"attack.{pose}", $"idle.{pose}", "idle"], time, true);
+    }
+
+    /// <summary>
+    /// The victim reacts to each blow of its executioner, on the same clock as the executioner's own
+    /// animation (counted from the blow). Without a reaction animation it lies still.
+    /// </summary>
+    private static Pose VictimPose(Actor victim)
+    {
+        if (victim.Executioner is not { } executioner) return new Pose(["executed"], Settled);
+        float since = executioner.ExecutionStrikesDone > 0 ? executioner.ExecutionElapsed - executioner.LastStrikeAt : -1f;
+        float windUp = executioner.ExecutionWeapon?.Execution.WindUp ?? 0f;
+        float time = since < 0f ? executioner.ExecutionElapsed - windUp : since;
+        string animation = executioner.ExecutionAnimation.ToString().ToLowerInvariant();
+        return new Pose([$"executed.{animation}", "executed"], time, true);
     }
 
     /// <summary>How a character died, from the last damage it took: "shot", "cut" or "blunt".</summary>

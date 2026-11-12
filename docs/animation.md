@@ -32,6 +32,7 @@ une animation se fait sans toucher au C#.
 | blessé qui rampe | `crawl` | distance / 20 |
 | bond | `leap.crouch`, `leap.air`, `leap.land` | depuis le début de la phase |
 | achèvement | `execute.{allure}` (`execute.headbash`, `execute.stomp`, `execute.stab`, `execute.smash`, `execute.behead`, `execute.tearlegs`, `execute.tearhead`), sinon `attack.{famille}` ; un tir d'achèvement rejoue `fire.{famille}` | **compté depuis chaque coup** |
+| achevé (victime) | `executed.{allure}`, `executed` ; sans animation : immobile, secoué par les coups | **compté depuis chaque coup du bourreau** (même horloge que lui) |
 | embuscade, sommeil | `rest` | horloge |
 | réveil (veilleur) | `awaken` | depuis le réveil |
 
@@ -41,8 +42,8 @@ La **famille** vient de l'arme tenue : champ `pose` de l'arme (`unarmed`, `club`
 
 ### Le temps « depuis l'impact »
 
-Pour les attaques et les achèvements, la pose donne un temps négatif avant le coup, 0 au coup, positif
-après. Le rendu le cale sur l'image marquée par l'événement `"impact"` : l'image du contact s'affiche
+Pour les attaques et les achèvements (côté bourreau comme côté victime), la pose donne un temps négatif
+avant le coup, 0 au coup, positif après. Le rendu le cale sur l'image marquée par l'événement `"impact"` : l'image du contact s'affiche
 exactement quand la simulation applique le coup, quelle que soit l'arme. Une batte (`hitDelay` 0,06 s) et
 un tuyau (0,05 s) partagent la même animation `attack.club` sans décalage.
 

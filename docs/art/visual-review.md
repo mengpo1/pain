@@ -47,9 +47,14 @@ Rien n'a été généré avec ; tous les graphismes viennent du générateur du 
 | Ambiance | palette néon saturée et pixels nets. Pas d'ondulation ni de cycle de couleurs plein écran comme la référence : pas de shader global, par choix |
 
 Points faibles connus :
-- le chien utilise encore l'ancien sprite fixe (sans cycle de pattes) ;
-- la victime d'un achèvement reste immobile sous les coups (seul le bourreau est animé) ;
-- les jambes ne distinguent pas la marche en crabe de la marche avant.
+- les jambes ne distinguent pas la marche en crabe de la marche avant ;
+- à cheval, le bourreau cache une grande partie de sa victime : sa réaction se voit surtout aux bras et aux
+  jambes ;
+- quand un chien est démembré, ses morceaux restent fixes (ils sont tirés, pas animés).
+
+Le chien (galop, morsure, chute, mort, achèvement) et la victime d'un achèvement (protection, sursaut à
+chaque coup, inertie) ont été ajoutés ensuite et vérifiés en jeu réel (1080p, scène de capture avec un
+voyou et un chien achevés à mains nues).
 
 ## Comparaison — pack thermique
 
