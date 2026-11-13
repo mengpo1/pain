@@ -1,0 +1,32 @@
+[
+  { "id": "floor_wood", "spriteId": "tile.floor_wood" },
+  { "id": "floor_tile", "spriteId": "tile.floor_tile" },
+  { "id": "floor_concrete", "spriteId": "tile.floor_concrete" },
+  { "id": "floor_carpet", "spriteId": "tile.floor_carpet" },
+  { "id": "floor_checker", "spriteId": "tile.floor_checker" },
+  { "id": "floor_kitchen", "spriteId": "tile.floor_kitchen" },
+  { "id": "floor_bath", "spriteId": "tile.floor_bath" },
+  { "id": "floor_marble", "spriteId": "tile.floor_marble" },
+  { "id": "floor_parquet", "spriteId": "tile.floor_parquet" },
+  { "id": "floor_carpet_red", "spriteId": "tile.floor_carpet_red" },
+  { "id": "floor_sidewalk", "spriteId": "tile.floor_sidewalk" },
+  { "id": "floor_asphalt", "spriteId": "tile.floor_asphalt" },
+  { "id": "wall_white", "spriteId": "tile.wall_white", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true },
+  { "id": "wall_brick", "spriteId": "tile.wall_brick", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true },
+  { "id": "wall_plaster", "spriteId": "tile.wall_plaster", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true },
+  {
+    // Blocks movement and bullets until it breaks, but never blocks vision.
+    "id": "glass",
+    "spriteId": "tile.glass",
+    "layer": "wall",
+    "blocksMovement": true,
+    "blocksProjectiles": true,
+    "blocksVision": false,
+    "destructible": true,
+    "breaksInto": "glass_broken",
+    "breakSound": "sound.glass",
+    "breakNoiseRadius": 300
+  },
+  // A broken window: bullets and eyes pass, bodies do not.
+  { "id": "glass_broken", "spriteId": "tile.glass_broken", "layer": "wall", "blocksMovement": true }
+]

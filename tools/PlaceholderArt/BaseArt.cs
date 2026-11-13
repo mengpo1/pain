@@ -1,0 +1,182 @@
+using PlaceholderArt.Rig;
+
+namespace PlaceholderArt;
+
+/// <summary>Base pack sprites: vibrant, saturated 80s-neon-ish colours with a dark ink outline.</summary>
+public static class BaseArt
+{
+    static readonly Rgba Ink = Rgba.Hex("#140c1c").Fade(0.9f);
+
+    public static readonly BloodColors Blood = new(Rgba.Hex("#5a0710"), Rgba.Hex("#870f1c"), Rgba.Hex("#d0404e"));
+
+    static readonly CreatureLook Creature = new()
+    {
+        Body = Rgba.Hex("#4c2672"), BodyDark = Rgba.Hex("#2a1240"), Rim = Rgba.Hex("#9a5ad0"),
+        Limb = Rgba.Hex("#34184e"), LimbLight = Rgba.Hex("#8250b4"), Claw = Rgba.Hex("#e8dccc"),
+        Eye = Rgba.Hex("#f4fff2"), Maw = Rgba.Hex("#0c0412"),
+    };
+
+    static Palette Clothes(string top, string trim, string shirt, string pants, string shoes, string skin, string? hair, string belt = "#2a1f1a") =>
+        new Palette()
+            .Set(Mat.Top, Rgba.Hex(top)).Set(Mat.Trim, Rgba.Hex(trim)).Set(Mat.Shirt, Rgba.Hex(shirt))
+            .Set(Mat.Pants, Rgba.Hex(pants)).Set(Mat.Shoes, Rgba.Hex(shoes)).Set(Mat.Dark, Rgba.Hex(shoes).Shade(0.6f))
+            .Set(Mat.Skin, Rgba.Hex(skin), 0.6f).Set(Mat.Hair, Rgba.Hex(hair ?? skin)).Set(Mat.Belt, Rgba.Hex(belt))
+            .Set(Mat.Eye, Rgba.Hex("#1a1014"), Rgba.Hex("#1a1014"), Rgba.Hex("#2a1a20"), Rgba.Hex("#3a2a30"))
+            .Set(Mat.Mouth, Rgba.Hex("#4a1a1e"), Rgba.Hex("#5e2228"), Rgba.Hex("#7a3038"), Rgba.Hex("#8a4048"));
+
+    /// <summary>The four humans of the action pack, built on the shared rig (HumanModel, HumanClips).</summary>
+    static readonly (string Name, HumanBuild Build, bool Heavy, int Seed)[] Cast =
+    [
+        // Olive bomber jacket over a white tee, brown collar, jeans.
+        ("player", new HumanBuild { Palette = Clothes("#6a7c36", "#5a3b22", "#ece6d6", "#2f3d63", "#1e1b20", "#e8b48a", "#2a1d18"), Hair = HairStyle.Short, OpenJacket = true }, false, 101),
+        // White suit, black shirt, slicked black hair.
+        ("guard", new HumanBuild { Palette = Clothes("#e9e9f0", "#c7c9d6", "#18181c", "#dcdce6", "#141416", "#d9a27a", "#121216", "#1a1a1e"), Hair = HairStyle.Slick, OpenJacket = true }, false, 102),
+        // Charcoal track suit with white stripes, bald.
+        ("thug", new HumanBuild { Palette = Clothes("#363a46", "#d8dce4", "#22242a", "#2c2f38", "#101012", "#c98d68", null), Hair = HairStyle.Bald, Stripes = true }, false, 103),
+        // Red tank top, buzz cut, big.
+        ("brute", new HumanBuild { Palette = Clothes("#a02234", "#7a1424", "#a02234", "#3e3a2c", "#1a1410", "#d49a70", "#3a2a22"), Hair = HairStyle.Buzz, BareArms = true, Scale = 1.3f, Bulk = 1.1f }, true, 104),
+    ];
+
+    public static void Generate(Pack pack)
+    {
+        foreach (var (name, build, heavy, seed) in Cast)
+        {
+            bool big = build.Scale > 1.1f;
+            RigHumans.Generate(pack, pack.Rig, name, build, Blood, seed, heavy, upperSize: big ? 56 : 44, fullSize: big ? 68 : 52);
+        }
+        Dogs(pack);
+        Creatures(pack);
+        Legs(pack);
+
+        foreach (var (name, sprite) in Weapons.All())
+        {
+            sprite.Harden();
+            TopDownRenderer.HardOutline(sprite, Ink.WithAlpha(1f));
+            pack.Png($"sprites/weapons/{name}.png", sprite);
+        }
+        foreach (HeldWeapons.Held held in HeldWeapons.All())
+        {
+            pack.Png($"sprites/weapons/{held.Name}_held.png", held.Sprite);
+            Console.WriteLine($"held {held.Name}: grip {held.GripX}");
+        }
+
+        Fx(pack);
+
+        pack.Png("sprites/tiles/floor_wood.png", Tiles.FloorWood());
+        pack.Png("sprites/tiles/floor_tile.png", Tiles.FloorTile());
+        pack.Png("sprites/tiles/floor_concrete.png", Tiles.FloorConcrete());
+        pack.Png("sprites/tiles/floor_carpet.png", Tiles.FloorCarpet());
+        pack.Png("sprites/tiles/wall_brick.png", Tiles.WallBrick());
+        pack.Png("sprites/tiles/wall_plaster.png", Tiles.WallPlaster());
+        pack.Png("sprites/tiles/glass.png", Tiles.Glass());
+        pack.Png("sprites/tiles/glass_broken.png", Tiles.GlassBroken());
+        pack.Png("sprites/tiles/door_wood.png", Tiles.DoorWood());
+        pack.Png("sprites/tiles/door_metal.png", Tiles.DoorMetal());
+
+        pack.Png("sprites/tiles/floor_checker.png", Tiles.FloorChecker());
+        pack.Png("sprites/tiles/floor_kitchen.png", Tiles.FloorKitchen());
+        pack.Png("sprites/tiles/floor_bath.png", Tiles.FloorBath());
+        pack.Png("sprites/tiles/floor_marble.png", Tiles.FloorMarble());
+        pack.Png("sprites/tiles/floor_parquet.png", Tiles.FloorParquet());
+        pack.Png("sprites/tiles/floor_carpet_red.png", Tiles.FloorCarpetRed());
+        pack.Png("sprites/tiles/floor_sidewalk.png", Tiles.FloorSidewalk());
+        pack.Png("sprites/tiles/floor_asphalt.png", Tiles.FloorAsphalt());
+        pack.Png("sprites/tiles/wall_white.png", Tiles.WallWhite());
+
+        // Furniture drawn by the rig renderer (same light, pixels and outline as the characters).
+        foreach (var (name, sprite) in Furniture.All()) pack.Png($"sprites/props/{name}.png", sprite);
+        pack.Png("sprites/props/rug.png", Rugs.Persian());
+        pack.Png("sprites/props/rug_round.png", Rugs.Round());
+
+        pack.Png("sprites/ui/crosshair.png", Crosshair());
+        pack.Png("sprites/ui/arrow.png", Arrow());
+    }
+
+    /// <summary>The dog, on the four-legged rig: animation strips, then the stills (standing, dead, torn pieces).</summary>
+    static void Dogs(Pack pack)
+    {
+        Palette fur = new Palette()
+            .Set(Mat.Flesh, Rgba.Hex("#8a5530")).Set(Mat.Fur, Rgba.Hex("#5e381c")).Set(Mat.Bone, Rgba.Hex("#6e4424"))
+            .Set(Mat.Claw, Rgba.Hex("#2a1a14")).Set(Mat.Skin, Rgba.Hex("#c49a6c")).Set(Mat.Mouth, Rgba.Hex("#b8384a"))
+            .Set(Mat.Dark, Rgba.Hex("#161010"), Rgba.Hex("#161010"), Rgba.Hex("#241a18"), Rgba.Hex("#3a2c28"));
+        var style = new RenderStyle();
+        const int size = 48;
+        RigBeasts.Generate(pack, "dog", CreatureClips.Dog(), CreatureClips.DogBuild, _ => fur, style, size, Blood, (_, _) => { }, 105);
+
+        Canvas Draw(BeastPose pose, Func<Prim, bool>? only = null) =>
+            TopDownRenderer.Render(BeastModel.Build(pose, CreatureClips.DogBuild), fur, size, size, new System.Numerics.Vector2(size / 2f, size / 2f), style, only);
+        pack.Png("sprites/actors/dog.png", Draw(CreatureClips.Dog().First().Frames[0].Pose));
+        Canvas dead = RigHumans.Pool(size, size / 2f + 1f, size / 2f + 2f, 9.5f, Blood, 105);
+        dead.Draw(Draw(CreatureClips.DogDead));
+        pack.Png("sprites/actors/dog_dead.png", dead);
+        (string Name, int Part)[] pieces =
+        [
+            ("leg1", BeastPart.FrontRight), ("leg2", BeastPart.FrontLeft), ("leg3", BeastPart.HindRight), ("leg4", BeastPart.HindLeft),
+            ("torso", BeastPart.Torso), ("head", BeastPart.Head),
+        ];
+        foreach (var (name, part) in pieces) pack.Png($"sprites/actors/dog_{name}.png", Draw(CreatureClips.DogDead, p => p.Part == part));
+    }
+
+    static void Creatures(Pack pack)
+    {
+        var body = new Canvas(48, 48);
+        var eyes = new Canvas(48, 48);
+        Actors.Creature(body, eyes, Creature, 21f, 24f, 106);
+        body.Outline(Ink);
+        eyes.Glow(Rgba.Hex("#9dffc8"), 1.3f, 2.2f);
+        body.Draw(eyes);
+        pack.Png("sprites/actors/creature.png", body);
+
+        var corpse = new Canvas(64, 64);
+        Actors.CreatureDead(corpse, Creature with { Eye = Rgba.Hex("#6a6478") }, 32f, 32f, 107);
+        corpse.Outline(Ink);
+        var dead = new Canvas(64, 64);
+        Effects.BloodPool(dead, 33f, 33f, 17f, new BloodColors(Rgba.Hex("#1c0a26"), Rgba.Hex("#2e1440"), Rgba.Hex("#7a4aa0")), 108);
+        dead.Draw(corpse);
+        pack.Png("sprites/actors/creature_dead.png", dead);
+    }
+
+    static void Legs(Pack pack)
+    {
+        var strip = new Canvas(128, 32);
+        for (int f = 0; f < 4; f++) Actors.LegsFrame(strip, f, Rgba.Hex("#2b2f3c"), Rgba.Hex("#141418"));
+        strip.Outline(Ink);
+        pack.Png("sprites/actors/legs.png", strip);
+
+        var kick = new Canvas(32, 32);
+        Actors.LegsKick(kick, Rgba.Hex("#2b2f3c"), Rgba.Hex("#141418"));
+        kick.Outline(Ink);
+        pack.Png("sprites/actors/legs_kick.png", kick);
+    }
+
+    static void Fx(Pack pack)
+    {
+        pack.Png("sprites/fx/bullet.png", Effects.Bullet(Rgba.Hex("#ff9a30"), Rgba.Hex("#fffbe6"), Rgba.Hex("#ffd060")));
+        pack.Png("sprites/fx/muzzle_flash.png", Effects.MuzzleFlash(Rgba.Hex("#ff8418"), Rgba.Hex("#ffd84a"), Rgba.Hex("#fffbe8")));
+        for (int i = 1; i <= 3; i++) pack.Png($"sprites/fx/blood_{i}.png", Effects.Splat(i, Blood, 110 + i));
+        pack.Png("sprites/fx/blood_drop.png", Effects.Drop(Blood));
+        pack.Png("sprites/fx/gore.png", Effects.Gore(Blood, Rgba.Hex("#d9707a"), Rgba.Hex("#efe2d0"), 120));
+        pack.Png("sprites/fx/gib.png", Effects.Gib(Blood, Rgba.Hex("#c4505c"), 121));
+        pack.Png("sprites/fx/spark.png", Effects.Spark(Rgba.Hex("#ffffff"), Rgba.Hex("#ffd84a")));
+        pack.Png("sprites/fx/shard.png", Effects.Shard(new Rgba(0.68f, 0.9f, 1f, 0.85f), new Rgba(1f, 1f, 1f, 0.95f)));
+        pack.Png("sprites/fx/smoke.png", Effects.Smoke(Rgba.Hex("#c4c4cc")));
+    }
+
+    /// <summary>White cross with a centre gap and a dark outline, readable on any background.</summary>
+    static Canvas Crosshair()
+    {
+        var c = new Canvas(16, 16);
+        foreach (var r in new[] { Shape.Rect(7f, 1f, 2f, 4.5f), Shape.Rect(7f, 10.5f, 2f, 4.5f), Shape.Rect(1f, 7f, 4.5f, 2f), Shape.Rect(10.5f, 7f, 4.5f, 2f) })
+            c.Fill(r, Rgba.White);
+        c.Outline(Rgba.Hex("#101018"));
+        return c;
+    }
+
+    static Canvas Arrow()
+    {
+        var c = new Canvas(16, 16);
+        c.Fill(Shape.Rect(2f, 6.5f, 7.5f, 3f).Or(Shape.Polygon((8.5f, 2.5f), (14.5f, 8f), (8.5f, 13.5f))), Rgba.White);
+        c.Outline(Rgba.Hex("#101018"));
+        return c;
+    }
+}

@@ -1,0 +1,67 @@
+[
+  {
+    // Fast, keen hearing, no weapon to drop.
+    "id": "dog",
+    "nameKey": "actor.dog.name",
+    "faction": "enemy",
+    "health": 100,
+    "radius": 9,
+    "anatomy": "quadruped",
+    "speed": 110,
+    "runSpeed": 290,
+    "acceleration": 2400,
+    "naturalWeaponId": "bite",
+    "sprites": {
+      "body": "actor.dog", "animationSet": "actor.dog", "dead": "actor.dog.dead", "down": "actor.dog.dead",
+      // Pieces torn off by bare-handed executions, in the order they come off.
+      "torso": "actor.dog.torso",
+      "parts": [
+        { "id": "leg", "sprite": "actor.dog.leg1" },
+        { "id": "leg", "sprite": "actor.dog.leg2" },
+        { "id": "leg", "sprite": "actor.dog.leg3" },
+        { "id": "leg", "sprite": "actor.dog.leg4" },
+        { "id": "head", "sprite": "actor.dog.head", "over": true }
+      ]
+    },
+    "sounds": { "death": "sound.death", "alert": "sound.dog_bark" },
+    "ai": {
+      "behavior": "wander",
+      "visionRange": 360,
+      "visionAngleDegrees": 160,
+      "closeDetectionRadius": 60,
+      "hearingMultiplier": 1.6,
+      "reactionTime": 0.15,
+      "turnSpeedDegrees": 720,
+      "wanderRadiusTiles": 3
+    }
+  },
+  {
+    // Non-human threat: slow until it notices you, very resistant, hunts by sound.
+    "id": "creature",
+    "nameKey": "actor.creature.name",
+    "faction": "enemy",
+    "health": 400,
+    "radius": 15,
+    "speed": 60,
+    "runSpeed": 235,
+    "acceleration": 1600,
+    "naturalWeaponId": "claws",
+    "knockdownImmune": true,
+    "hitStunDuration": 0.35,
+    "damageMultipliers": { "blunt": 0.25, "unarmed": 0, "thrown": 0.25, "sharp": 0.5, "execution": 0 },
+    "sprites": { "body": "actor.creature", "dead": "actor.creature.dead", "bloodTint": "#5a3a8a" },
+    "sounds": { "death": "sound.death" },
+    "ai": {
+      "behavior": "wander",
+      "visionRange": 300,
+      "visionAngleDegrees": 200,
+      "closeDetectionRadius": 70,
+      "hearingMultiplier": 2.2,
+      "reactionTime": 0.5,
+      "turnSpeedDegrees": 300,
+      "loseTargetTime": 5,
+      "searchDuration": 8,
+      "wanderRadiusTiles": 5
+    }
+  }
+]

@@ -1,0 +1,38 @@
+{
+  // Thermal surveillance camera seen from above: warm bodies glow, the world is cold and grainy.
+  // Every value can be tuned here; "post" effects need no shader.
+  "id": "thermal_cam",
+  "background": "#030304",
+  "tints": { "floor": "#ffffff", "wall": "#ffffff", "actor": "#ffffff", "weapon": "#ffffff", "decor": "#ffffff", "fx": "#ffffff", "blood": "#ffffff" },
+  "shadow": { "enabled": false },
+  // Walls and roofs read as solid structures: a faint warm rim, a cold edge.
+  "walls": { "rim": "#ffffff40", "rimWidth": 2, "shade": "#000000b0", "shadeWidth": 4 },
+  "ui": {
+    "font": "font.mono",
+    "text": "#e8e8e8",
+    "accent": "#ffffff",
+    "secondary": "#b4b4b4",
+    "danger": "#ffffff",
+    "panel": "#000000c8",
+    "shadow": "#000000",
+    "hudStyle": "surveillance",
+    "overlayLabelKey": "noctproto.camLabel",
+    "titleWave": 0.12
+  },
+  "post": {
+    "vignette": 0.45,
+    "grain": 0.1,
+    "scanlines": 0.18,
+    "flicker": 0.45,
+    "videoNoise": 0.35,
+    "rollingBar": 0.8,
+    "heatGlow": 0.9,
+    "darkness": 0.26,
+    "darknessColor": "#000000",
+    "playerLightRadius": 250,
+    "playerLightIntensity": 1.0,
+    "muzzleFlashLight": 2.0,
+    "colorMultiply": "#eef2f4",
+    "hideUnseenActors": true
+  }
+}

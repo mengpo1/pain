@@ -1,0 +1,110 @@
+{
+  "id": "arena",
+  "nameKey": "level.arena.name",
+  "introKey": "level.arena.intro",
+  "tileSize": 32,
+  "legend": {
+    "#": "wall_plaster",
+    ".": "floor_concrete"
+  },
+  "doorSymbols": {
+    "D": {
+      "tile": "floor_concrete",
+      "door": "door_wood"
+    }
+  },
+  "map": [
+    "################################",
+    "#..........#...................#",
+    "#..........#...................#",
+    "#..........D...................#",
+    "#..........#...................#",
+    "#..........#...................#",
+    "#..........######D##############",
+    "#..............................#",
+    "#..............................#",
+    "#..............................#",
+    "#.............##.......##......#",
+    "#.............##.......##......#",
+    "#..............................#",
+    "######D#########################",
+    "#.........######################",
+    "#.........######################",
+    "#.........######################",
+    "################################"
+  ],
+  "player": {
+    "definition": "player",
+    "position": [3, 8],
+    "facingDegrees": 0,
+    "weaponId": "none"
+  },
+  "actors": [
+    {
+      "id": "solo",
+      "definition": "thug",
+      "position": [5, 15],
+      "facingDegrees": 90,
+      "behavior": "guard",
+      "weaponId": "none"
+    },
+    {
+      // Bare hands on a dog: its legs or its head come off.
+      "id": "dog",
+      "definition": "dog",
+      "position": [5, 2],
+      "facingDegrees": 0,
+      "behavior": "guard"
+    },
+    {
+      "id": "duo_1",
+      "definition": "thug",
+      "position": [21, 3],
+      "facingDegrees": 180,
+      "behavior": "guard",
+      "weaponId": "none",
+      "tag": "duo"
+    },
+    {
+      "id": "duo_2",
+      "definition": "thug",
+      "position": [25, 3],
+      "facingDegrees": 180,
+      "behavior": "guard",
+      "weaponId": "none",
+      "tag": "duo"
+    }
+  ],
+  "weapons": [
+    {
+      "definition": "bat",
+      "position": [6, 9],
+      "rotationDegrees": 30
+    },
+    {
+      "definition": "pistol",
+      "position": [9, 8],
+      "rotationDegrees": -20,
+      "ammo": 6
+    },
+    {
+      "definition": "pipe",
+      "position": [26, 8],
+      "rotationDegrees": 70
+    }
+  ],
+  "props": [
+    {
+      "sprite": "prop.table",
+      "position": [27.5, 1],
+      "size": [2, 1]
+    }
+  ],
+  "objectives": [
+    {
+      "type": "eliminateAll",
+      "textKey": "objective.eliminateAll"
+    }
+  ],
+  "music": "music.action"
+}

@@ -1,0 +1,151 @@
+namespace PlaceholderArt;
+
+public sealed record CreatureLook
+{
+    public required Rgba Body { get; init; }
+    public required Rgba BodyDark { get; init; }
+    public required Rgba Rim { get; init; }
+    public required Rgba Limb { get; init; }
+    public required Rgba LimbLight { get; init; }
+    public required Rgba Claw { get; init; }
+    public required Rgba Eye { get; init; }
+    public required Rgba Maw { get; init; }
+    /// <summary>Limb length multiplier.</summary>
+    public float Reach { get; init; } = 1f;
+    /// <summary>Limb thickness multiplier.</summary>
+    public float Thickness { get; init; } = 1f;
+}
+
+/// <summary>
+/// Top-down characters, always facing +X. Local coordinates have the body centre at the origin;
+/// +Y is the character's right-hand side.
+/// </summary>
+public static class Actors
+{
+    static readonly int[] Sides = [-1, 1];
+
+    /// <summary>Maps local body coordinates to canvas pixels.</summary>
+    readonly record struct Frame(float Cx, float Cy, float S, float Bulk)
+    {
+        public float X(float x) => Cx + x * S;
+        public float Y(float y) => Cy + y * S * Bulk;
+        public float R(float r) => r * S;
+    }
+
+    // ------------------------------------------------------------------ creature
+
+    /// <summary>Standing creature: irregular body, six spindly clawed limbs, a cluster of eyes near the front.
+    /// Eyes are drawn on <paramref name="eyes"/> so the caller can make them glow.</summary>
+    public static void Creature(Canvas c, Canvas eyes, CreatureLook l, float cx, float cy, int seed)
+    {
+        var rng = new Random(seed);
+        // (root, joint, tip, claw) for the -Y side; mirrored with a little asymmetry for +Y
+        var limbs = new (float X, float Y)[][]
+        {
+            [(6f, -4f), (12.5f, -9f), (18.5f, -6.5f), (22f, -2.6f)],
+            [(1f, -9f), (5.5f, -16.5f), (13f, -19f), (17f, -17f)],
+            [(-6.5f, -8f), (-11f, -14f), (-9f, -19.6f), (-5.6f, -21.2f)],
+        };
+        foreach (int s in Sides)
+        {
+            foreach (var limb in limbs)
+            {
+                var p = new (float X, float Y)[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    float jx = i == 0 ? 0f : (rng.NextSingle() - 0.5f) * 1.6f, jy = i == 0 ? 0f : (rng.NextSingle() - 0.5f) * 1.6f;
+                    var (x, y) = limb[i];
+                    float rx = limb[0].X + (x - limb[0].X) * l.Reach, ry = limb[0].Y + (y - limb[0].Y) * l.Reach;
+                    p[i] = (cx + rx + jx, cy + (ry + jy) * s);
+                }
+                SpindlyLimb(c, l, p[0], p[1], p[2], p[3]);
+            }
+        }
+
+        CreatureBody(c, l, cx, cy, 9.2f, 10.8f, 1f, rng);
+
+        // maw with a few teeth, then the eye cluster
+        c.Fill(Shape.Ellipse(cx + 8.3f, cy, 1.5f, 3.2f), l.Maw);
+        foreach (float ty in new[] { -2.2f, -0.8f, 0.7f, 2.1f })
+            c.Fill(Shape.Circle(cx + 9.1f, cy + ty, 0.42f), l.Claw);
+        foreach (var (x, y, r) in new[] { (6.2f, -4.7f, 1.5f), (7.0f, 4.2f, 1.4f), (4.4f, -7.4f, 1.0f), (5.1f, 7.0f, 0.95f) })
+            eyes.Fill(Shape.Circle(cx + x, cy + y, r), l.Eye);
+    }
+
+    /// <summary>Dead creature: flattened body with limbs splayed and curled in every direction.</summary>
+    public static void CreatureDead(Canvas c, CreatureLook l, float cx, float cy, int seed)
+    {
+        var rng = new Random(seed);
+        float[] angles = [-2.7f, -1.85f, -0.95f, -0.1f, 0.8f, 1.7f, 2.55f];
+        foreach (float a in angles)
+        {
+            float bend = (rng.NextSingle() * 0.25f + 0.3f) * (rng.Next(2) == 0 ? -1f : 1f);
+            float r1 = (16.5f + rng.NextSingle() * 3f) * l.Reach, r2 = (23.5f + rng.NextSingle() * 3f) * l.Reach;
+            (float, float) P(float ang, float rad) => (cx + MathF.Cos(ang) * rad, cy + MathF.Sin(ang) * rad);
+            var root = P(a, 7.5f);
+            var joint = P(a + bend * 0.6f, r1);
+            var tip = P(a + bend * 1.5f, r2);
+            var claw = P(a + bend * 2.7f, r2 - 3f);
+            SpindlyLimb(c, l, root, joint, tip, claw);
+        }
+        CreatureBody(c, l, cx, cy, 10.5f, 9.2f, 1.35f, rng);
+        c.Fill(Shape.Ellipse(cx + 8f, cy + 0.5f, 1.3f, 2.6f, 0.3f), l.Maw);
+        foreach (var (x, y, r) in new[] { (5.8f, -4.2f, 1.1f), (6.6f, 4.4f, 1.0f), (4.2f, -6.6f, 0.75f) })
+            c.Fill(Shape.Circle(cx + x, cy + y, r), l.Eye);
+    }
+
+    static void SpindlyLimb(Canvas c, CreatureLook l, (float X, float Y) a, (float X, float Y) j, (float X, float Y) t, (float X, float Y) claw)
+    {
+        float k = l.Thickness;
+        c.Fill(Shape.Capsule(a.X, a.Y, j.X, j.Y, 1.9f * k, 1.25f * k), l.Limb);
+        c.Fill(Shape.Capsule(j.X, j.Y, t.X, t.Y, 1.25f * k, 0.85f * k), l.Limb);
+        c.Fill(Shape.Circle(j.X, j.Y, 1.45f * k), l.Limb);
+        c.Fill(Shape.Capsule(a.X, a.Y - 0.45f, j.X, j.Y - 0.45f, 0.6f * k, 0.4f * k), l.LimbLight.Fade(0.8f));
+        c.Fill(Shape.Capsule(j.X, j.Y - 0.35f, t.X, t.Y - 0.3f, 0.4f * k, 0.3f * k), l.LimbLight.Fade(0.6f));
+        c.Fill(Shape.Capsule(t.X, t.Y, claw.X, claw.Y, 0.95f * k, 0.05f), l.Claw);
+    }
+
+    static void CreatureBody(Canvas c, CreatureLook l, float cx, float cy, float rx, float ry, float wobble, Random rng)
+    {
+        float p1 = rng.NextSingle() * 6.283f, p2 = rng.NextSingle() * 6.283f, p3 = rng.NextSingle() * 6.283f;
+        Shape Body(float scale, float ox, float oy) => Shape.Blob(cx + ox, cy + oy, (MathF.Max(rx, ry) + 3f * wobble) * scale,
+            a => scale * (Shape.EllipseRadius(rx, ry, a)
+                          + wobble * (1.1f * MathF.Sin(3 * a + p1) + 0.7f * MathF.Sin(5 * a + p2) + 0.45f * MathF.Sin(8 * a + p3))));
+
+        int nseed = rng.Next();
+        c.Fill(Body(1f, 0f, 0f), l.Rim);
+        c.Fill(Body(0.9f, 0f, 0f), l.BodyDark);
+        c.Fill(Body(0.74f, -0.6f, -0.5f), (x, y) => l.BodyDark.Lerp(l.Body, Noise.Tile(x / 64f, y / 64f, 10, 10, 2, nseed)));
+        // ridge of plates along the back
+        for (int i = 0; i < 4; i++)
+            c.Fill(Shape.Ellipse(cx - 6.5f + i * 3.1f, cy + (i % 2 == 0 ? -0.7f : 0.7f), 1.6f, 1.05f), l.LimbLight.Fade(0.45f));
+    }
+
+    // ------------------------------------------------------------------ legs
+
+    /// <summary>32x32 legs kicking forward: the -Y foot planted, the +Y leg stretched out towards +X.</summary>
+    public static void LegsKick(Canvas c, Rgba pants, Rgba shoes)
+    {
+        float cx = 16f, cy = 16f;
+        c.Fill(Shape.Capsule(cx - 0.5f, cy - 3.6f, cx - 3.2f, cy - 4.6f, 2.5f, 2.3f), pants);
+        c.Fill(Shape.Ellipse(cx - 2.2f, cy - 4.6f, 3.4f, 2.1f), shoes);
+        c.Fill(Shape.Capsule(cx - 0.5f, cy + 3.6f, cx + 10.5f, cy + 2.2f, 2.7f, 2.2f), pants);
+        c.Fill(Shape.Ellipse(cx + 12.2f, cy + 2.1f, 3.4f, 2.2f), shoes);
+        c.Fill(Shape.Ellipse(cx + 13.2f, cy + 1.6f, 1.5f, 0.8f), shoes.Tone(1.35f));
+    }
+
+    /// <summary>One 32x32 walk frame of feet seen from above, drawn at horizontal offset frame * 32.</summary>
+    public static void LegsFrame(Canvas c, int frame, Rgba pants, Rgba shoes)
+    {
+        float cx = 16f + 32f * frame, cy = 16f;
+        float[] left = [1.5f, 6.5f, -1.5f, -5.5f];   // foot on the -Y side
+        float[] right = [-1.5f, -5.5f, 1.5f, 6.5f];  // foot on the +Y side
+        foreach (var (dx, s) in new[] { (left[frame], -1), (right[frame], 1) })
+        {
+            float fx = cx + dx, fy = cy + 4.4f * s;
+            c.Fill(Shape.Capsule(cx - 0.5f, cy + 3.6f * s, fx - 1.2f, fy, 2.5f, 2.3f), pants);
+            c.Fill(Shape.Ellipse(fx + 0.6f, fy, 3.4f, 2.1f), shoes);
+            c.Fill(Shape.Ellipse(fx + 1.6f, fy - 0.5f, 1.5f, 0.8f), shoes.Tone(1.35f));
+        }
+    }
+}

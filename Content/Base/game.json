@@ -1,0 +1,75 @@
+{
+  // What makes this content "a game": title, campaign, look and rules.
+  "titleKey": "game.title",
+  "defaultLanguage": "fr",
+  "fallbackLanguage": "en",
+  "campaign": ["first_night", "warehouse", "offices"],
+  // Listed in the level menu after the campaign.
+  "extraLevels": ["arena", "demo"],
+  "theme": "neon",
+  "menuMusic": "music.menu",
+  "rules": {
+    // Damage between allies, per kind of attack (allies always collide physically).
+    "friendlyFire": { "melee": false, "projectiles": true, "thrown": false, "explosions": true, "doors": true },
+    "unarmedWeaponId": "unarmed",
+    "pickupRadius": 24,
+    "pickupWhileArmed": "swap",
+    "dropWeaponOnKnockdown": true,
+    "dropWeaponOnDeath": true,
+    "doorsKnockDown": true,
+    "enemiesHaveInfiniteAmmo": true,
+    "thrownHarmSpeed": 260,
+    // Space finishes off a target on the floor (or getting up). Same rules for enemies.
+    "execution": {
+      "enabled": true,
+      "range": 24,
+      "durationMultiplier": 1,
+      "cancelByMoving": false,
+      "allowOnStunned": false,
+      "enemiesCanExecute": true
+    },
+    "combat": { "inputBuffer": 0.15, "bulletsHitDowned": true, "hitOnStunnedKnocksDown": true },
+    "score": {
+      "enabled": true,
+      "comboWindow": 3,
+      "points": { "melee": 400, "firearm": 300, "thrown": 600, "door": 800, "execution": 500 }
+    }
+  },
+  "camera": {
+    "viewHeight": 400,
+    "zoom": 1,
+    "followSharpness": 16,
+    "lookAhead": 0.22,
+    "lookAheadMax": 90,
+    "farLook": 0.6,
+    "farLookMax": 300,
+    "shakeDecay": 4,
+    "maxShake": 12
+  },
+  "sounds": {
+    "uiMove": "sound.ui_move",
+    "uiSelect": "sound.ui_select",
+    "pickup": "sound.pickup",
+    "throw": "sound.throw",
+    "bounce": "sound.clank",
+    "impact": "sound.clank",
+    "footstep": "sound.footstep",
+    "objectiveComplete": "sound.ui_select",
+    "levelComplete": "sound.complete",
+    "crush": "sound.crush",
+    "tear": "sound.tear"
+  },
+  // Game feel (presentation only). hitstop = micro-freeze in seconds, shake from 0 to 1,
+  // punch = camera jolt in the direction of the blow (world units).
+  "feel": {
+    "hit": { "hitstop": 0.02, "shake": 0.06, "punch": 1.5 },
+    "knockdown": { "hitstop": 0.045, "shake": 0.16, "punch": 2.5 },
+    "kill": { "hitstop": 0.06, "shake": 0.22, "punch": 3 },
+    "executionStrike": { "hitstop": 0.045, "shake": 0.4, "punch": 4 },
+    "executionFinish": { "hitstop": 0.1, "shake": 0.75, "punch": 9 },
+    "playerHurt": { "hitstop": 0.06, "shake": 0.45 },
+    "maxHitstop": 0.1,
+    "hitFlash": 0.08,
+    "fallDuration": 0.09
+  }
+}

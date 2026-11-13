@@ -1,0 +1,29 @@
+{
+  "id": "player",
+  "nameKey": "actor.player.name",
+  "faction": "player",
+  "health": 100,
+  "radius": 10,
+  "speed": 215,
+  "acceleration": 9000,
+  "friction": 9000,
+  "hitStunDuration": 0,
+  "sprites": {
+    "body": "actor.player",
+    "animationSet": "actor.player",
+    "legs": "actor.player.legs",
+    "down": "actor.player.down",
+    "dead": "actor.player.dead",
+    "mount": "actor.player.mount",
+    "crawl": "actor.player.crawl",
+    "torso": "actor.player.torso",
+    "parts": [
+      { "id": "head", "sprite": "actor.player.head", "over": true },
+      { "id": "arm", "sprite": "actor.player.arm1" }, { "id": "arm", "sprite": "actor.player.arm2" },
+      { "id": "leg", "sprite": "actor.player.leg1" }, { "id": "leg", "sprite": "actor.player.leg2" }
+    ],
+    "kick": "actor.legs.kick",
+    "bloodTint": "#ffffff"
+  },
+  "sounds": { "death": "sound.player_death" }
+}

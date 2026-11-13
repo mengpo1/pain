@@ -1,0 +1,990 @@
+{
+ "id": "installation",
+ "nameKey": "noctproto.level.installation.name",
+ "tileSize": 32,
+ "legend": {
+  ".": "ground_gravel",
+  ",": "floor_dirt",
+  "_": "floor_slab",
+  "g": "floor_grate",
+  "#": "wall_concrete",
+  "x": "fence",
+  "=": "glass",
+  "a": "asphalt"
+ },
+ "doorSymbols": {
+  "D": {
+   "tile": "floor_concrete",
+   "door": "door_metal"
+  },
+  "B": {
+   "tile": "floor_concrete",
+   "door": "door_wood"
+  }
+ },
+ "map": [
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "x............................................x",
+  "x.,,,,,,,,....############################...x",
+  "x.,,,,,,,,....#ggggggggg#_________#______#...x",
+  "x.,,,,,,,,....#ggggggggg#_________#______#...x",
+  "x.,,,,,,,,....#ggggggggg#_________#______#...x",
+  "x.,,,,,,,,....#ggggggggg#_________#______#...x",
+  "x.,,,,,,,,....#ggggggggg#_________#______#...x",
+  "x.............#####B#########D#######B####...x",
+  "x.............#__________________________#...x",
+  "x.............#__________________________#...x",
+  "x.............####B########B########B#####...x",
+  "x.............#_______#_________#________#...x",
+  "x.########....#_______#_________#________#...x",
+  "x.#______#....#_______#_________#________#...x",
+  "x.#______#....#_______#_________#________#...x",
+  "x.#______#....#_______#_________#________#...x",
+  "x.#______#....#_______#_________#________#...x",
+  "x.#______#....#_______#_________#________#...x",
+  "x.####B###....###=#=#######D#########=#=##...x",
+  "xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaax",
+  "xaa,,,,,,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaax",
+  "xaa,,,,,,aaaaaaaaaaaaaaaaaaaaa,,,,,,,aaaaaaaax",
+  "xaa,,,,,,aaaaaaaaaaaaaaaaaaaaa,,,,,,,aaaaaaaax",
+  "xaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,,,,,,,aaaaaaaax",
+  "xxxxxxxx,,,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "x............................................x",
+  "x............................................x",
+  "x............................................x",
+  "x.............,,,,,,,,,......................x",
+  "x.............,,,,,,,,,......................x",
+  "x.............,,,,,,,,,......................x",
+  "x............................................x",
+  "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+ ],
+ "player": {
+  "definition": "player",
+  "position": [
+   7,
+   30
+  ],
+  "facingDegrees": -90,
+  "weaponId": "pistol",
+  "inventory": [
+   {
+    "ammo": "9mm",
+    "amount": 16
+   },
+   {
+    "medkits": 1
+   }
+  ]
+ },
+ "actors": [
+  {
+   "id": "scav_yard",
+   "definition": "scavenger",
+   "position": [
+    20,
+    22
+   ],
+   "facingDegrees": 180,
+   "behavior": "wander"
+  },
+  {
+   "id": "scav_generator",
+   "definition": "scavenger",
+   "position": [
+    18,
+    5
+   ],
+   "facingDegrees": 0,
+   "behavior": "guard"
+  },
+  {
+   "id": "watcher_radio",
+   "definition": "watcher",
+   "position": [
+    32,
+    4
+   ],
+   "facingDegrees": 180,
+   "behavior": "ambush"
+  },
+  {
+   "id": "scav_shed",
+   "definition": "scavenger",
+   "position": [
+    5,
+    16
+   ],
+   "facingDegrees": 90,
+   "behavior": "dormant",
+   "tag": "return"
+  }
+ ],
+ "weapons": [
+  {
+   "definition": "pipe",
+   "position": [
+    29,
+    15
+   ],
+   "rotationDegrees": 40
+  }
+ ],
+ "props": [
+  {
+   "sprite": "prop.barrier",
+   "position": [
+    14.5,
+    22.6
+   ],
+   "size": [
+    2,
+    0.6
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.barrier",
+   "position": [
+    25.5,
+    21.4
+   ],
+   "size": [
+    2,
+    0.6
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.car",
+   "position": [
+    37.5,
+    22.5
+   ],
+   "size": [
+    2,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": true
+  },
+  {
+   "sprite": "prop.crate",
+   "position": [
+    11,
+    21
+   ],
+   "size": [
+    1,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.crate",
+   "position": [
+    12,
+    21.2
+   ],
+   "size": [
+    1,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.barrel",
+   "position": [
+    42,
+    21
+   ],
+   "size": [
+    0.8,
+    0.8
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.barrel",
+   "position": [
+    43,
+    22
+   ],
+   "size": [
+    0.8,
+    0.8
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.car",
+   "position": [
+    24.5,
+    28.5
+   ],
+   "size": [
+    2,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": true
+  },
+  {
+   "sprite": "prop.barrier",
+   "position": [
+    32.5,
+    27.4
+   ],
+   "size": [
+    2,
+    0.6
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.generator",
+   "position": [
+    21.5,
+    4
+   ],
+   "size": [
+    2,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.radio_console",
+   "position": [
+    29.5,
+    3
+   ],
+   "size": [
+    2,
+    0.8
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.table",
+   "position": [
+    19.5,
+    15
+   ],
+   "size": [
+    2,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.crate",
+   "position": [
+    30,
+    17
+   ],
+   "size": [
+    1,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.crate",
+   "position": [
+    34,
+    13
+   ],
+   "size": [
+    1,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.crate",
+   "position": [
+    35,
+    13
+   ],
+   "size": [
+    1,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.barrel",
+   "position": [
+    40,
+    13
+   ],
+   "size": [
+    0.8,
+    0.8
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.table",
+   "position": [
+    37.5,
+    5
+   ],
+   "size": [
+    2,
+    1
+   ],
+   "blocksProjectiles": true,
+   "blocksVision": false
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    3.5,
+    10.5
+   ],
+   "size": [
+    2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    3.5,
+    11.6
+   ],
+   "size": [
+    2,
+    0.9
+   ],
+   "rotationDegrees": 4
+  },
+  {
+   "sprite": "prop.tank",
+   "position": [
+    7.6,
+    10.4
+   ],
+   "size": [
+    1.4,
+    1.4
+   ]
+  },
+  {
+   "sprite": "prop.pipes",
+   "position": [
+    44.2,
+    9.5
+   ],
+   "size": [
+    0.5,
+    3
+   ],
+   "rotationDegrees": 90
+  },
+  {
+   "sprite": "prop.pipes",
+   "position": [
+    44.2,
+    15.5
+   ],
+   "size": [
+    0.5,
+    3
+   ],
+   "rotationDegrees": 90
+  },
+  {
+   "sprite": "prop.tires",
+   "position": [
+    2.2,
+    21.6
+   ],
+   "size": [
+    0.9,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.pallets",
+   "position": [
+    13.2,
+    23.8
+   ],
+   "size": [
+    1,
+    1
+   ]
+  },
+  {
+   "sprite": "prop.rubble",
+   "position": [
+    20.6,
+    23.9
+   ],
+   "size": [
+    1.2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    19.5,
+    20.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    35.5,
+    20.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    14.5,
+    26.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.pole",
+   "position": [
+    30.5,
+    26.4
+   ],
+   "size": [
+    0.3,
+    0.3
+   ]
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    40.2,
+    27.6
+   ],
+   "size": [
+    2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.container",
+   "position": [
+    40.2,
+    28.8
+   ],
+   "size": [
+    2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.van",
+   "position": [
+    35.5,
+    31.2
+   ],
+   "size": [
+    3,
+    1.4
+   ]
+  },
+  {
+   "sprite": "prop.tank",
+   "position": [
+    43,
+    31.6
+   ],
+   "size": [
+    1.4,
+    1.4
+   ]
+  },
+  {
+   "sprite": "prop.rubble",
+   "position": [
+    18,
+    31.3
+   ],
+   "size": [
+    1.2,
+    0.9
+   ]
+  },
+  {
+   "sprite": "prop.pallets",
+   "position": [
+    11.5,
+    30.8
+   ],
+   "size": [
+    1,
+    1
+   ]
+  },
+  {
+   "sprite": "prop.tires",
+   "position": [
+    27.5,
+    31.8
+   ],
+   "size": [
+    0.9,
+    0.9
+   ]
+  }
+ ],
+ "decor": [
+  {
+   "sprite": "decor.landing_mark",
+   "position": [
+    3,
+    28.5
+   ],
+   "scale": 1.4,
+   "layer": "floor"
+  },
+  {
+   "sprite": "prop.antenna",
+   "position": [
+    6,
+    4
+   ],
+   "layer": "floor"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    17.5,
+    4.5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    29,
+    5.5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    38,
+    5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    18,
+    15.5
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    27,
+    14
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    37,
+    16
+   ],
+   "layer": "roof"
+  },
+  {
+   "sprite": "prop.vent",
+   "position": [
+    5,
+    16
+   ],
+   "layer": "roof"
+  }
+ ],
+ "items": [
+  {
+   "id": "ammo_hall",
+   "sprite": "item.ammo_9mm",
+   "nameKey": "noctproto.item.ammo9",
+   "position": [
+    25,
+    13
+   ],
+   "loot": [
+    {
+     "ammo": "9mm",
+     "amount": 8
+    }
+   ]
+  },
+  {
+   "id": "ammo_generator",
+   "sprite": "item.ammo_9mm",
+   "nameKey": "noctproto.item.ammo9",
+   "position": [
+    16,
+    6
+   ],
+   "loot": [
+    {
+     "ammo": "9mm",
+     "amount": 8
+    }
+   ]
+  },
+  {
+   "id": "ammo_shed",
+   "sprite": "item.ammo_9mm",
+   "nameKey": "noctproto.item.ammo9",
+   "position": [
+    3.5,
+    15
+   ],
+   "loot": [
+    {
+     "ammo": "9mm",
+     "amount": 6
+    }
+   ]
+  },
+  {
+   "id": "medkit_yard",
+   "sprite": "item.medkit",
+   "nameKey": "noctproto.item.medkit",
+   "position": [
+    33,
+    23
+   ],
+   "loot": [
+    {
+     "medkits": 1
+    }
+   ]
+  }
+ ],
+ "interactables": [
+  {
+   "id": "office_locker",
+   "sprite": "prop.locker",
+   "usedSprite": "prop.locker_open",
+   "promptKey": "prompt.search",
+   "position": [
+    15,
+    12
+   ],
+   "loot": [
+    {
+     "ammo": "9mm",
+     "amount": 10
+    }
+   ]
+  },
+  {
+   "id": "storage_crate",
+   "sprite": "prop.supply_crate",
+   "usedSprite": "prop.supply_crate_open",
+   "promptKey": "prompt.search",
+   "position": [
+    39,
+    17
+   ],
+   "loot": [
+    {
+     "ammo": "shells",
+     "amount": 8
+    },
+    {
+     "medkits": 1
+    },
+    {
+     "weapon": "shotgun"
+    }
+   ]
+  },
+  {
+   "id": "archive_locker",
+   "sprite": "prop.locker",
+   "usedSprite": "prop.locker_open",
+   "promptKey": "prompt.search",
+   "position": [
+    40,
+    4
+   ],
+   "loot": [
+    {
+     "medkits": 1
+    }
+   ]
+  },
+  {
+   "id": "shed_crate",
+   "sprite": "prop.supply_crate",
+   "usedSprite": "prop.supply_crate_open",
+   "promptKey": "prompt.search",
+   "position": [
+    8,
+    14
+   ],
+   "loot": [
+    {
+     "ammo": "9mm",
+     "amount": 8
+    }
+   ]
+  },
+  {
+   "id": "battery_locker",
+   "sprite": "prop.locker",
+   "usedSprite": "prop.locker_open",
+   "promptKey": "prompt.search",
+   "position": [
+    26,
+    3
+   ],
+   "loot": [
+    {
+     "item": "battery",
+     "nameKey": "noctproto.item.battery"
+    }
+   ]
+  }
+ ],
+ "zones": {
+  "extraction": {
+   "x": 1,
+   "y": 27,
+   "width": 5,
+   "height": 4
+  },
+  "courtyard": {
+   "x": 1,
+   "y": 20,
+   "width": 44,
+   "height": 5
+  },
+  "facility": {
+   "x": 23,
+   "y": 12,
+   "width": 9,
+   "height": 7
+  },
+  "radio_wing": {
+   "x": 24,
+   "y": 9,
+   "width": 11,
+   "height": 2
+  },
+  "radio_room": {
+   "x": 25,
+   "y": 3,
+   "width": 9,
+   "height": 5
+  }
+ },
+ "objectives": [
+  {
+   "type": "reachZone",
+   "zone": "facility",
+   "textKey": "noctproto.objective.reachFacility"
+  },
+  {
+   "type": "reachZone",
+   "zone": "radio_room",
+   "textKey": "noctproto.objective.findRadioRoom"
+  },
+  {
+   "type": "collect",
+   "target": "battery",
+   "textKey": "noctproto.objective.takeBattery"
+  },
+  {
+   "type": "reachZone",
+   "zone": "extraction",
+   "requires": "battery",
+   "textKey": "noctproto.objective.extraction"
+  }
+ ],
+ "triggers": [
+  {
+   "on": "start",
+   "actions": [
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.signal",
+     "duration": 4.5
+    },
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.mission",
+     "duration": 5
+    }
+   ]
+  },
+  {
+   "on": "enterZone",
+   "subject": "courtyard",
+   "actions": [
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.unknown",
+     "duration": 4
+    }
+   ]
+  },
+  {
+   "on": "objectiveCompleted",
+   "subject": "0",
+   "actions": [
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.inside",
+     "duration": 4
+    }
+   ]
+  },
+  {
+   "on": "enterZone",
+   "subject": "radio_wing",
+   "actions": [
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.faint",
+     "duration": 5
+    }
+   ]
+  },
+  {
+   "on": "collected",
+   "subject": "battery",
+   "actions": [
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.battery",
+     "duration": 3.5
+    },
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.extraction",
+     "duration": 4
+    },
+    {
+     "type": "transmission",
+     "textKey": "noctproto.tx.fast",
+     "duration": 4.5
+    },
+    {
+     "type": "spawn",
+     "definition": "leaper",
+     "position": [
+      16,
+      22
+     ],
+     "facingDegrees": 0,
+     "tag": "return_leaper",
+     "alert": true
+    },
+    {
+     "type": "alertTag",
+     "tag": "return"
+    }
+   ]
+  }
+ ],
+ "ambience": "ambience.facility",
+ "roofs": [
+  {
+   "x": 14,
+   "y": 2,
+   "width": 11,
+   "height": 7,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 24,
+   "y": 2,
+   "width": 11,
+   "height": 7,
+   "sprite": "roof.metal"
+  },
+  {
+   "x": 34,
+   "y": 2,
+   "width": 8,
+   "height": 7,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 14,
+   "y": 8,
+   "width": 28,
+   "height": 4,
+   "sprite": "roof.metal"
+  },
+  {
+   "x": 14,
+   "y": 11,
+   "width": 9,
+   "height": 9,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 22,
+   "y": 11,
+   "width": 11,
+   "height": 9,
+   "sprite": "roof.metal"
+  },
+  {
+   "x": 32,
+   "y": 11,
+   "width": 10,
+   "height": 9,
+   "sprite": "roof.flat"
+  },
+  {
+   "x": 2,
+   "y": 13,
+   "width": 8,
+   "height": 7,
+   "sprite": "roof.metal"
+  }
+ ]
+}

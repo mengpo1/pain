@@ -1,0 +1,103 @@
+[
+  {
+    // Armed guard: shoots on sight after a short reaction time.
+    "id": "guard",
+    "nameKey": "actor.guard.name",
+    "faction": "enemy",
+    "health": 100,
+    "radius": 10,
+    // A lethal hit may leave it crawling on the floor (weapon "woundChance").
+    "wound": { "crawlSpeed": 30, "bleedOutTime": 0 },
+    "speed": 85,
+    "runSpeed": 180,
+    "acceleration": 5000,
+    "friction": 5000,
+    "weaponId": "pistol",
+    "sprites": { "body": "actor.guard", "animationSet": "actor.guard", "legs": "actor.guard.legs", "down": "actor.guard.down", "dead": "actor.guard.dead",
+                 "mount": "actor.guard.mount", "kick": "actor.legs.kick", "crawl": "actor.guard.crawl",
+                 // Pieces that blades and close shotgun blasts can sever (same-size images).
+                 "torso": "actor.guard.torso",
+                 "parts": [
+                   { "id": "head", "sprite": "actor.guard.head", "over": true },
+                   { "id": "arm", "sprite": "actor.guard.arm1" }, { "id": "arm", "sprite": "actor.guard.arm2" },
+                   { "id": "leg", "sprite": "actor.guard.leg1" }, { "id": "leg", "sprite": "actor.guard.leg2" }
+                 ] },
+    "sounds": { "death": "sound.death", "hurt": "sound.groan" },
+    "ai": {
+      "behavior": "guard",
+      "visionRange": 430,
+      "visionAngleDegrees": 120,
+      "reactionTime": 0.32,
+      "turnSpeedDegrees": 420,
+      "aimErrorDegrees": 3,
+      "preferredRangeFactor": 0.35,
+      "alertAlliesRadius": 160
+    }
+  },
+  {
+    // Melee thug: rushes the player.
+    "id": "thug",
+    "nameKey": "actor.thug.name",
+    "faction": "enemy",
+    "health": 100,
+    "radius": 10,
+    // A lethal hit may leave it crawling on the floor (weapon "woundChance").
+    "wound": { "crawlSpeed": 30, "bleedOutTime": 0 },
+    "speed": 90,
+    "runSpeed": 195,
+    "acceleration": 5000,
+    "friction": 5000,
+    "weaponId": "bat",
+    "sprites": { "body": "actor.thug", "animationSet": "actor.thug", "legs": "actor.thug.legs", "down": "actor.thug.down", "dead": "actor.thug.dead",
+                 "mount": "actor.thug.mount", "kick": "actor.legs.kick", "crawl": "actor.thug.crawl",
+                 // Pieces that blades and close shotgun blasts can sever (same-size images).
+                 "torso": "actor.thug.torso",
+                 "parts": [
+                   { "id": "head", "sprite": "actor.thug.head", "over": true },
+                   { "id": "arm", "sprite": "actor.thug.arm1" }, { "id": "arm", "sprite": "actor.thug.arm2" },
+                   { "id": "leg", "sprite": "actor.thug.leg1" }, { "id": "leg", "sprite": "actor.thug.leg2" }
+                 ] },
+    "sounds": { "death": "sound.death", "hurt": "sound.groan" },
+    "ai": {
+      "behavior": "patrol",
+      "visionRange": 400,
+      "visionAngleDegrees": 130,
+      "reactionTime": 0.25,
+      "turnSpeedDegrees": 520,
+      "alertAlliesRadius": 120
+    }
+  },
+  {
+    // Heavy: cannot be knocked down, shrugs off blunt weapons, needs several bullets.
+    "id": "brute",
+    "nameKey": "actor.brute.name",
+    "faction": "enemy",
+    "health": 300,
+    "radius": 14,
+    // A lethal hit may leave it crawling on the floor (weapon "woundChance").
+    "wound": { "crawlSpeed": 20, "bleedOutTime": 0 },
+    "speed": 70,
+    "runSpeed": 125,
+    "naturalWeaponId": "brute_fists",
+    "knockdownImmune": true,
+    "knockdownResistStun": 0.35,
+    "hitStunDuration": 0.25,
+    "damageMultipliers": { "blunt": 0, "unarmed": 0, "thrown": 0, "sharp": 0.5 },
+    "sprites": { "body": "actor.brute", "animationSet": "actor.brute", "legs": "actor.brute.legs", "down": "actor.brute.down", "dead": "actor.brute.dead",
+                 "mount": "actor.brute.mount", "kick": "actor.legs.kick", "crawl": "actor.brute.crawl",
+                 // Pieces that blades and close shotgun blasts can sever (same-size images).
+                 "torso": "actor.brute.torso",
+                 "parts": [
+                   { "id": "head", "sprite": "actor.brute.head", "over": true },
+                   { "id": "arm", "sprite": "actor.brute.arm1" }, { "id": "arm", "sprite": "actor.brute.arm2" },
+                   { "id": "leg", "sprite": "actor.brute.leg1" }, { "id": "leg", "sprite": "actor.brute.leg2" }
+                 ] },
+    "sounds": { "death": "sound.death", "hurt": "sound.groan" },
+    "ai": {
+      "behavior": "guard",
+      "visionRange": 380,
+      "reactionTime": 0.45,
+      "turnSpeedDegrees": 260
+    }
+  }
+]

@@ -1,0 +1,11 @@
+[
+  { "id": "ground_gravel", "spriteId": "tile.ground_gravel" },
+  { "id": "floor_dirt", "spriteId": "tile.floor_dirt" },
+  { "id": "floor_grate", "spriteId": "tile.floor_grate" },
+  { "id": "floor_slab", "spriteId": "tile.floor_slab" },
+  { "id": "asphalt", "spriteId": "tile.asphalt" },
+  { "id": "wall_concrete", "spriteId": "tile.wall_concrete", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true },
+  // Chain-link fence: blocks the way, not the view nor the bullets.
+  { "id": "fence", "spriteId": "tile.fence", "layer": "wall", "blocksMovement": true },
+  { "id": "wall_rock", "spriteId": "tile.wall_rock", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true }
+]

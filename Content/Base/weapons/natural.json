@@ -1,0 +1,78 @@
+[
+  {
+    // Bare hands: quick, dry punches that floor without killing. On the floor: Space, then
+    // one attack press per blow (the third kills): astride, the head slammed into the floor, or
+    // kicks to the head. A dog loses its legs or its head.
+    "id": "unarmed",
+    "nameKey": "weapon.unarmed.name",
+    "kind": "melee",
+    "spriteId": "",
+    "canDrop": false,
+    "damage": 0,
+    "damageType": "unarmed",
+    "range": 17,
+    "arcDegrees": 100,
+    "attackDuration": 0.15,
+    "hitDelay": 0.04,
+    "fireRate": 4.5,
+    "knockdown": true,
+    "knockdownDuration": 2.2,
+    "knockback": 260,
+    "execution": {
+      "strikes": 3, "windUp": 0.1, "strikeInterval": 0.12, "strikeOnInput": true, "autoStrikeDelay": 0.6, "recovery": 0.12,
+      "animations": ["headBash", "stomp"],
+      "against": { "quadruped": { "animations": ["tearLegs", "tearHead"] } }
+    },
+    "sounds": { "attack": "sound.swing", "hit": "sound.punch" }
+  },
+  {
+    "id": "brute_fists",
+    "pose": "heavy",
+    "nameKey": "weapon.unarmed.name",
+    "kind": "melee",
+    "canDrop": false,
+    "damage": 100,
+    "damageType": "blunt",
+    "range": 20,
+    "arcDegrees": 100,
+    "attackDuration": 0.45,
+    "hitDelay": 0.22,
+    "fireRate": 1.3,
+    "knockback": 260,
+    "execution": { "strikes": 1, "windUp": 0.25, "recovery": 0.2, "animations": ["stomp"] },
+    "sounds": { "attack": "sound.swing", "hit": "sound.hit_blunt" }
+  },
+  {
+    "id": "bite",
+    "nameKey": "weapon.bite.name",
+    "kind": "melee",
+    "canDrop": false,
+    "damage": 100,
+    "damageType": "sharp",
+    "range": 14,
+    "arcDegrees": 80,
+    "attackDuration": 0.25,
+    "hitDelay": 0.1,
+    "fireRate": 1.8,
+    "knockback": 120,
+    "execution": { "strikes": 2, "windUp": 0.1, "strikeInterval": 0.18, "recovery": 0.15, "animations": ["bite"] },
+    "sounds": { "attack": "sound.dog_bark", "hit": "sound.hit_sharp" }
+  },
+  {
+    // Long wind-up: the player can see the blow coming and dodge it.
+    "id": "claws",
+    "nameKey": "weapon.claws.name",
+    "kind": "melee",
+    "canDrop": false,
+    "damage": 100,
+    "damageType": "sharp",
+    "range": 26,
+    "arcDegrees": 150,
+    "attackDuration": 0.5,
+    "hitDelay": 0.28,
+    "fireRate": 1.2,
+    "knockback": 300,
+    "execution": { "strikes": 1, "windUp": 0.3, "recovery": 0.25 },
+    "sounds": { "attack": "sound.swing", "hit": "sound.hit_sharp" }
+  }
+]

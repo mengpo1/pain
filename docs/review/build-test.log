@@ -1,0 +1,30 @@
+# Compilation et tests — mengpo1/pain, branche claude/youthful-noether-typ76w, commit 56f552e
+# Date : 2026-11-13T17:34:18Z
+# Environnement : Linux 6.18.44-fc-v445, x86_64, SDK .NET 10.0.404
+
+$ dotnet build TopDown.slnx -c Release
+code de retour : 0
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+Time Elapsed 00:00:11.16
+
+$ dotnet test tests/TopDown.Tests -c Release --no-build
+code de retour : 0
+Passed!  - Failed:     0, Passed:   270, Skipped:     0, Total:   270, Duration: 965 ms - TopDown.Tests.dll (net10.0)
+
+# Jeu réel, pilote automatique (Xvfb, OpenGL logiciel)
+$ dotnet src/TopDown.Desktop/bin/Release/net10.0/TopDown.dll --profile action --level demo --autopilot --mute --frames 600 --size 1280x720 --screenshot demo.png
+code de retour : 0 ; avertissements/erreurs : 0 ; Screenshot saved
+$ dotnet src/TopDown.Desktop/bin/Release/net10.0/TopDown.dll --profile noct --level noct_demo --autopilot --mute --frames 600 --size 1280x720 --screenshot noct_demo.png
+code de retour : 0 ; avertissements/erreurs : 0 ; Screenshot saved
+$ dotnet src/TopDown.Desktop/bin/Release/net10.0/TopDown.dll --profile noct --level installation --autopilot --mute --frames 600 --size 1280x720 --screenshot installation.png
+code de retour : 0 ; avertissements/erreurs : 0 ; Screenshot saved
+
+# Intégration continue de cette branche sur 56f552e (run 43304181985)
+Build and tests (macos-latest) : success  (dotnet build TopDown.slnx -c Release ; dotnet test tests/TopDown.Tests -c Release --no-build)
+Build and tests (ubuntu-latest) : success
+Build and tests (windows-latest) : success
+Game smoke test (Linux) : success  (tous les niveaux des trois profils en pilote automatique sous Xvfb)
+Game smoke test (macOS, informational) : success  (first_night et installation lancés et rendus, Apple Silicon)
+https://github.com/mengpo1/pain/actions/runs/43304181985

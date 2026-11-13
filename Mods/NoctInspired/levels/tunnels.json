@@ -1,0 +1,195 @@
+{
+  "id": "tunnels",
+  "nameKey": "noct.level.tunnels.name",
+  "introKey": "noct.level.tunnels.intro",
+  "tileSize": 32,
+  "legend": {
+    "#": "wall_rock",
+    ",": "floor_dirt",
+    ":": "floor_grate",
+    ".": "floor_concrete"
+  },
+  "map": [
+    "##############################################",
+    "##############################################",
+    "##,,,,,,,###################:::::::::#########",
+    "##,,,,,,,#####,,,,,,,,,#####:::::::::#########",
+    "##,,,,,,,,,,,,,,,,,,,,,#####:::::::::#########",
+    "##,,,,,,,,,,,,,,,,,,,,,,,,,,:::::::::#########",
+    "##,,,,,,,#####,,,,,,,,,,,,,,:::::::::#########",
+    "##,,,,,,,#####,,,,,,,,,#####:::::::::#########",
+    "#####,,#######,,,,,,,,,#####::::::::,,########",
+    "#####,,#######,,,,,,,,,#############,,,#,,####",
+    "#####,,##############################,,#,,####",
+    "#####,,##############################,,,,,,,##",
+    "#####,,##############################,,,,,,,##",
+    "#####,,###############################,,,,,,##",
+    "#####,,###################,,,,,,,,,###,,,,,,##",
+    "#####,,#####,,,,,,,,######,,,,,,,,,###,,,,,,##",
+    "#####,,#####,,,,,,,,######,,,,,,,,,,,,,,,,,,##",
+    "#####,,#####,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,##",
+    "#####,,#####,,,,,,,,,,,,,,,,,,,,,,,###,,,,,,##",
+    "#####,,#####,,,,,,,,######,,,,,,,,,###########",
+    "##........##,,,,,,,,######,,,,,,,,,###########",
+    "##........,,,,,,,,,,######,,,,,,,,,###########",
+    "##........,,,,,,,,,,##########,,###,,#########",
+    "##........####################,,###,,#########",
+    "##........####################,,,,,,,,,,,,,,##",
+    "##........####################,,,,,,,,,,,,,,##",
+    "##........####################,,,,,,,,,,,,,,##",
+    "##........####################,,,,,,,,,,,,,,##",
+    "##############################################",
+    "##############################################"
+  ],
+  "player": {
+    "definition": "player",
+    "position": [5, 25],
+    "facingDegrees": 270,
+    "weaponId": "hunting_rifle"
+  },
+  "actors": [
+    {
+      "id": "husk_1",
+      "definition": "husk",
+      "position": [5, 4]
+    },
+    {
+      "id": "husk_2",
+      "definition": "husk",
+      "position": [18, 6]
+    },
+    {
+      "id": "husk_3",
+      "definition": "husk",
+      "position": [15, 19]
+    },
+    {
+      "id": "husk_4",
+      "definition": "husk",
+      "position": [40, 15]
+    },
+    {
+      "id": "stalker_1",
+      "definition": "stalker",
+      "position": [31, 5],
+      "behavior": "wander"
+    },
+    {
+      "id": "stalker_2",
+      "definition": "stalker",
+      "position": [30, 18],
+      "behavior": "wander"
+    },
+    {
+      "id": "survivor",
+      "definition": "guard",
+      "position": [41, 26],
+      "weaponId": "shotgun",
+      "facingDegrees": 180
+    }
+  ],
+  "weapons": [
+    {
+      "definition": "machete",
+      "position": [7, 21],
+      "rotationDegrees": 15
+    },
+    {
+      "definition": "flare_gun",
+      "position": [20, 4],
+      "rotationDegrees": 40,
+      "ammo": 2
+    }
+  ],
+  "props": [
+    {
+      "sprite": "prop.barrel",
+      "position": [3, 3],
+      "size": [0.8, 0.8],
+      "blocksProjectiles": true
+    },
+    {
+      "sprite": "prop.crate",
+      "position": [33, 3],
+      "size": [1, 1],
+      "blocksProjectiles": true,
+      "blocksVision": true
+    },
+    {
+      "sprite": "prop.barrel",
+      "position": [42, 24],
+      "size": [0.8, 0.8],
+      "blocksProjectiles": true
+    }
+  ],
+  "items": [
+    {
+      "id": "black_box",
+      "sprite": "prop.generator",
+      "nameKey": "noct.item.blackBox",
+      "position": [35, 3]
+    }
+  ],
+  "lights": [
+    {
+      "position": [5, 24],
+      "radius": 4,
+      "color": "#ffffff",
+      "intensity": 0.7,
+      "flicker": 0.2
+    },
+    {
+      "position": [32, 5],
+      "radius": 3,
+      "color": "#ffffff",
+      "intensity": 0.5,
+      "flicker": 0.9
+    },
+    {
+      "position": [37, 26],
+      "radius": 4,
+      "color": "#ffffff",
+      "intensity": 0.6,
+      "flicker": 0.4
+    }
+  ],
+  "zones": {
+    "shaft": {
+      "x": 40,
+      "y": 24,
+      "width": 4,
+      "height": 4
+    }
+  },
+  "objectives": [
+    {
+      "type": "collect",
+      "target": "black_box",
+      "textKey": "noct.objective.blackBox"
+    },
+    {
+      "type": "reachZone",
+      "zone": "shaft",
+      "textKey": "noct.objective.shaft"
+    }
+  ],
+  "triggers": [
+    {
+      "on": "objectiveCompleted",
+      "subject": "0",
+      "actions": [
+        {
+          "type": "message",
+          "textKey": "noct.msg.blackBox",
+          "duration": 4
+        },
+        {
+          "type": "playSound",
+          "sound": "sound.heartbeat"
+        }
+      ]
+    }
+  ],
+  "music": "music.dread",
+  "ambience": "ambience.drone"
+}
