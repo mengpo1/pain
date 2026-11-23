@@ -222,15 +222,17 @@ n'est pas régulière. Sur une vraie machine, il alterne toutes les 1/30 s.
     allumé. Seuls les impacts auxquels le joueur participe le déclenchent.
   - Le pack action : `feel.kill.backdrop` 0,25 s et `backdropFlash` `#b3122e`. Les achèvements n'en
     déclenchent pas.
-  - L'effet est coupé quand la secousse d'écran est réglée à 0 dans les options : c'est un clignotement,
-    à proposer aux joueurs sensibles.
+  - Le joueur le coupe dans les options : « Flashs lumineux : non ». Ce réglage est **indépendant** des
+    tremblements, activé par défaut, et une explication s'affiche sous l'option. Les réglages existants ne
+    changent pas : un fichier sans ce champ le garde activé.
 - **Tests.** Effet de rendu seulement. Le pack action charge sans avertissement, et les thèmes thermiques
   n'ayant pas de `backdropFlash`, ils ne clignotent pas. Vérifié sur l'enregistrement : premier flash
   sur l'image du coup (t = 1,833 s dans `apres_batte_images.jpg`).
 - **Limites.** La règle exacte de la vidéo n'est pas déductible (certains coups de mêlée flashent,
   d'autres non). Ici : toute élimination hors achèvement. Les renversements par une porte, qui flashent
   dans la vidéo, ne flashent pas.
-- **Vérifier en jeu.** Scène `cal_bat`. Pour le couper : options, secousse d'écran à 0.
+- **Vérifier en jeu.** Scène `cal_bat`. Avec « Flashs lumineux : non », aucun clignotement : vérifié sur un
+  enregistrement (3 éliminations, aucune image rouge ; 5 images rouges avec l'option active).
 
 ### 10. Points à l'endroit de l'élimination
 
@@ -304,26 +306,40 @@ sont à l'échelle 1, avec les effets fixés à l'écran coupés. À gauche, le 
 
 ### Packs thermiques
 
-Les deux packs thermiques héritent des définitions du pack de base, champ par champ. Toutes les valeurs
-modifiées qu'ils utilisent y sont donc **figées à leur ancienne valeur** :
-- `pistol` et `shotgun` (recul, cadence) ;
-- `pipe` et `machete` (recul) ;
-- `unarmed.execution` ;
-- `feel.fallDuration` ;
-- `door_wood`, dans NoctPrototype ;
-- `guard.getUpDuration`, dans NoctInspired ;
-- `glass`, `glass_broken` et, dans NoctInspired, `wall_plaster`, qui gardent des tuiles pleines.
+Les deux packs thermiques héritent des définitions du pack de base, champ par champ : toute valeur
+modifiée dans le pack de base leur parvient, qu'un de leurs niveaux s'en serve ou non. Une revue de la PR
+a relevé des oublis dans la première version. Le survivant héritait d'un relevé de 0,1 s alors que son
+animation dure 0,355 s ; le fusil, le pistolet-mitrailleur, le revolver, la batte, le garde et le voyou
+étaient aussi touchés.
 
-Leurs planches d'animation ne sont pas régénérées différemment. Le test
-`The_thermal_packs_keep_their_previous_tuning` vérifie ces valeurs, et `NoctPrototypeTests` passe
-toujours.
+**Correction.** La protection est désormais générale.
+- `ThermalProfileTests.The_thermal_profiles_load_exactly_what_they_loaded_before_the_calibration` compare
+  **toutes les valeurs effectivement chargées** par les profils `noct` et `signal` à un instantané pris
+  sur le contenu d'avant l'étalonnage (commit 2285c08), avec le code actuel. Il couvre :
+  - chaque arme, personnage, tuile, porte, modificateur et niveau ;
+  - les règles, le fichier `game.json` (caméra, ressenti…) et le thème actif ;
+  - chaque animation.
+
+  L'instantané (`tests/TopDown.Tests/Snapshots/thermal_profiles.json`, une empreinte par valeur) se
+  régénère avec `THERMAL_SNAPSHOT_FROM=<copie du commit 2285c08>`. Le test cite chaque valeur qui
+  diffère.
+- Pour qu'il passe, chaque valeur modifiée est figée à son ancienne valeur dans les deux mods :
+  - armes `pistol`, `shotgun`, `rifle`, `smg`, `revolver`, `bat`, `pipe`, `machete` et
+    `unarmed.execution` ;
+  - `player`, `guard` et `thug` (`getUpDuration` 0,4) ;
+  - `door_wood` ;
+  - `feel.fallDuration` et `feel.kill.backdrop` ;
+  - les cinq tuiles de mur et de vitre (`thickness: null`, tuiles pleines).
+- `Every_human_stands_up_before_it_can_act_again` vérifie, dans les trois profils, que l'animation de
+  relevé de chaque humain atteint sa pose debout avant la fin de l'état « se relève ». Avant la
+  correction, ce test échouait pour le survivant des deux packs thermiques.
 
 ## Tests et vérifications
 
 | Vérification | Résultat |
 |---|---|
 | `dotnet build TopDown.slnx -c Release` | réussi, 0 avertissement (`TreatWarningsAsErrors`) |
-| `dotnet test tests/TopDown.Tests` | **315 réussis**, 0 échec. 45 nouveaux cas : 28 dans `ReferenceCalibrationTests`, 13 dans `ThinWallTests`, 3 cas de cadence dans `ResponsivenessTests`, 1 dans `GameplayTests` (et 1 test complété) |
+| `dotnet test tests/TopDown.Tests` | **320 réussis**, 0 échec. 50 nouveaux cas : 28 dans `ReferenceCalibrationTests`, 13 dans `ThinWallTests`, 5 dans `ThermalProfileTests`, 3 cas de cadence dans `ResponsivenessTests`, 1 dans `GameplayTests` (et 1 test complété) |
 | Avant correction | sur le commit de départ, 12 des 15 premiers tests d'étalonnage échouaient, avec les valeurs « avant » citées plus haut |
 | Jeu réel, pilote automatique | avec les murs fins : `action/first_night`, `warehouse`, `offices` (300 images), `demo`, `arena` (600), `signal/outpost`, `tunnels` (300), `noct/installation` (mission entière, 4200), `noct/noct_demo` (600). Code de retour 0, aucun avertissement |
 | Scènes d'étalonnage | les 5 scènes chargent et tournent (`The_calibration_scenes_load_and_play`) |

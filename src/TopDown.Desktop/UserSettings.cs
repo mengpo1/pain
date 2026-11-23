@@ -19,6 +19,11 @@ public sealed class UserSettings
     public int WindowHeight { get; set; } = 720;
     public bool VSync { get; set; } = true;
     public float ScreenShake { get; set; } = 1f;
+    /// <summary>
+    /// Flashing effects (the backdrop strobing on kills). On by default, so existing settings files keep
+    /// what they had; players sensitive to flashing lights turn it off, independently of the shake.
+    /// </summary>
+    public bool Flashes { get; set; } = true;
     /// <summary>Multiplies the content's camera zoom.</summary>
     public float Zoom { get; set; } = 1f;
     /// <summary>Action name → bindings ("W", "Mouse:Left"…). Missing actions keep their defaults.</summary>

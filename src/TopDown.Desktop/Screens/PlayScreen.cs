@@ -405,8 +405,8 @@ public sealed class PlayScreen : Screen
         _hitstop = MathF.Min(Feel.MaxHitstop, MathF.Max(_hitstop, applied.Hitstop));
         _camera.Shake(applied.Shake);
         _camera.Punch(WorldRenderer.ToXna(direction), applied.Punch);
-        // A strobing backdrop is a screen effect: switched off with the screen shake.
-        if (applied.Backdrop > 0f && Host.Settings.ScreenShake > 0f && applied.Backdrop > _backdropFlash)
+        // A strobing backdrop is a flashing effect: the player can turn those off in the settings.
+        if (applied.Backdrop > 0f && Host.Settings.Flashes && applied.Backdrop > _backdropFlash)
             _backdropFlash = _backdropLength = applied.Backdrop;
     }
 

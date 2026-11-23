@@ -30,6 +30,8 @@
     "interface": "Interface",
     "fullscreen": "Plein écran",
     "shake": "Tremblements de l'écran",
+    "flashes": "Flashs lumineux",
+    "flashesHint": "Le fond clignote en rouge à chaque élimination (effet stroboscopique). Non : aucun clignotement.",
     "zoom": "Zoom",
     "on": "oui",
     "off": "non",

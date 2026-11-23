@@ -287,8 +287,9 @@ reproductibles décrites dans le livrable B.
 | 8 | Caméra et effets | flash du fond, points à l'impact (**faits**) ; secousse aux achèvements (à décider) ; rotation de la vue, cycle de couleur du fond (proposés) | en partie |
 | 9 | Son | rien de mesurable | — |
 
-Les packs thermiques (`noct`, `signal`) gardent exactement leurs réglages : les valeurs modifiées dans le
-pack de base y sont figées, et un test le vérifie.
+Les packs thermiques (`noct`, `signal`) gardent exactement leurs réglages. Les valeurs modifiées dans le
+pack de base y sont figées, et un test compare toutes les valeurs qu'ils chargent à celles d'avant
+l'étalonnage.
 
 ## 8. Ce qui reste et pourquoi
 

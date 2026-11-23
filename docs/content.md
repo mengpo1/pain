@@ -293,7 +293,7 @@ Présentation uniquement, jamais les règles. Pour chaque type d'impact où le j
 `hitstop` (micro-arrêt en secondes), `shake` (secousse de 0 à 1) et `punch` (à-coup de la caméra dans
 le sens du coup, en unités du monde) et `backdrop` (durée en secondes pendant laquelle le fond autour du
 niveau clignote, une image sur deux à 30 Hz, dans la couleur `backdropFlash` du thème ; rien si le thème
-n'en a pas ; coupé quand la secousse d'écran est réglée à 0). `playerHurt` remplace les autres
+n'en a pas ; le joueur le coupe dans les options, « Flashs lumineux », indépendamment des tremblements). `playerHurt` remplace les autres
 quand c'est le joueur qui est touché. `maxHitstop` plafonne le gel cumulé, `hitFlash` règle le flash
 blanc d'un personnage touché, `fallDuration` la chute visible au sol. `extraLevels` liste des niveaux
 proposés après la campagne (la salle d'essai `arena`). Sons : `crush` quand une tête éclate, `tear`
