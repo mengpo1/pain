@@ -172,6 +172,39 @@ public class ReferenceCalibrationTests
         Assert.InRange(thrown, minBodies, maxBodies);
     }
 
+    // ------------------------------------------------------------------ walls (04:17.0, 10:10.0)
+
+    [Theory]
+    [InlineData("wall_white")]
+    [InlineData("wall_brick")]
+    [InlineData("wall_plaster")]
+    [InlineData("glass")]
+    public void Walls_are_as_thin_as_in_the_reference(string tile)
+    {
+        float? thickness = ActionPack.Value.Definitions.Tiles[tile].Thickness;
+
+        // Reference: 2–5 px for characters 10–15 px wide, 0.2–0.45 of a body width.
+        Assert.NotNull(thickness);
+        Assert.InRange(thickness!.Value / BodyWidth, 0.2f, 0.45f);
+    }
+
+    [Fact]
+    public void Every_door_of_the_action_levels_meets_its_walls()
+    {
+        foreach (LevelDefinition level in ActionPack.Value.Levels.Values)
+        {
+            GameWorld world = GameWorld.Create(level, ActionPack.Value.Definitions, seed: 1);
+            TileMap map = world.Map;
+            foreach (Door door in world.Doors)
+            {
+                // Just beyond each end of the closed door, the wall is solid: no gap to slip or shoot through.
+                Vector2 along = Geo.FromAngle(door.ClosedAngle);
+                Assert.True(map.IsSolidAt(door.Hinge - along * 2f), $"{level.Id}: wall missing at the hinge of the door at {door.Hinge}");
+                Assert.True(map.IsSolidAt(door.Hinge + along * (door.Length + 2f)), $"{level.Id}: wall missing at the end of the door at {door.Hinge}");
+            }
+        }
+    }
+
     // ------------------------------------------------------------------ doors (08:49.37–.47, 09:08.017–.050)
 
     [Fact]
@@ -306,6 +339,8 @@ public class ReferenceCalibrationTests
         Assert.Equal(0.6f, bareHanded.AutoStrikeDelay);
         Assert.Equal(0.09f, Load(mod).Game.Feel.FallDuration);
         if (mod == "noct_prototype") Assert.Equal(620f, Load(mod).Definitions.Doors["door_wood"].PushSpeedDegrees);
+        Assert.False(definitions.Tiles["glass"].Thickness > 0f);
+        if (usesGuards) Assert.False(definitions.Tiles["wall_plaster"].Thickness > 0f);
         if (usesGuards) Assert.Equal(0.4f, definitions.Actors["guard"].GetUpDuration);
     }
 

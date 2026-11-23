@@ -191,6 +191,53 @@ public class ThinWallTests
     }
 
     [Fact]
+    public void The_validator_warns_about_thin_walls_meeting_at_a_corner()
+    {
+        // A throw-away mod with one level, loaded on top of the shipped action pack (thin walls).
+        string root = Path.Combine(Path.GetTempPath(), "thin-walls-" + Guid.NewGuid().ToString("N"));
+        string mod = Path.Combine(root, "corner");
+        Directory.CreateDirectory(Path.Combine(mod, "levels"));
+        File.WriteAllText(Path.Combine(mod, "manifest.json"),
+            """{ "id": "corner", "name": "Corner", "version": "1.0.0", "formatVersion": 1, "dependencies": ["base"] }""");
+        File.WriteAllText(Path.Combine(mod, "levels", "corner.json"), """
+            {
+              "id": "corner", "nameKey": "level.arena.name", "tileSize": 32,
+              "legend": { "#": "wall_white", ".": "floor_wood" },
+              "map": ["#####", "#...#", "#.#.#", "#..##", "#####"],
+              "player": { "definition": "player", "position": [1, 1] },
+              "objectives": [{ "type": "eliminateAll", "textKey": "objective.eliminateAll" }]
+            }
+            """);
+        try
+        {
+            TopDown.Content.ContentDatabase content = TopDown.Content.ContentLoader.Load(new TopDown.Content.ContentLoadOptions
+            {
+                ContentRoot = Path.Combine(RepositoryRoot, "Content"),
+                ModsRoot = root,
+                EnabledMods = ["corner"],
+            });
+
+            // (2, 2) and (3, 3) touch only at a corner.
+            Assert.Contains(content.Diagnostics.Items, d => d.ToString().Contains("(2, 2) and (3, 3) only touch at a corner"));
+        }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
+    }
+
+    private static string RepositoryRoot
+    {
+        get
+        {
+            string? directory = AppContext.BaseDirectory;
+            while (directory is not null && !File.Exists(Path.Combine(directory, "TopDown.slnx")))
+                directory = Path.GetDirectoryName(directory);
+            return directory ?? throw new InvalidOperationException("Repository root not found.");
+        }
+    }
+
+    [Fact]
     public void The_player_goes_through_a_door_in_a_thin_wall()
     {
         GameWorld world = World(Rooms, new Vector2(2, 3));

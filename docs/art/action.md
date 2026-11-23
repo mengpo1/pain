@@ -24,6 +24,9 @@ Pixel art net, couleurs saturées, vue strictement de dessus. Tout est original 
 - Ombres portées par le thème (`shadow.offset` 3, 4) pour murs et personnages ; biseau des murs
   (`walls` : liseré clair en haut et à gauche, sombre en bas et à droite).
 - Sang : trois tons (`#5a0710`, `#870f1c`, `#d0404e`), flaques à bord net.
+- Murs fins : bande de 8 unités au milieu de la ligne de tuiles, texture du mur recadrée, liseré et ombre
+  sur les faces exposées ; les vitres aussi. Le sol des pièces passe sous la partie libre des tuiles de mur
+  et des embrasures ; dehors, c'est le fond.
 
 ## Personnages
 

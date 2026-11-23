@@ -22,6 +22,7 @@ Rien n'est fusionné dans `main`.
 | 8 | Flash du fond sur les éliminations | effet (code et données) | `TopDown.Content/Model.cs`, `Desktop/Screens/PlayScreen.cs`, `Desktop/Graphics/WorldRenderer.cs`, `game.json`, `themes/neon.json` |
 | 8 | Points affichés à l'endroit de l'élimination | effet (code et données) | `Core/World/Events.cs`, `Core/World/GameWorld.cs`, `Desktop/Ui/Hud.cs`, `locales/*.json` |
 | — | Packs thermiques inchangés | non-régression | `Mods/NoctPrototype/…`, `Mods/NoctInspired/…` |
+| 6–7 | Murs fins (collisions, tirs, vue, chemins, rendu) | logique, graphisme, réglage | `Core/Definitions/TileDefinition.cs`, `Core/World/TileMap.cs`, `Core/World/Physics.cs`, `Core/World/LevelBuilder.cs`, `Desktop/Graphics/WorldRenderer.cs`, `Desktop/Ui/DebugOverlay.cs`, `TopDown.Content/ContentValidator.cs`, `Content/Base/tiles/tiles.json` |
 | — | Scènes de vérification reproductibles | outil | `tools/CalibrationScenes/` |
 
 ## Avant / après dans le jeu
@@ -247,6 +248,60 @@ n'est pas régulière. Sur une vraie machine, il alterne toutes les 1/30 s.
   toujours dans le HUD et non 2 s après la série.
 - **Vérifier en jeu.** Scène `cal_bat` : « +400 », « +800 », « +1200 ».
 
+### 11. Murs fins
+
+![Murs pleins / murs fins : first_night](murs_first_night.jpg)
+
+Autres niveaux : [`murs_demo.jpg`](murs_demo.jpg), [`murs_warehouse.jpg`](murs_warehouse.jpg). Ces images
+sont à l'échelle 1, avec les effets fixés à l'écran coupés. À gauche, le même code avec les murs pleins.
+
+- **Problème.** Dans la vidéo, les murs sont deux traits clairs de 0,2 à 0,45 largeur de personnage
+  (04:17.0, 10:10.0), les pièces sont vastes et l'extérieur est un fond uni. Dans PAIN, chaque mur était une
+  tuile pleine de 32 unités, soit 1,45 largeur de personnage : des bandes épaisses qui mangeaient l'espace
+  et la lisibilité.
+- **Cause.** Architecture : un mur ne pouvait être qu'une tuile entière.
+- **Modification.**
+  - Nouveau champ `thickness` sur les tuiles de mur.
+  - `TileMap.Solids` calcule la partie pleine de chaque tuile. C'est la zone de murs réduite de
+    (tuile − épaisseur) / 2 sur ses bords libres : une bande centrée dans une ligne de murs, un L dans un
+    angle, un T à une jonction, un bloc plein à l'intérieur d'une masse de murs. Les **embrasures de porte**
+    comptent comme du mur, si bien que la bande va jusqu'à la porte, centrée sur la même ligne qu'elle.
+  - Tout le moteur utilise cette forme :
+    - les collisions des personnages (`Physics.ResolveStatic`) ;
+    - les tracés de tirs, de vue, de portée des coups et des lancers (`TileMap.Raycast`, qui ne s'arrête
+      sur une tuile fine que si le segment croise sa bande).
+  - Les tuiles entières gardent exactement l'ancien calcul.
+  - Le rendu :
+    - dessine le mur seulement dans ses bandes, texture recadrée, liseré et ombre sur les faces exposées ;
+    - fait passer sous la partie libre le sol de la pièce qui la borde, quart par quart, y compris dans
+      les embrasures ;
+    - laisse le fond à l'extérieur.
+  - Le validateur signale deux murs fins qui ne se touchent que par un coin, car ils laisseraient un passage.
+  - Pack action : murs blancs, briques, plâtre et vitres à **8 unités** (0,36 largeur de personnage).
+  - Packs thermiques : leurs tuiles restent pleines.
+- **Tests.**
+  - `ThinWallTests`, 13 tests :
+    - formes en ligne, en angle, en T, en bloc et au bord de la carte ;
+    - jonction avec une porte, et forme recalculée quand une tuile change (vitre brisée) ;
+    - un personnage entre dans la partie libre d'une tuile de mur et s'arrête sur la bande ;
+    - les tracés s'arrêtent sur la bande avec la bonne normale et passent à côté ;
+    - la vue passe au bout d'un mur ;
+    - un chemin part de l'intérieur d'une tuile de mur ;
+    - on franchit une porte ;
+    - l'avertissement du validateur.
+  - `Walls_are_as_thin_as_in_the_reference`, et `Every_door_of_the_action_levels_meets_its_walls` : aucune
+    porte des cinq niveaux n'a d'interstice.
+  - Les tests existants (portes, vitres, IA, groupes, niveaux livrés) passent sans modification.
+- **Limites.**
+  - Les pièces gagnent 12 unités de chaque côté. Les meubles posés contre un mur en sont donc décollés
+    d'autant ; les niveaux n'ont pas été retouchés.
+  - Le chemin de l'IA traite toujours les tuiles de mur comme infranchissables. C'est prudent : il ne
+    passe simplement pas par leur partie libre.
+  - Deux murs fins ne se rejoignent pas en diagonale. Aucun niveau livré n'en a, et le validateur le signale.
+- **Vérifier en jeu.** N'importe quel niveau du profil action, par exemple `first_night` ou `demo`. Longer
+  un mur, tirer le long d'un mur, passer une porte. La touche de débogage des collisions dessine désormais
+  les bandes réelles.
+
 ### Packs thermiques
 
 Les deux packs thermiques héritent des définitions du pack de base, champ par champ. Toutes les valeurs
@@ -256,7 +311,8 @@ modifiées qu'ils utilisent y sont donc **figées à leur ancienne valeur** :
 - `unarmed.execution` ;
 - `feel.fallDuration` ;
 - `door_wood`, dans NoctPrototype ;
-- `guard.getUpDuration`, dans NoctInspired.
+- `guard.getUpDuration`, dans NoctInspired ;
+- `glass`, `glass_broken` et, dans NoctInspired, `wall_plaster`, qui gardent des tuiles pleines.
 
 Leurs planches d'animation ne sont pas régénérées différemment. Le test
 `The_thermal_packs_keep_their_previous_tuning` vérifie ces valeurs, et `NoctPrototypeTests` passe
@@ -267,9 +323,9 @@ toujours.
 | Vérification | Résultat |
 |---|---|
 | `dotnet build TopDown.slnx -c Release` | réussi, 0 avertissement (`TreatWarningsAsErrors`) |
-| `dotnet test tests/TopDown.Tests` | **297 réussis**, 0 échec. 27 nouveaux cas : 23 dans `ReferenceCalibrationTests`, 3 cas de cadence dans `ResponsivenessTests`, 1 dans `GameplayTests` (et 1 test complété) |
+| `dotnet test tests/TopDown.Tests` | **315 réussis**, 0 échec. 45 nouveaux cas : 28 dans `ReferenceCalibrationTests`, 13 dans `ThinWallTests`, 3 cas de cadence dans `ResponsivenessTests`, 1 dans `GameplayTests` (et 1 test complété) |
 | Avant correction | sur le commit de départ, 12 des 15 premiers tests d'étalonnage échouaient, avec les valeurs « avant » citées plus haut |
-| Jeu réel, pilote automatique, 600 images | `action/first_night`, `action/demo`, `noct/installation`, `noct/noct_demo`, `signal/outpost` : code de retour 0, aucun avertissement |
+| Jeu réel, pilote automatique | avec les murs fins : `action/first_night`, `warehouse`, `offices` (300 images), `demo`, `arena` (600), `signal/outpost`, `tunnels` (300), `noct/installation` (mission entière, 4200), `noct/noct_demo` (600). Code de retour 0, aucun avertissement |
 | Scènes d'étalonnage | les 5 scènes chargent et tournent (`The_calibration_scenes_load_and_play`) |
 
 **Non vérifié.** Une vraie machine avec carte graphique (alternance régulière du flash, 60 images/s et

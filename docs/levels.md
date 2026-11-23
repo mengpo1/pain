@@ -66,6 +66,11 @@ avec lui (bouches d'aération, antennes). Purement visuel : rien ne change pour 
   elle reste verrouillée pour toute la partie.
 - L'apparence (`sprite`) et la collision (`size`, `blocks*`) des `props` sont indépendantes. Le `decor`
   n'a jamais de collision.
+- Avec des murs fins (`thickness` de la tuile), chaque mur est une bande au milieu de sa ligne de tuiles :
+  les pièces gagnent la moitié d'une tuile, moins la moitié de la bande, de chaque côté. Un meuble posé
+  contre un mur s'en trouve décollé d'autant (12 unités pour une bande de 8) : le placer d'une demi-tuile
+  plus près pour le coller au mur. Deux murs fins ne se rejoignent qu'en ligne ou en colonne : deux tuiles
+  qui ne se touchent que par un coin laissent un passage (le validateur le signale).
 
 ## Joueur, objets et conteneurs
 
@@ -121,5 +126,5 @@ Exemple complet : la mission « Le dernier signal » (`Mods/NoctPrototype/levels
 
 Au chargement, chaque niveau est vérifié : caractères absents de la légende, tuiles, définitions et
 armes inconnues, zones et cibles d'objectifs inexistantes, portes hors carte, objets placés dans un mur
-ou hors de la carte, tags jamais utilisés. Un niveau en erreur n'est pas proposé dans le menu et la
+ou hors de la carte, tags jamais utilisés, murs fins qui ne se touchent que par un coin. Un niveau en erreur n'est pas proposé dans le menu et la
 raison est affichée dans le diagnostic du contenu.

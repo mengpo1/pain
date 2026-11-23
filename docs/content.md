@@ -210,10 +210,18 @@ Toutes les poses à cheval regardent vers la tête : les épaules du bourreau so
 ## Tuiles (`tiles/`) et portes (`doors/`)
 
 ```json
-{ "id": "glass", "spriteId": "tile.glass", "layer": "wall",
+{ "id": "glass", "spriteId": "tile.glass", "layer": "wall", "thickness": 8,
   "blocksMovement": true, "blocksProjectiles": true, "blocksVision": false,
   "destructible": true, "breaksInto": "glass_broken", "breakSound": "sound.glass", "breakNoiseRadius": 300 }
 ```
+
+`thickness` (unités, tuiles de mur seulement) fait un **mur fin**. Seule une bande de cette largeur,
+centrée sur la tuile, est pleine. Elle se prolonge vers les murs voisins (lignes et colonnes, pas les
+diagonales) et vers les embrasures des portes. Le reste de la tuile est du sol libre : on y marche, on
+voit et on tire au travers, et il prend le sol de la pièce qui le borde (le fond, du côté de l'extérieur).
+Une masse de murs reste pleine à l'intérieur. Absent ou 0 : la tuile entière est pleine. Le pack action
+utilise 8 unités, le pack thermique des tuiles pleines. Collisions, tirs, vue, chemins et rendu utilisent
+la même forme (`TileMap.Solids`).
 
 ```json
 { "id": "door_wood", "spriteId": "door.wood", "thickness": 6, "maxAngleDegrees": 90,

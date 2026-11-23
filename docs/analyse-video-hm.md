@@ -271,6 +271,7 @@ reproductibles décrites dans le livrable B.
 | Contact au sol après un coup | ≤ 1 image | 0,14–0,18 s | **0,05 s** |
 | Relevé | 2–3 images | 0,40 s | **0,10 s** (une image de 1/120 s d'arrondi en plus) |
 | Ouverture d'une porte poussée | 2–3 images | 0,142 s | **≈ 0,085 s** |
+| Épaisseur des murs (largeurs de personnage) | 0,2–0,45 | 1,45 (tuile pleine) | **0,36** (bande de 8 unités) |
 
 ## 7. Plan priorisé
 
@@ -281,8 +282,8 @@ reproductibles décrites dans le livrable B.
 | 3 | Animations d'attaque et d'impact | chute en 0,05 s, relevé en 0,1 s (générateur et manifeste) | **fait** |
 | 4 | Achèvements | rythme à mains nues de 0,2–0,3 s entre frappes | **fait** (JSON) |
 | 5 | Ennemis | réaction, patrouille, groupes : dans les plages observées | rien à corriger d'après la vidéo |
-| 6 | Collisions | murs fins, la moitié d'une tuile au plus (§ 8) | **proposé**, non fait (architecture) |
-| 7 | Fidélité graphique | murs fins à double trait, champ de vue | proposé, lié au lot 6 |
+| 6 | Collisions | murs fins de 8 unités : collisions, tirs, vue et chemins sur la même forme | **fait** (moteur et JSON) |
+| 7 | Fidélité graphique | murs fins dessinés (texture recadrée, liseré, sol des pièces dessous) ; champ de vue (non fait) | **fait** pour les murs |
 | 8 | Caméra et effets | flash du fond, points à l'impact (**faits**) ; secousse aux achèvements (à décider) ; rotation de la vue, cycle de couleur du fond (proposés) | en partie |
 | 9 | Son | rien de mesurable | — |
 
@@ -291,20 +292,15 @@ pack de base y sont figées, et un test le vérifie.
 
 ## 8. Ce qui reste et pourquoi
 
-- **Murs fins.** C'est l'écart visuel et spatial le plus net qui reste. PAIN pose ses murs sur des tuiles
-  pleines de 32 unités. Il faudrait des murs « de bord » (épaisseur 8–10 unités, centrés ou plaqués sur
-  une arête de tuile), avec leurs effets sur :
-  - les collisions (`Physics.ResolveStatic`) ;
-  - les lignes de vue et de tir (`Physics.SegmentBlocked`) ;
-  - le chemin (`Pathfinder`) ;
-  - le rendu (`WorldRenderer.DrawTiles`, biseau) ;
-  - le format des niveaux.
-
-  C'est un changement d'architecture qui touche tous les niveaux et les deux packs thermiques. Il mérite
-  un lot à part, après accord.
-- **Secousse aux achèvements.** La vidéo n'en montre aucune, mais elle avait été demandée explicitement.
-  Il suffit de mettre `shake` et `punch` à 0 dans `feel.executionStrike` et `feel.executionFinish` si l'on
-  veut s'aligner sur la vidéo.
+- **Murs fins** : faits ensuite (livrable B, § 11). Il reste :
+  - les meubles posés contre un mur, décollés de 12 unités ;
+  - le chemin de l'IA, qui ne passe pas par la partie libre des tuiles de mur (prudent, sans effet visible) ;
+  - les niveaux à revoir pour profiter de la place gagnée.
+- **Secousse aux achèvements.** La vidéo n'en montre aucune. **Décision : on la garde**, comme demandé
+  auparavant. Pour s'aligner sur la vidéo, il suffirait de mettre `shake` et `punch` à 0 dans
+  `feel.executionStrike` et `feel.executionFinish`.
+- **Champ de vue.** Au plus 25 % plus serré que la référence. L'échelle entière du pixel art ne laisse que
+  360 ou 540 lignes en 1080p.
 - **Points sur les renversements**, combo affiché à la fin de la série, fond qui change de couleur,
   inclinaison de la vue : faisables, de priorité basse.
 - **Ce qui ne s'établit pas avec cette vidéo** :
