@@ -110,8 +110,8 @@ public sealed class DebugOverlay
                 Blocking blocking = map.Get(x, y).Blocking;
                 if (blocking == Blocking.None) continue;
                 Color color = blocking.HasFlag(Blocking.Vision) ? Color.Red : Color.Cyan;
-                RectF rect = map.TileRect(x, y);
-                Primitives.Rect(batch, pixel, new Vector2(rect.X, rect.Y), new Vector2(rect.Width, rect.Height), color * 0.6f);
+                foreach (RectF rect in map.Solids(x, y))
+                    Primitives.Rect(batch, pixel, new Vector2(rect.X, rect.Y), new Vector2(rect.Width, rect.Height), color * 0.6f);
             }
         }
 

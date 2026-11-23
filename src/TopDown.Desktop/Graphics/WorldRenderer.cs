@@ -217,13 +217,126 @@ public sealed class WorldRenderer
             for (int x = minX; x <= maxX; x++)
             {
                 TileDefinition tile = map.Get(x, y);
+                bool thin = map.IsThin(x, y);
+                if (layer == TileLayer.Floor && (thin || IsDoorwayInThinWall(map, x, y)))
+                {
+                    // Split between the rooms on either side, like the wall it belongs to.
+                    DrawFloorUnderThinWall(batch, map, x, y, tint, tile.Layer == TileLayer.Floor ? tile : null);
+                    continue;
+                }
+
                 if (tile.Layer != layer || string.IsNullOrEmpty(tile.SpriteId)) continue;
                 SpriteFrame frame = _assets.Sprite(tile.SpriteId);
+                if (thin)
+                {
+                    DrawThinWall(batch, map, x, y, frame, offset, tint, bevel: overrideColor is null && tile.BlocksVision);
+                    continue;
+                }
+
                 var destination = new Rectangle((int)(x * size + offset.X), (int)(y * size + offset.Y), (int)size, (int)size);
                 batch.Draw(frame.Texture, destination, frame.Source, tint);
                 if (layer == TileLayer.Wall && overrideColor is null && tile.BlocksVision) DrawWallBevel(batch, map, x, y, destination);
             }
         }
+    }
+
+    /// <summary>
+    /// A thin wall: its sprite only where the tile is solid (same part of the sprite, so textures line up),
+    /// with the rim and the shade on the faces that border open space.
+    /// </summary>
+    private void DrawThinWall(SpriteBatch batch, TileMap map, int x, int y, SpriteFrame frame, Vector2 offset, Color tint, bool bevel)
+    {
+        float size = map.TileSize;
+        foreach (RectF solid in map.Solids(x, y))
+        {
+            batch.Draw(frame.Texture, WorldRect(solid, offset), SourceOf(frame, solid, x * size, y * size, size), tint);
+        }
+
+        if (!bevel) return;
+        int rim = (int)MathF.Round(_walls.RimWidth), shade = (int)MathF.Round(_walls.ShadeWidth);
+        if (rim <= 0 && shade <= 0) return;
+        foreach (RectF solid in map.Solids(x, y))
+        {
+            // Each side, piece by piece (a side can be half covered by an arm), lit above and to the left.
+            foreach ((NVector2 a, NVector2 b, NVector2 outward) in Sides(solid))
+            {
+                foreach ((NVector2 from, NVector2 to) in Pieces(map, x, y, a, b))
+                {
+                    NVector2 middle = (from + to) * 0.5f + outward * 0.5f;
+                    if (map.IsSolidAt(middle)) continue;
+                    bool lit = outward.X < 0f || outward.Y < 0f;
+                    int width = lit ? rim : shade;
+                    if (width <= 0) continue;
+                    RectF band = outward.X != 0f
+                        ? new RectF(outward.X < 0f ? from.X : from.X - width, MathF.Min(from.Y, to.Y), width, MathF.Abs(to.Y - from.Y))
+                        : new RectF(MathF.Min(from.X, to.X), outward.Y < 0f ? from.Y : from.Y - width, MathF.Abs(to.X - from.X), width);
+                    batch.Draw(_assets.Pixel, WorldRect(band, Vector2.Zero), lit ? _wallRim : _wallShade);
+                }
+            }
+        }
+    }
+
+    private static IEnumerable<(NVector2 A, NVector2 B, NVector2 Outward)> Sides(RectF r)
+    {
+        yield return (new NVector2(r.Left, r.Top), new NVector2(r.Right, r.Top), -NVector2.UnitY);
+        yield return (new NVector2(r.Left, r.Top), new NVector2(r.Left, r.Bottom), -NVector2.UnitX);
+        yield return (new NVector2(r.Left, r.Bottom), new NVector2(r.Right, r.Bottom), NVector2.UnitY);
+        yield return (new NVector2(r.Right, r.Top), new NVector2(r.Right, r.Bottom), NVector2.UnitX);
+    }
+
+    /// <summary>A side cut where the tile's bands begin and end, so each piece is either open or covered.</summary>
+    private static IEnumerable<(NVector2 From, NVector2 To)> Pieces(TileMap map, int x, int y, NVector2 a, NVector2 b)
+    {
+        float size = map.TileSize, margin = (size - map.Get(x, y).Thickness!.Value) * 0.5f;
+        bool horizontal = a.Y == b.Y;
+        float start = horizontal ? a.X : a.Y, end = horizontal ? b.X : b.Y, origin = horizontal ? x * size : y * size;
+        float[] cuts = [start, origin + margin, origin + size - margin, end];
+        Array.Sort(cuts);
+        for (int i = 0; i + 1 < cuts.Length; i++)
+        {
+            float from = MathF.Max(cuts[i], start), to = MathF.Min(cuts[i + 1], end);
+            if (to - from < 0.5f) continue;
+            yield return horizontal ? (new NVector2(from, a.Y), new NVector2(to, a.Y)) : (new NVector2(a.X, from), new NVector2(a.X, to));
+        }
+    }
+
+    /// <summary>
+    /// The open parts of a thin wall tile get the floor of the room they face: each quarter takes the floor
+    /// beside it, above or below it, or across its corner (none outside the building).
+    /// </summary>
+    private void DrawFloorUnderThinWall(SpriteBatch batch, TileMap map, int x, int y, Color tint, TileDefinition? own)
+    {
+        float size = map.TileSize, half = size * 0.5f;
+        for (int qy = -1; qy <= 1; qy += 2)
+        {
+            for (int qx = -1; qx <= 1; qx += 2)
+            {
+                TileDefinition? floor = FloorAt(map, x + qx, y) ?? FloorAt(map, x, y + qy) ?? FloorAt(map, x + qx, y + qy) ?? own;
+                if (floor is null || string.IsNullOrEmpty(floor.SpriteId)) continue;
+                SpriteFrame frame = _assets.Sprite(floor.SpriteId);
+                var quarter = new RectF(x * size + (qx > 0 ? half : 0f), y * size + (qy > 0 ? half : 0f), half, half);
+                batch.Draw(frame.Texture, WorldRect(quarter, Vector2.Zero), SourceOf(frame, quarter, x * size, y * size, size), tint);
+            }
+        }
+    }
+
+    /// <summary>Neighbouring floor that a split tile borrows (another doorway does not count).</summary>
+    private static TileDefinition? FloorAt(TileMap map, int x, int y) =>
+        map.InBounds(x, y) && !map.IsJoint(x, y) && map.Get(x, y) is { Layer: TileLayer.Floor } tile && !string.IsNullOrEmpty(tile.SpriteId) ? tile : null;
+
+    private static bool IsDoorwayInThinWall(TileMap map, int x, int y) =>
+        map.IsJoint(x, y) && (map.IsThin(x - 1, y) || map.IsThin(x + 1, y) || map.IsThin(x, y - 1) || map.IsThin(x, y + 1));
+
+    private static Rectangle WorldRect(RectF rect, Vector2 offset) =>
+        new((int)MathF.Round(rect.X + offset.X), (int)MathF.Round(rect.Y + offset.Y), (int)MathF.Round(rect.Width), (int)MathF.Round(rect.Height));
+
+    /// <summary>The part of a tile sprite matching <paramref name="part"/> of the tile at (tileX, tileY).</summary>
+    private static Rectangle SourceOf(SpriteFrame frame, RectF part, float tileX, float tileY, float size)
+    {
+        float sx = frame.Source.Width / size, sy = frame.Source.Height / size;
+        return new Rectangle(
+            frame.Source.X + (int)MathF.Round((part.X - tileX) * sx), frame.Source.Y + (int)MathF.Round((part.Y - tileY) * sy),
+            (int)MathF.Round(part.Width * sx), (int)MathF.Round(part.Height * sy));
     }
 
     /// <summary>Lit and shaded rims on the sides of a wall that border something else than a wall.</summary>

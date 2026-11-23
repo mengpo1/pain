@@ -94,6 +94,12 @@ internal static class TestContent
                 Destructible = true, BreaksInto = "broken_glass",
             },
             ["broken_glass"] = new() { Id = "broken_glass", Layer = TileLayer.Wall, BlocksMovement = true },
+            // A thin wall: an 8-unit band centred on the tile (see TileMap.Solids).
+            ["thin_wall"] = new()
+            {
+                Id = "thin_wall", SpriteId = "tile.wall", Layer = TileLayer.Wall, BlocksMovement = true, BlocksProjectiles = true,
+                BlocksVision = true, Thickness = 8f,
+            },
         };
 
         var doors = new Dictionary<string, DoorDefinition>
