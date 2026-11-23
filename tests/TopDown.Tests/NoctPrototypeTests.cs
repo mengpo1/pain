@@ -278,7 +278,7 @@ public class NoctPrototypeTests
         Assert.False(actionGame.Game.Hud.Survival);
         Assert.Null(actionGame.Definitions.Weapon("pistol").AmmoType);
         Assert.Null(actionGame.Definitions.Actor("player").Stamina);
-        Assert.Equal(215f, actionGame.Definitions.Actor("player").Speed);
+        Assert.Equal(250f, actionGame.Definitions.Actor("player").Speed); // base value (calibrated), not the survivor's 165
         Assert.DoesNotContain(actionGame.Definitions.Actors.Keys, id => id is "scavenger" or "leaper" or "watcher");
     }
 }

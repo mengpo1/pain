@@ -14,7 +14,8 @@
     "attackDuration": 0.22,
     "hitDelay": 0.06,
     "fireRate": 3.2,
-    "knockback": 240,
+    // A killed body is thrown about one body width (reference video).
+    "knockback": 520,
     "noiseRadius": 40,
     "holdOffset": [13, 7],
     // One heavy blow.
@@ -37,7 +38,7 @@
     "attackDuration": 0.2,
     "hitDelay": 0.05,
     "fireRate": 3.4,
-    "knockback": 220,
+    "knockback": 500,
     "noiseRadius": 40,
     "holdOffset": [12, 7],
     // Club: two quick blows.
@@ -85,7 +86,7 @@
     "hitDelay": 0.07,
     "fireRate": 2.8,
     "maxTargets": 2,
-    "knockback": 150,
+    "knockback": 480,
     "noiseRadius": 30,
     "holdOffset": [13, 7],
     "woundChance": 0.25,

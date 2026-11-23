@@ -1,0 +1,19 @@
+{
+ "level": {
+  "cal_bat": {
+   "name": "Étalonnage : batte"
+  },
+  "cal_bare_hands": {
+   "name": "Étalonnage : mains nues"
+  },
+  "cal_rifle": {
+   "name": "Étalonnage : fusil automatique"
+  },
+  "cal_run": {
+   "name": "Étalonnage : course"
+  },
+  "cal_door": {
+   "name": "Étalonnage : porte"
+  }
+ }
+}

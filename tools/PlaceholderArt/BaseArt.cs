@@ -42,7 +42,10 @@ public static class BaseArt
         foreach (var (name, build, heavy, seed) in Cast)
         {
             bool big = build.Scale > 1.1f;
-            RigHumans.Generate(pack, pack.Rig, name, build, Blood, seed, heavy, upperSize: big ? 56 : 44, fullSize: big ? 68 : 52);
+            // Falls reach the floor in 0.05 s and the get-up stands in 0.1 s (the brute keeps its heavy one): in
+            // the reference video a hit character is down within one frame and back up within two or three.
+            RigHumans.Generate(pack, pack.Rig, name, build, Blood, seed, heavy, upperSize: big ? 56 : 44, fullSize: big ? 68 : 52,
+                clips: HumanClips.All(heavy, toFloor: 0.05f, riseIn: heavy ? null : 0.09f));
         }
         Dogs(pack);
         Creatures(pack);

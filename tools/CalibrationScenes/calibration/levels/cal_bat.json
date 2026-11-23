@@ -1,0 +1,70 @@
+{
+ "id": "cal_bat",
+ "nameKey": "level.cal_bat.name",
+ "tileSize": 32,
+ "legend": {
+  "#": "wall_plaster",
+  ".": "floor_concrete"
+ },
+ "map": [
+  "####################################",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "####################################"
+ ],
+ "player": {
+  "definition": "player",
+  "position": [
+   2,
+   4
+  ],
+  "facingDegrees": 0,
+  "weaponId": "bat"
+ },
+ "actors": [
+  {
+   "id": "e0",
+   "definition": "thug",
+   "position": [
+    17,
+    4
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  },
+  {
+   "id": "e1",
+   "definition": "thug",
+   "position": [
+    23,
+    5
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  },
+  {
+   "id": "e2",
+   "definition": "thug",
+   "position": [
+    29,
+    3
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  }
+ ],
+ "objectives": [
+  {
+   "type": "eliminateAll",
+   "textKey": "objective.eliminateAll"
+  }
+ ]
+}

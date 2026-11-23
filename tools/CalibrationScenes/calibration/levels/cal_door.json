@@ -1,0 +1,54 @@
+{
+ "id": "cal_door",
+ "nameKey": "level.cal_door.name",
+ "tileSize": 32,
+ "legend": {
+  "#": "wall_plaster",
+  ".": "floor_wood"
+ },
+ "map": [
+  "##############################",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............D..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "##############################"
+ ],
+ "player": {
+  "definition": "player",
+  "position": [
+   2,
+   4
+  ],
+  "facingDegrees": 0,
+  "weaponId": "none"
+ },
+ "actors": [
+  {
+   "id": "e0",
+   "definition": "thug",
+   "position": [
+    15,
+    4
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  }
+ ],
+ "objectives": [
+  {
+   "type": "eliminateAll",
+   "textKey": "objective.eliminateAll"
+  }
+ ],
+ "doorSymbols": {
+  "D": {
+   "tile": "floor_wood",
+   "door": "door_wood"
+  }
+ }
+}

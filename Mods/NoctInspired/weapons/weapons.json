@@ -1,7 +1,12 @@
 [
   // Changes to base weapons: only the values given here are replaced.
-  { "id": "pistol", "magazineSize": 7 },
-  { "id": "shotgun", "magazineSize": 4 },
+  { "id": "pistol", "magazineSize": 7, "knockback": 140 },
+  { "id": "shotgun", "magazineSize": 4, "fireRate": 1.25, "knockback": 300 },
+  // The action pack was retuned on a reference video (docs/analyse-video-hm.md); the thermal
+  // survival keeps its slower, heavier feel: those values are pinned here.
+  { "id": "pipe", "knockback": 220 },
+  { "id": "machete", "knockback": 150 },
+  { "id": "unarmed", "execution": { "windUp": 0.1, "strikeInterval": 0.12, "autoStrikeDelay": 0.6 } },
   {
     // New weapon: a slow, loud flare. Every creature nearby will come.
     "id": "flare_gun",

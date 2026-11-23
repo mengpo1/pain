@@ -9,6 +9,8 @@
     "execution": { "durationMultiplier": 1.6 },
     "score": { "enabled": false }
   },
+  // The action pack's quicker fall (0.05 s, calibrated on a reference video) is not wanted here.
+  "feel": { "fallDuration": 0.09 },
   "camera": {
     "viewHeight": 340,
     "followSharpness": 5,

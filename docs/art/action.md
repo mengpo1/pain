@@ -45,7 +45,9 @@ Pixel art net, couleurs saturées, vue strictement de dessus. Tout est original 
   au contact atteint la portée de l'arme.
 - Tirs : recul des mains sur 1 à 2 pixels, l'éclair est un effet du moteur à la bouche du canon.
 - Chutes : de face à la personne qui frappe (−X) jusqu'au dos, tête vers +X, en 5 à 6 images ;
-  l'image finale est celle du corps au sol et des morceaux démembrés.
+  l'image finale est celle du corps au sol et des morceaux démembrés. Le corps touche le sol (`thud`)
+  0,05 s après le coup et le relevé est debout en 0,09 s (le costaud : 0,36 s), comme dans la vidéo de
+  référence (`docs/analyse-video-hm.md`) : le générateur raccourcit les premières images, pas les poses.
 - Morts : `death.shot`, `death.cut`, `death.blunt`, la flaque s'étend sur les 4 dernières images.
 - Achèvements : `execute.headbash` (à cheval, tête frappée contre le sol), `execute.stomp`, `execute.stab`,
   `execute.smash` (batte à deux mains), `execute.behead`, `execute.tearlegs`, `execute.tearhead` ; le chien

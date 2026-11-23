@@ -4,10 +4,12 @@
   "faction": "player",
   "health": 100,
   "radius": 10,
-  "speed": 215,
+  // Calibrated on the reference video (docs/analyse-video-hm.md): a run crosses ~0.69 of the screen height per second.
+  "speed": 250,
   "acceleration": 9000,
   "friction": 9000,
   "hitStunDuration": 0,
+  "getUpDuration": 0.1,
   "sprites": {
     "body": "actor.player",
     "animationSet": "actor.player",

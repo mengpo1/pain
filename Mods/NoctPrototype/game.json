@@ -14,6 +14,8 @@
     "execution": { "durationMultiplier": 1.3 },
     "score": { "enabled": false }
   },
+  // The action pack's quicker fall (0.05 s, calibrated on a reference video) is not wanted here.
+  "feel": { "fallDuration": 0.09 },
   "camera": {
     // A surveillance camera high above: a wider view, a lazy follow and a slow hovering drift.
     "viewHeight": 430,

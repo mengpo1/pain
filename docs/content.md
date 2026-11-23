@@ -250,7 +250,7 @@ Choisis dans le menu, ils s'appliquent au joueur et à la perception des ennemis
     "combat": { "inputBuffer": 0.15, "bulletsHitDowned": true, "hitOnStunnedKnocksDown": true },
     "score": { "enabled": true, "comboWindow": 3, "points": { "melee": 400, "firearm": 300, "thrown": 600, "door": 800, "execution": 500 } }
   },
-  "camera": { "viewHeight": 400, "zoom": 1, "followSharpness": 16, "lookAhead": 0.22, "lookAheadMax": 90,
+  "camera": { "viewHeight": 400, "zoom": 1, "followSharpness": 9, "lookAhead": 0.22, "lookAheadMax": 90,
               "farLook": 0.6, "farLookMax": 300, "shakeDecay": 4, "maxShake": 12 },
   "sounds": { "uiMove": "...", "uiSelect": "...", "pickup": "...", "throw": "...", "bounce": "...",
               "impact": "...", "footstep": "...", "objectiveComplete": "...", "levelComplete": "...",
@@ -258,9 +258,9 @@ Choisis dans le menu, ils s'appliquent au joueur et à la perception des ennemis
   "extraLevels": ["arena"],
   "feel": {
     "hit": { "hitstop": 0.02, "shake": 0.06, "punch": 1.5 }, "knockdown": { "hitstop": 0.045, "shake": 0.16, "punch": 2.5 },
-    "kill": { "hitstop": 0.06, "shake": 0.22, "punch": 3 }, "executionStrike": { "hitstop": 0.045, "shake": 0.4, "punch": 4 },
+    "kill": { "hitstop": 0.06, "shake": 0.22, "punch": 3, "backdrop": 0.25 }, "executionStrike": { "hitstop": 0.045, "shake": 0.4, "punch": 4 },
     "executionFinish": { "hitstop": 0.1, "shake": 0.75, "punch": 9 }, "playerHurt": { "hitstop": 0.06, "shake": 0.45 },
-    "maxHitstop": 0.1, "hitFlash": 0.08, "fallDuration": 0.09
+    "maxHitstop": 0.1, "hitFlash": 0.08, "fallDuration": 0.05
   }
 }
 ```
@@ -283,13 +283,21 @@ Choisis dans le menu, ils s'appliquent au joueur et à la perception des ennemis
 
 Présentation uniquement, jamais les règles. Pour chaque type d'impact où le joueur est impliqué :
 `hitstop` (micro-arrêt en secondes), `shake` (secousse de 0 à 1) et `punch` (à-coup de la caméra dans
-le sens du coup, en unités du monde). `playerHurt` remplace les autres
+le sens du coup, en unités du monde) et `backdrop` (durée en secondes pendant laquelle le fond autour du
+niveau clignote, une image sur deux à 30 Hz, dans la couleur `backdropFlash` du thème ; rien si le thème
+n'en a pas ; coupé quand la secousse d'écran est réglée à 0). `playerHurt` remplace les autres
 quand c'est le joueur qui est touché. `maxHitstop` plafonne le gel cumulé, `hitFlash` règle le flash
 blanc d'un personnage touché, `fallDuration` la chute visible au sol. `extraLevels` liste des niveaux
 proposés après la campagne (la salle d'essai `arena`). Sons : `crush` quand une tête éclate, `tear`
 quand un morceau est arraché.
 
 `camera.viewHeight` fixe la hauteur de monde visible : tous les écrans voient la même zone.
+`camera.followSharpness` règle le suivi (lissage exponentiel) : à vitesse constante, la caméra reste
+`vitesse / followSharpness` unités en retard et prend 95 % d'un changement de vitesse en `3 / followSharpness`
+secondes. Le pack action est étalonné sur une vidéo de référence (`docs/analyse-video-hm.md`).
+
+Quand le score est actif, chaque élimination par le joueur affiche ses points (« +400 ») à l'endroit où la
+victime est tombée (texte `hud.points`, couleurs `ui.secondary`, `ui.text` et `ui.accent` du thème).
 
 ## Thèmes (`themes/`)
 
@@ -306,7 +314,8 @@ quand un morceau est arraché.
 }
 ```
 
-Couleurs `#rrggbb` ou `#rrggbbaa`. `hudStyle` : `default` ou `surveillance` (cadre de caméra, horloge,
+Couleurs `#rrggbb` ou `#rrggbbaa`. `backdropFlash` (facultatif) : couleur du clignotement du fond
+autour du niveau sur les impacts dont le ressenti a un `backdrop` (le pack action : `#b3122e`). `hudStyle` : `default` ou `surveillance` (cadre de caméra, horloge,
 position en grille, liaison montante, crochets sur les créatures qui chassent). `post.pixelArt: true` dessine
 le monde à un pixel par unité puis l'agrandit d'un facteur entier sans lissage (pixels nets ; la hauteur
 visible est arrondie à ce facteur). `walls` : biseau des murs et des toits (`rim`, `rimWidth` côté lumière,

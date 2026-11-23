@@ -1,0 +1,59 @@
+{
+ "id": "cal_bare_hands",
+ "nameKey": "level.cal_bare_hands.name",
+ "tileSize": 32,
+ "legend": {
+  "#": "wall_plaster",
+  ".": "floor_concrete"
+ },
+ "map": [
+  "####################################",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "####################################"
+ ],
+ "player": {
+  "definition": "player",
+  "position": [
+   2,
+   4
+  ],
+  "facingDegrees": 0,
+  "weaponId": "none"
+ },
+ "actors": [
+  {
+   "id": "e0",
+   "definition": "thug",
+   "position": [
+    13,
+    4
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  },
+  {
+   "id": "e1",
+   "definition": "thug",
+   "position": [
+    21,
+    4
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  }
+ ],
+ "objectives": [
+  {
+   "type": "eliminateAll",
+   "textKey": "objective.eliminateAll"
+  }
+ ]
+}

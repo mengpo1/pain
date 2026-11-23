@@ -5,6 +5,8 @@
     "nameKey": "actor.guard.name",
     "faction": "enemy",
     "health": 100,
+    // Back on their feet in ~0.1 s once the knock-down ends (reference video, 10:13.7 and 11:35.9).
+    "getUpDuration": 0.1,
     "radius": 10,
     // A lethal hit may leave it crawling on the floor (weapon "woundChance").
     "wound": { "crawlSpeed": 30, "bleedOutTime": 0 },
@@ -40,6 +42,7 @@
     "nameKey": "actor.thug.name",
     "faction": "enemy",
     "health": 100,
+    "getUpDuration": 0.1,
     "radius": 10,
     // A lethal hit may leave it crawling on the floor (weapon "woundChance").
     "wound": { "crawlSpeed": 30, "bleedOutTime": 0 },

@@ -1,0 +1,9 @@
+{
+  "id": "calibration",
+  "name": "Calibration scenes",
+  "version": "0.1.0",
+  "formatVersion": 1,
+  "description": "Development scenes to check the action pack against the reference video (docs/analyse-video-hm.md). Not a game mod.",
+  "author": "TopDown contributors",
+  "dependencies": ["base"]
+}

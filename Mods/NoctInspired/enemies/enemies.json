@@ -4,7 +4,9 @@
     "id": "guard",
     "nameKey": "actor.survivor.name",
     "sounds": { "alert": "sound.alert" },
-    "ai": { "reactionTime": 0.5, "visionRange": 340, "alertAlliesRadius": 220 }
+    "ai": { "reactionTime": 0.5, "visionRange": 340, "alertAlliesRadius": 220 },
+    // Keeps the slow get-up of the engine (the action pack's guard rises in 0.1 s).
+    "getUpDuration": 0.4
   },
   {
     // Something that used to be a person: slow, then suddenly fast.

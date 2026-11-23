@@ -1,0 +1,9 @@
+{
+  "id": "calibration_measure",
+  "name": "Calibration measurement look",
+  "version": "0.1.0",
+  "formatVersion": 1,
+  "description": "Turns off the screen-fixed effects (vignette, grain, scanlines) so that camera motion can be measured on recordings.",
+  "author": "TopDown contributors",
+  "dependencies": ["base"]
+}

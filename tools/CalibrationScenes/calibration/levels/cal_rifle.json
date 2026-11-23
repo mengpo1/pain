@@ -1,0 +1,92 @@
+{
+ "id": "cal_rifle",
+ "nameKey": "level.cal_rifle.name",
+ "tileSize": 32,
+ "legend": {
+  "#": "wall_plaster",
+  ".": "floor_concrete"
+ },
+ "map": [
+  "####################################",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "#..................................#",
+  "####################################"
+ ],
+ "player": {
+  "definition": "player",
+  "position": [
+   2,
+   4
+  ],
+  "facingDegrees": 0,
+  "weaponId": "rifle"
+ },
+ "actors": [
+  {
+   "id": "e0",
+   "definition": "thug",
+   "position": [
+    16,
+    2
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  },
+  {
+   "id": "e1",
+   "definition": "thug",
+   "position": [
+    16,
+    4
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  },
+  {
+   "id": "e2",
+   "definition": "thug",
+   "position": [
+    16,
+    6
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  },
+  {
+   "id": "e3",
+   "definition": "thug",
+   "position": [
+    20,
+    3
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  },
+  {
+   "id": "e4",
+   "definition": "thug",
+   "position": [
+    20,
+    5
+   ],
+   "facingDegrees": 180,
+   "behavior": "dormant",
+   "weaponId": "none"
+  }
+ ],
+ "objectives": [
+  {
+   "type": "eliminateAll",
+   "textKey": "objective.eliminateAll"
+  }
+ ]
+}

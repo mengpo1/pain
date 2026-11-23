@@ -38,7 +38,9 @@
   "camera": {
     "viewHeight": 400,
     "zoom": 1,
-    "followSharpness": 16,
+    // Loose follow measured on the reference video (docs/analyse-video-hm.md): the camera trails a running player
+    // by ~8 % of the screen and takes ~0.3 s to catch up.
+    "followSharpness": 9,
     "lookAhead": 0.22,
     "lookAheadMax": 90,
     "farLook": 0.6,
@@ -71,6 +73,6 @@
     "playerHurt": { "hitstop": 0.06, "shake": 0.45 },
     "maxHitstop": 0.1,
     "hitFlash": 0.08,
-    "fallDuration": 0.09
+    "fallDuration": 0.05
   }
 }

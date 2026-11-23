@@ -139,9 +139,17 @@ public static class HumanClips
         });
     }
 
-    /// <summary>Every clip of a human (the heavy set adds the brute's double-fist smash).</summary>
-    public static IEnumerable<RigClip> All(bool heavy)
+    /// <summary>
+    /// Every clip of a human (the heavy set adds the brute's double-fist smash). With
+    /// <paramref name="toFloor"/>, falls and deaths reach the floor (their "thud" frame) after that many
+    /// seconds; with <paramref name="riseIn"/>, the get-up reaches its standing frame after that many seconds:
+    /// same poses, quicker transitions.
+    /// </summary>
+    public static IEnumerable<RigClip> All(bool heavy, float? toFloor = null, float? riseIn = null)
     {
+        RigClip Fall(RigClip clip) => toFloor is { } seconds ? Hurry(clip, clip.Frames.FindIndex(f => f.Event == "thud"), seconds) : clip;
+        RigClip Rise(RigClip clip) => riseIn is { } seconds ? Hurry(clip, clip.Frames.Count - 1, seconds) : clip;
+
         foreach (var (name, pose, angle, over) in Stances)
         {
             yield return Idle($"idle.{name}", pose, angle, over);
@@ -162,11 +170,11 @@ public static class HumanClips
         yield return FireLong();
 
         yield return Hurt();
-        yield return Knockdown();
-        yield return GetUp();
-        yield return DeathShot();
-        yield return DeathCut();
-        yield return DeathBlunt();
+        yield return Fall(Knockdown());
+        yield return Rise(GetUp());
+        yield return Fall(DeathShot());
+        yield return Fall(DeathCut());
+        yield return Fall(DeathBlunt());
         yield return Crawl();
         yield return Executed("executed", stab: false);
         yield return Executed("executed.stab", stab: true);
@@ -395,6 +403,14 @@ public static class HumanClips
         p.KneeLeft = V(1f, -0.4f, 0f);
         p.OpenRight = p.OpenLeft = true;
     });
+
+    /// <summary>Rescales the frames before frame <paramref name="key"/> so that it is reached after <paramref name="seconds"/>.</summary>
+    static RigClip Hurry(RigClip clip, int key, float seconds)
+    {
+        float before = clip.Frames.Take(key).Sum(f => f.Duration);
+        if (key <= 0 || before <= 0f) return clip;
+        return clip with { Frames = clip.Frames.Select((f, i) => i < key ? f with { Duration = f.Duration * seconds / before } : f).ToList() };
+    }
 
     /// <summary>Thrown backwards: stagger, fold at the knees, hit the floor, bounce, lie still.</summary>
     static RigClip Knockdown() => new("knockdown", ClipKind.Full, false,

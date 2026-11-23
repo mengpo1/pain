@@ -4,7 +4,8 @@
     "spriteId": "door.wood",
     "thickness": 6,
     "maxAngleDegrees": 90,
-    "pushSpeedDegrees": 620,
+    // Kicked open, it swings 90° in ~0.09 s (2–3 frames in the reference video, 08:49.37–.47).
+    "pushSpeedDegrees": 1100,
     "damping": 2.2,
     "knockdownSpeedDegrees": 240,
     "knockdownDuration": 2.6,
