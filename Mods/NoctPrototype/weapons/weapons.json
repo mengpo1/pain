@@ -7,6 +7,10 @@
   { "id": "pipe", "knockback": 220 },
   { "id": "machete", "knockback": 150 },
   { "id": "unarmed", "execution": { "windUp": 0.1, "strikeInterval": 0.12, "autoStrikeDelay": 0.6 } },
+  { "id": "bat", "knockback": 240 },
+  { "id": "revolver", "knockback": 220 },
+  { "id": "smg", "knockback": 140 },
+  { "id": "rifle", "fireRate": 8, "knockback": 140 },
 
   // Natural weapons of the creatures: they hurt without knocking down, the survivor can take a few.
   {

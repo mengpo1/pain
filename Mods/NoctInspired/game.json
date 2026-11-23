@@ -9,8 +9,9 @@
     "execution": { "durationMultiplier": 1.6 },
     "score": { "enabled": false }
   },
-  // The action pack's quicker fall (0.05 s, calibrated on a reference video) is not wanted here.
-  "feel": { "fallDuration": 0.09 },
+  // The action pack's quicker fall (0.05 s) and kill strobe, from its calibration on a reference video,
+  // are not wanted here.
+  "feel": { "fallDuration": 0.09, "kill": { "backdrop": 0 } },
   "camera": {
     "viewHeight": 340,
     "followSharpness": 5,

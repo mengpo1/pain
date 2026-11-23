@@ -2,5 +2,7 @@
   // More vulnerable than in the action game.
   "id": "player",
   "speed": 165,
+  // Rises in 0.4 s like before (the action pack's player rises in 0.1 s since its calibration).
+  "getUpDuration": 0.4,
   "sounds": { "death": "sound.static" }
 }

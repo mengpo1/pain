@@ -1,4 +1,6 @@
 [
+  // The base thug keeps its previous get-up (the action pack's rises in 0.1 s since its calibration).
+  { "id": "thug", "getUpDuration": 0.4 },
   {
     // Survivors in protective suits, nervous and slower to react.
     "id": "guard",

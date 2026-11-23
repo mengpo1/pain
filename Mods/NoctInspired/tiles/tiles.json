@@ -1,8 +1,10 @@
 [
   // The action pack's walls and windows are thin (8 units); the thermal pack keeps full tiles.
-  { "id": "wall_plaster", "thickness": 0 },
-  { "id": "glass", "thickness": 0 },
-  { "id": "glass_broken", "thickness": 0 },
+  { "id": "wall_white", "thickness": null },
+  { "id": "wall_brick", "thickness": null },
+  { "id": "wall_plaster", "thickness": null },
+  { "id": "glass", "thickness": null },
+  { "id": "glass_broken", "thickness": null },
   { "id": "floor_grate", "spriteId": "tile.floor_grate" },
   { "id": "floor_dirt", "spriteId": "tile.floor_dirt" },
   { "id": "wall_rock", "spriteId": "tile.wall_rock", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true }
