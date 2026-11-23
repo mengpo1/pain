@@ -40,6 +40,8 @@ public sealed class PlayScreen : Screen
     private readonly Func<Actor, float> _flashAmount;
     private readonly Dictionary<Actor, float> _flashUntil = new();
     private float _hitstop;
+    /// <summary>Seconds left of the backdrop strobe (see <see cref="ImpactFeel.Backdrop"/>), and its full length.</summary>
+    private float _backdropFlash, _backdropLength;
 
     private GameWorld _world = null!;
     private PlayerCommands _pending;
@@ -89,6 +91,7 @@ public sealed class PlayScreen : Screen
         _visibility.Clear();
         _flashUntil.Clear();
         _hitstop = 0f;
+        _backdropFlash = 0f;
         _accumulator = 0f;
         _outcomeTime = 0f;
         _paused = false;
@@ -156,6 +159,7 @@ public sealed class PlayScreen : Screen
         _camera.Update(frame, WorldRenderer.ToXna(playerPosition), _aimWorld, lookFar, Session.Content.Game.Camera, Host.Settings.ScreenShake);
         Audio.ListenerPosition = _camera.Position;
         _effects.Update(frame);
+        _backdropFlash = MathF.Max(0f, _backdropFlash - frame);
         foreach (Actor actor in _world.Actors)
         {
             if (actor.State == ActorState.Wounded && _gore.Crawling(actor, _effects, Blood(actor), _time))
@@ -299,6 +303,9 @@ public sealed class PlayScreen : Screen
                 _effects.Smoke(WorldRenderer.ToXna(down.Target.Position), colors.Fx * 0.25f, 2);
                 Impact(Feel.Knockdown, down.Source, down.Target, down.Source is { } source ? FromTo(source, down.Target) : NVector2.Zero);
                 break;
+            case PointsScored points:
+                _hud.ShowPoints(points.Position, points.Points);
+                break;
             case ActorKilled killed:
                 Audio.Play(killed.Victim.Definition.Sounds.Death, killed.Victim.Position);
                 _effects.BloodSpray(WorldRenderer.ToXna(killed.Victim.Position), WorldRenderer.ToXna(killed.Direction), 18, Blood(killed.Victim));
@@ -398,7 +405,18 @@ public sealed class PlayScreen : Screen
         _hitstop = MathF.Min(Feel.MaxHitstop, MathF.Max(_hitstop, applied.Hitstop));
         _camera.Shake(applied.Shake);
         _camera.Punch(WorldRenderer.ToXna(direction), applied.Punch);
+        // A strobing backdrop is a screen effect: switched off with the screen shake.
+        if (applied.Backdrop > 0f && Host.Settings.ScreenShake > 0f && applied.Backdrop > _backdropFlash)
+            _backdropFlash = _backdropLength = applied.Backdrop;
     }
+
+    /// <summary>The theme background, or its flash colour every other 1/30 s while a strobe runs (lit from the first frame).</summary>
+    private Color Backdrop() =>
+        _backdropFlash > 0f && _renderer.Colors.BackdropFlash is { } flash && (int)((_backdropLength - _backdropFlash) * BackdropStrobeRate) % 2 == 0
+            ? flash
+            : _renderer.Colors.Background;
+
+    private const float BackdropStrobeRate = 30f;
 
     private void Flash(Actor actor) => _flashUntil[actor] = _time + Feel.HitFlash;
 
@@ -455,7 +473,7 @@ public sealed class PlayScreen : Screen
     {
         float alpha = _paused ? 1f : _accumulator / Step;
         UpdateVisibility();
-        _post.BeginScene(_renderer.Colors.Background, _camera);
+        _post.BeginScene(Backdrop(), _camera);
         _renderer.Draw(batch, _world, _camera, _effects, _gore, alpha, _time, _isVisible, _flashAmount);
         _post.EndScene(batch, _camera, CollectLights(), _paused ? 0f : dt);
 

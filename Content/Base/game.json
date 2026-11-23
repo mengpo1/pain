@@ -60,11 +60,12 @@
     "tear": "sound.tear"
   },
   // Game feel (presentation only). hitstop = micro-freeze in seconds, shake from 0 to 1,
-  // punch = camera jolt in the direction of the blow (world units).
+  // punch = camera jolt in the direction of the blow (world units), backdrop = seconds of strobing
+  // backdrop around the level (theme colour "backdropFlash"; 6–10 video frames in the reference).
   "feel": {
     "hit": { "hitstop": 0.02, "shake": 0.06, "punch": 1.5 },
     "knockdown": { "hitstop": 0.045, "shake": 0.16, "punch": 2.5 },
-    "kill": { "hitstop": 0.06, "shake": 0.22, "punch": 3 },
+    "kill": { "hitstop": 0.06, "shake": 0.22, "punch": 3, "backdrop": 0.25 },
     "executionStrike": { "hitstop": 0.045, "shake": 0.4, "punch": 4 },
     "executionFinish": { "hitstop": 0.1, "shake": 0.75, "punch": 9 },
     "playerHurt": { "hitstop": 0.06, "shake": 0.45 },

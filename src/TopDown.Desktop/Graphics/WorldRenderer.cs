@@ -818,6 +818,7 @@ public sealed class ThemeColors
     {
         Color Tint(string role) => ColorParser.Parse(theme.Tints.GetValueOrDefault(role), Color.White);
         Background = ColorParser.Parse(theme.Background, Color.Black);
+        BackdropFlash = theme.BackdropFlash is { } flash ? ColorParser.Parse(flash, Background) : null;
         Floor = Tint("floor");
         Wall = Tint("wall");
         Actor = Tint("actor");
@@ -834,6 +835,7 @@ public sealed class ThemeColors
     }
 
     public Color Background { get; }
+    public Color? BackdropFlash { get; }
     public Color Floor { get; }
     public Color Wall { get; }
     public Color Actor { get; }

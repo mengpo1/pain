@@ -80,6 +80,11 @@ public sealed class ImpactFeel
     public float Shake { get; set; }
     /// <summary>Camera jolt in the direction of the blow, in world units.</summary>
     public float Punch { get; set; }
+    /// <summary>
+    /// Seconds during which the backdrop around the level strobes with the theme's
+    /// <see cref="ThemeDefinition.BackdropFlash"/> colour (none when the theme has no such colour).
+    /// </summary>
+    public float Backdrop { get; set; }
 }
 
 /// <summary>Sounds of generic events (not tied to a weapon or a character).</summary>
@@ -132,6 +137,8 @@ public sealed class ThemeDefinition
 {
     public string Id { get; set; } = "";
     public string Background { get; set; } = "#000000";
+    /// <summary>Colour the backdrop strobes to on impacts whose feel asks for it; null = never.</summary>
+    public string? BackdropFlash { get; set; }
 
     /// <summary>Colour multiplied with sprites, per role: floor, wall, actor, weapon, decor, fx, blood.</summary>
     public Dictionary<string, string> Tints { get; set; } = new();

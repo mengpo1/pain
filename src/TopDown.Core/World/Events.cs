@@ -48,6 +48,9 @@ public sealed record ActorWounded(Actor Target, Actor? Source, Vector2 Direction
 public sealed record ActorKilled(Actor Victim, Actor? Killer, Vector2 Direction, HitMethod Method, string DamageType,
     WeaponDefinition? Weapon = null, IReadOnlyList<int>? Severed = null) : GameEvent;
 
+/// <summary>Points the player earned for a kill (score enabled only), where the victim fell.</summary>
+public sealed record PointsScored(Vector2 Position, int Points, int Combo, HitMethod Method) : GameEvent;
+
 public sealed record WeaponPickedUp(Actor Actor, WeaponDefinition Weapon) : GameEvent;
 
 public sealed record WeaponThrown(Actor Actor, WeaponDefinition Weapon) : GameEvent;

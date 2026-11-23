@@ -22,6 +22,9 @@ public sealed class Hud
     private readonly Queue<(string Text, float Duration)> _transmissions = new();
     private (string Text, float Duration, float Elapsed)? _transmission;
     private float _comboPulse;
+    /// <summary>"+400" floating where a victim fell: world position, text, age in seconds.</summary>
+    private readonly List<(System.Numerics.Vector2 Position, string Text, float Age)> _points = new();
+    private const float PointsLifetime = 1.1f;
     private int _lastCombo;
 
     public Hud(UiContext ui, InputBindings bindings, bool survival = false)
@@ -45,6 +48,7 @@ public sealed class Hud
     public void Clear()
     {
         _messages.Clear();
+        _points.Clear();
         _transmissions.Clear();
         _transmission = null;
     }
@@ -88,6 +92,13 @@ public sealed class Hud
             (string text, float left) = _messages[i];
             if (left - dt <= 0f) _messages.RemoveAt(i);
             else _messages[i] = (text, left - dt);
+        }
+
+        for (int i = _points.Count - 1; i >= 0; i--)
+        {
+            var popup = _points[i];
+            if (popup.Age + dt >= PointsLifetime) _points.RemoveAt(i);
+            else _points[i] = popup with { Age = popup.Age + dt };
         }
 
         if (world.Score.Combo > _lastCombo) _comboPulse = 1f;
@@ -286,8 +297,31 @@ public sealed class Hud
     /// Detection markers of the surveillance feed: brackets on the creatures hunting the subject ("?" on the
     /// merely suspicious ones), and a notch on the edge of the image for hunters out of frame.
     /// </summary>
+    /// <summary>Points earned for a kill, shown where the victim fell.</summary>
+    public void ShowPoints(System.Numerics.Vector2 position, int points)
+    {
+        if (points <= 0) return;
+        _points.Add((position, T.Format("hud.points", ("points", points)), 0f));
+    }
+
+    /// <summary>Floating points: they rise a little, cycle through the theme colours and fade at the end.</summary>
+    private void DrawPoints(SpriteBatch batch, Camera2D camera)
+    {
+        Color[] cycle = [C.Secondary, C.Text, C.Accent];
+        foreach (var (position, text, age) in _points)
+        {
+            Vector2 at = camera.WorldToScreen(WorldRenderer.ToXna(position)) - new Vector2(0f, (14f + age * 16f) * camera.Zoom);
+            float fade = Math.Clamp((PointsLifetime - age) / 0.25f, 0f, 1f);
+            Color color = cycle[(int)(age / PointsColorStep) % cycle.Length] * fade;
+            _ui.Text(batch, text, at, 18f, color, Align.Center);
+        }
+    }
+
+    private const float PointsColorStep = 0.08f;
+
     public void DrawMarkers(SpriteBatch batch, GameWorld world, Camera2D camera, Rectangle screen, Func<Actor, bool> isVisible, float time)
     {
+        DrawPoints(batch, camera);
         if (!Surveillance || world.Outcome != WorldOutcome.Playing) return;
         Texture2D pixel = _ui.Assets.Pixel;
         Actor player = world.Player;

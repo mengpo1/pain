@@ -398,7 +398,12 @@ public sealed class GameWorld
 
     internal void OnActorKilled(Actor victim, in Hit hit)
     {
-        if (hit.Source is { IsPlayer: true }) Score.OnKill(hit.Method);
+        if (hit.Source is { IsPlayer: true })
+        {
+            Score.OnKill(hit.Method);
+            if (Score.Enabled) AddEvent(new PointsScored(victim.Position, Score.LastKillPoints, Score.Combo, hit.Method));
+        }
+
         if (victim.IsPlayer && Outcome == WorldOutcome.Playing)
         {
             Outcome = WorldOutcome.Defeat;

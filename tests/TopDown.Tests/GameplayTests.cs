@@ -165,6 +165,25 @@ public class GameplayTests
     }
 
     [Fact]
+    public void Each_kill_reports_its_points_where_the_victim_fell()
+    {
+        GameWorld world = World(new LevelDefinitionBuilder(Room(20, 8), new Vector2(2, 3), playerWeapon: "revolver")
+            .With(TestContent.Enemy("dummy", 10, 2), TestContent.Enemy("dummy", 10, 4)).Build());
+        var scored = new List<PointsScored>();
+
+        world.ClearEvents();
+        Run(world, 0.6f, Aim(world, TileCenter(10, 2), attack: true));
+        scored.AddRange(world.Events.OfType<PointsScored>());
+        world.ClearEvents();
+        Run(world, 0.6f, Aim(world, TileCenter(10, 4), attack: true));
+        scored.AddRange(world.Events.OfType<PointsScored>());
+
+        Assert.Equal([300, 600], scored.Select(p => p.Points));
+        Assert.Equal([1, 2], scored.Select(p => p.Combo));
+        Assert.True(Vector2.Distance(scored[1].Position, TileCenter(10, 4)) < 32f);
+    }
+
+    [Fact]
     public void Score_can_be_disabled()
     {
         GameWorld world = World(new LevelDefinitionBuilder(Room(20, 5), new Vector2(2, 2), playerWeapon: "revolver")
@@ -174,6 +193,7 @@ public class GameplayTests
 
         Assert.Equal(1, world.Score.Kills);
         Assert.Equal(0, world.Score.Total);
+        Assert.Empty(world.Events.OfType<PointsScored>());
     }
 
     [Fact]
