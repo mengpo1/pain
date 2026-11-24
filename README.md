@@ -170,9 +170,11 @@ docs/                 formats et guides
     niveaux en pilotage automatique (la mission du « Dernier signal » jouée de bout en bout jusqu'à
     l'extraction), et une partie pilotée au clavier et à la souris (menu, ramassage, attaque, pause,
     mode debug, recommencement) ;
-  - en intégration continue (`.github/workflows/ci.yml`) : compilation et tests sous **Linux, Windows et
-    macOS** ; le jeu réel sur tous les niveaux sous Linux ; le jeu lancé et rendu sous **macOS** (Apple
-    Silicon) sur un niveau d'action et sur la mission Noct.
+  - en intégration continue (`.github/workflows/ci.yml`) : compilation et tests sous **Linux et Windows**,
+    et le jeu réel sur tous les niveaux sous Linux, à chaque pull request et à chaque push sur `main`.
+    **macOS** (compilation, tests, jeu lancé et rendu sur Apple Silicon) seulement à la demande, pour
+    économiser les minutes : poser le label `macos` sur la pull request (ou, une fois le workflow sur la
+    branche par défaut, onglet Actions, « CI », « Run workflow »).
 - **Non vérifié** : une vraie session de jeu sur un Mac ou un PC Windows avec carte graphique, et le son
   et les musiques (pas de carte son dans l'environnement de développement : le jeu le détecte et
   continue sans audio ; les musiques sont contrôlées par mesures de volume, de spectre et de bouclage).

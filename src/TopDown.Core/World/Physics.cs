@@ -16,7 +16,7 @@ public enum HitKind
 public readonly record struct RayHit(HitKind Kind, float Fraction, Vector2 Point, Vector2 Normal, int TileX, int TileY, Door? Door, Actor? Actor);
 
 /// <summary>
-/// Collision queries and character movement. Characters are circles; walls are tiles;
+/// Collision queries and character movement. Characters are circles; walls are tiles (or the bands of thin walls);
 /// props are rectangles; doors are thick rotating segments.
 /// </summary>
 public sealed class Physics
@@ -158,8 +158,9 @@ public sealed class Physics
                 for (int x = minX; x <= maxX; x++)
                 {
                     if (!Map.Blocks(x, y, Blocking.Movement)) continue;
-                    if (Geo.CircleRectPush(actor.Position, r, Map.TileRect(x, y), out Vector2 push))
+                    foreach (RectF solid in Map.Solids(x, y))
                     {
+                        if (!Geo.CircleRectPush(actor.Position, r, solid, out Vector2 push)) continue;
                         actor.Position += push;
                         velocity = RemoveInward(velocity, push);
                         pushed = true;

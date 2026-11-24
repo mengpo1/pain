@@ -84,6 +84,8 @@ internal static class ContentValidator
             if (tile.Destructible && tile.BreaksInto is null) d.Warning(source, "Destructible tile without 'breaksInto' (becomes a bare floor).");
             Reference(defs.Tiles, d, source, "tile", tile.BreaksInto);
             Sound(assets, d, source, tile.BreakSound);
+            if (tile.Thickness is < 0f) d.Error(source, "'thickness' must be >= 0 (0 or none: a full tile).");
+            if (tile.Thickness is > 0f && tile.Layer != TileLayer.Wall) d.Warning(source, "'thickness' only applies to wall tiles.");
         }
 
         foreach (DoorDefinition door in defs.Doors.Values)
@@ -158,6 +160,17 @@ internal static class ContentValidator
             Reference(defs.Doors, d, source, "door", door.Door);
         }
 
+        // Thin walls only join along rows and columns: two walls touching at a corner leave a gap between them.
+        TileDefinition? TileOf(int x, int y)
+        {
+            if (y < 0 || y >= level.Map.Count || x < 0 || x >= level.Map[y].Length) return null;
+            return level.Legend.TryGetValue(level.Map[y][x].ToString(), out string? id) && defs.Tiles.TryGetValue(id, out TileDefinition? t) ? t : null;
+        }
+
+        bool WallOrDoor(int x, int y) =>
+            TileOf(x, y) is { Layer: TileLayer.Wall } || (y >= 0 && y < level.Map.Count && x >= 0 && x < level.Map[y].Length
+                && level.DoorSymbols.ContainsKey(level.Map[y][x].ToString()));
+
         for (int y = 0; y < level.Map.Count; y++)
         {
             for (int x = 0; x < level.Map[y].Length; x++)
@@ -165,6 +178,12 @@ internal static class ContentValidator
                 string symbol = level.Map[y][x].ToString();
                 if (symbol != " " && !level.Legend.ContainsKey(symbol) && !level.DoorSymbols.ContainsKey(symbol))
                     d.Error(source, $"Map character '{symbol}' at ({x}, {y}) is not in the legend.");
+                if (TileOf(x, y) is not { Thickness: > 0f }) continue;
+                foreach (int dx in new[] { -1, 1 })
+                {
+                    if (WallOrDoor(x + dx, y + 1) && !WallOrDoor(x + dx, y) && !WallOrDoor(x, y + 1))
+                        d.Warning(source, $"Thin walls at ({x}, {y}) and ({x + dx}, {y + 1}) only touch at a corner: there is a gap between them.");
+                }
             }
         }
 

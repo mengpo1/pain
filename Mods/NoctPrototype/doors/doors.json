@@ -1,0 +1,5 @@
+[
+  // The action pack's wooden door swings faster since its calibration on a reference video
+  // (docs/analyse-video-hm.md); the installation keeps its heavier doors.
+  { "id": "door_wood", "pushSpeedDegrees": 620 }
+]

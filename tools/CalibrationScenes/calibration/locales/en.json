@@ -1,0 +1,19 @@
+{
+ "level": {
+  "cal_bat": {
+   "name": "Calibration: bat"
+  },
+  "cal_bare_hands": {
+   "name": "Calibration: bare hands"
+  },
+  "cal_rifle": {
+   "name": "Calibration: automatic rifle"
+  },
+  "cal_run": {
+   "name": "Calibration: run"
+  },
+  "cal_door": {
+   "name": "Calibration: door"
+  }
+ }
+}

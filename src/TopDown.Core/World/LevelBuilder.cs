@@ -28,7 +28,12 @@ internal static class LevelBuilder
             world.AddWeapon(new WorldWeapon(weapon, level.ToWorld(placement.Position), Geo.DegToRad(placement.RotationDegrees)));
         }
 
-        foreach (LevelDoor placement in level.Doors.Concat(DoorsFromSymbols(level, map))) world.AddDoor(BuildDoor(level, definitions, placement));
+        foreach (LevelDoor placement in level.Doors.Concat(DoorsFromSymbols(level, map)).ToList())
+        {
+            world.AddDoor(BuildDoor(level, definitions, placement));
+            // Thin walls reach into the doorway to meet the door.
+            map.MarkJoint((int)placement.Tile.X, (int)placement.Tile.Y);
+        }
 
         foreach (LevelProp prop in level.Props)
         {

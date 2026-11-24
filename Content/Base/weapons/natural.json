@@ -2,7 +2,8 @@
   {
     // Bare hands: quick, dry punches that floor without killing. On the floor: Space, then
     // one attack press per blow (the third kills): astride, the head slammed into the floor, or
-    // kicks to the head. A dog loses its legs or its head.
+    // kicks to the head. A dog loses its legs or its head. Without presses the blows follow every
+    // 0.3 s; the kill lands 0.6–0.9 s after mounting, as in the reference video.
     "id": "unarmed",
     "nameKey": "weapon.unarmed.name",
     "kind": "melee",
@@ -19,7 +20,7 @@
     "knockdownDuration": 2.2,
     "knockback": 260,
     "execution": {
-      "strikes": 3, "windUp": 0.1, "strikeInterval": 0.12, "strikeOnInput": true, "autoStrikeDelay": 0.6, "recovery": 0.12,
+      "strikes": 3, "windUp": 0.2, "strikeInterval": 0.2, "strikeOnInput": true, "autoStrikeDelay": 0.3, "recovery": 0.12,
       "animations": ["headBash", "stomp"],
       "against": { "quadruped": { "animations": ["tearLegs", "tearHead"] } }
     },

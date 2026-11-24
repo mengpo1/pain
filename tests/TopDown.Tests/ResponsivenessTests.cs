@@ -1,4 +1,5 @@
 using System.Numerics;
+using TopDown.Core.Definitions;
 using TopDown.Core.World;
 using static TopDown.Tests.TestContent;
 
@@ -37,6 +38,31 @@ public class ResponsivenessTests
 
         Assert.Single(world.Events.OfType<MeleeSwing>());
         Assert.Single(world.Events.OfType<ActorHit>());
+    }
+
+    [Theory]
+    [InlineData(15f)]
+    [InlineData(4f)]
+    [InlineData(8f)]
+    public void A_cadence_of_whole_steps_is_kept_exactly(float fireRate)
+    {
+        DefinitionSet definitions = Definitions();
+        WeaponDefinition gun = definitions.Weapons["railgun"];
+        gun.FireRate = fireRate;
+        gun.Automatic = true;
+        GameWorld world = World(Level(Room(30, 5), new Vector2(2, 2), playerWeapon: "railgun"), definitions);
+        int shots = 0;
+        var hold = new PlayerCommands { AttackHeld = true, AttackPressed = true, AimTarget = TileCenter(28, 2) };
+        for (int i = 0; i < 120; i++)
+        {
+            world.ClearEvents();
+            world.Step(Dt, hold);
+            hold.AttackPressed = false;
+            shots += world.Events.OfType<ShotFired>().Count();
+        }
+
+        // 1/rate is a whole number of 1/120 s steps: exactly `rate` shots in one second, none lost to rounding.
+        Assert.Equal((int)fireRate, shots);
     }
 
     [Fact]

@@ -1,4 +1,7 @@
 [
+  // Base humans keep their previous get-up (the action pack's rise in 0.1 s since its calibration).
+  { "id": "guard", "getUpDuration": 0.4 },
+  { "id": "thug", "getUpDuration": 0.4 },
   {
     // Charognard: the basic creature. Easy alone (two pistol shots), dangerous in a pack: it calls
     // the others. Can be shoved back, stunned, knocked down with a club and finished off.

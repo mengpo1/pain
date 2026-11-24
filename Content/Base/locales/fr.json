@@ -30,6 +30,8 @@
     "interface": "Interface",
     "fullscreen": "Plein écran",
     "shake": "Tremblements de l'écran",
+    "flashes": "Flashs lumineux",
+    "flashesHint": "Le fond clignote en rouge à chaque élimination (effet stroboscopique). Non : aucun clignotement.",
     "zoom": "Zoom",
     "on": "oui",
     "off": "non",
@@ -49,6 +51,7 @@
   },
   "hud": {
     "score": "{points} pts",
+    "points": "+{points}",
     "combo": "COMBO x{count}",
     "empty": "VIDE",
     "outOfAmmo": "Plus de munitions : lancez l'arme !",

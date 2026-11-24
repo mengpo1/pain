@@ -38,6 +38,13 @@ public sealed class TileDefinition
     public string? BreakSound { get; set; }
     public float BreakNoiseRadius { get; set; } = 250f;
 
+    /// <summary>
+    /// Thin wall: only a band of this width (world units), centred on the tile and joined to the
+    /// neighbouring walls and doorways, is solid; the rest of the tile is open floor. Null, 0 or a value
+    /// of at least the tile size: the whole tile is solid.
+    /// </summary>
+    public float? Thickness { get; set; }
+
     public Blocking Blocking =>
         (BlocksMovement ? Blocking.Movement : Blocking.None)
         | (BlocksProjectiles ? Blocking.Projectiles : Blocking.None)

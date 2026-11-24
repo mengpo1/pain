@@ -116,6 +116,7 @@ public sealed class MenuScreen : Screen
         Volume("settings.interface", () => Settings.UiVolume, v => Settings.UiVolume = v),
         new(() => $"{T.Get("settings.fullscreen")} : {OnOff(Settings.Fullscreen)}", Host.ToggleFullscreen, _ => Host.ToggleFullscreen()),
         Volume("settings.shake", () => Settings.ScreenShake, v => Settings.ScreenShake = v),
+        new(() => $"{T.Get("settings.flashes")} : {OnOff(Settings.Flashes)}", ToggleFlashes, _ => ToggleFlashes()) { Hint = () => T.Get("settings.flashesHint") },
         new(() => $"{T.Get("settings.zoom")} : {Percent(Settings.Zoom)}", () => AdjustZoom(1), AdjustZoom),
         Back(),
     ];
@@ -125,6 +126,8 @@ public sealed class MenuScreen : Screen
             step => set(Math.Clamp(MathF.Round((get() + step * 0.1f) * 10f) / 10f, 0f, 1f)));
 
     private MenuItem Back() => new(() => T.Get("menu.back"), GoBack);
+
+    private void ToggleFlashes() => Settings.Flashes = !Settings.Flashes;
 
     private void AdjustZoom(int step) => Settings.Zoom = Math.Clamp(MathF.Round((Settings.Zoom + step * 0.1f) * 10f) / 10f, 0.6f, 1.6f);
 

@@ -30,6 +30,8 @@
     "interface": "Interface",
     "fullscreen": "Fullscreen",
     "shake": "Screen shake",
+    "flashes": "Flashing effects",
+    "flashesHint": "The backdrop strobes red on each kill. Off: no flashing at all.",
     "zoom": "Zoom",
     "on": "on",
     "off": "off",
@@ -49,6 +51,7 @@
   },
   "hud": {
     "score": "{points} pts",
+    "points": "+{points}",
     "combo": "COMBO x{count}",
     "empty": "EMPTY",
     "outOfAmmo": "Out of ammo: throw it!",

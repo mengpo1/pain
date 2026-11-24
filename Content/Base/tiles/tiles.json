@@ -11,14 +11,17 @@
   { "id": "floor_carpet_red", "spriteId": "tile.floor_carpet_red" },
   { "id": "floor_sidewalk", "spriteId": "tile.floor_sidewalk" },
   { "id": "floor_asphalt", "spriteId": "tile.floor_asphalt" },
-  { "id": "wall_white", "spriteId": "tile.wall_white", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true },
-  { "id": "wall_brick", "spriteId": "tile.wall_brick", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true },
-  { "id": "wall_plaster", "spriteId": "tile.wall_plaster", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true },
+  // Walls are thin, as in the reference video (docs/analyse-video-hm.md): an 8-unit band centred on
+  // the tile and joined to the neighbouring walls and doors; the rest of the tile is floor.
+  { "id": "wall_white", "spriteId": "tile.wall_white", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true, "thickness": 8 },
+  { "id": "wall_brick", "spriteId": "tile.wall_brick", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true, "thickness": 8 },
+  { "id": "wall_plaster", "spriteId": "tile.wall_plaster", "layer": "wall", "blocksMovement": true, "blocksProjectiles": true, "blocksVision": true, "thickness": 8 },
   {
     // Blocks movement and bullets until it breaks, but never blocks vision.
     "id": "glass",
     "spriteId": "tile.glass",
     "layer": "wall",
+    "thickness": 8,
     "blocksMovement": true,
     "blocksProjectiles": true,
     "blocksVision": false,
@@ -28,5 +31,5 @@
     "breakNoiseRadius": 300
   },
   // A broken window: bullets and eyes pass, bodies do not.
-  { "id": "glass_broken", "spriteId": "tile.glass_broken", "layer": "wall", "blocksMovement": true }
+  { "id": "glass_broken", "spriteId": "tile.glass_broken", "layer": "wall", "blocksMovement": true, "thickness": 8 }
 ]

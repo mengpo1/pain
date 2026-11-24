@@ -5,6 +5,8 @@
   "health": 100,
   "speed": 165,
   "runSpeed": 250,
+  // Rises in 0.4 s like before (the action pack's survivor of the reference video rises in 0.1 s).
+  "getUpDuration": 0.4,
   "acceleration": 9000,
   "friction": 9000,
   "stamina": { "max": 100, "runDrain": 30, "regen": 24, "regenDelay": 0.6, "recoverThreshold": 30, "runNoise": 260 },

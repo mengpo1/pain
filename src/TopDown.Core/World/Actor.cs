@@ -376,11 +376,19 @@ public sealed class Actor
         ExecutionTarget = null;
     }
 
+    /// <summary>
+    /// Counts a timer down to zero. A remainder below <see cref="TimerTolerance"/> is float noise: a
+    /// cooldown of exactly n steps (1/15 s = 8 steps at 120 Hz) must end on its n-th step, not the next.
+    /// </summary>
+    private static float Countdown(float timer, float dt) => timer - dt <= TimerTolerance ? 0f : timer - dt;
+
+    private const float TimerTolerance = 1e-4f;
+
     /// <summary>Advances timers and timed states.</summary>
     internal void TickState(float dt)
     {
-        AttackCooldown = MathF.Max(0f, AttackCooldown - dt);
-        LeapCooldown = MathF.Max(0f, LeapCooldown - dt);
+        AttackCooldown = Countdown(AttackCooldown, dt);
+        LeapCooldown = Countdown(LeapCooldown, dt);
         StateElapsed += dt;
         switch (State)
         {
